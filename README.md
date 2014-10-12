@@ -12,7 +12,7 @@ A Simple Operate System.
   `make install` to compile;<br> 
   `make run` to run this system by Virtual Box;<br> 
   `make clean` to clear the temp files;<br> 
-  `make` is equal to `install run clean`.
+  `make` is equal to `install run`.
   
 
 
