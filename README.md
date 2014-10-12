@@ -4,14 +4,15 @@ Course-Design-of-Data-Structure
 A Simple Operate System.
 
 ####Developemt 
-  gcc 4.7.1;
-  nasm 2.11.05;
-  Virtual Box 4.3.12.
+  gcc 4.7.1;<br> 
+  nasm 2.11.05;<br> 
+  Virtual Box 4.3.12.<br> 
   
 ####Compile 
-  `make install` to compile;
-  `make run` to run this system by Virtual Box;
-  `make clean` to clear the temp files;
+  `make install` to compile;<br> 
+  `make run` to run this system by Virtual Box;<br> 
+  `make clean` to clear the temp files;<br> 
   `make` is equal to `install run clean`.
+  
 
 
