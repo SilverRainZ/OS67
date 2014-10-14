@@ -1,7 +1,7 @@
     org 0x7c6d
     jmp disstr
 msg:
-    db "run to add."
+    db "run to init."
     db 0x0a
     db 0
 disstr:
