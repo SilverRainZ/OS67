@@ -22,7 +22,7 @@
 	DB	"FAT12   "	    ; FilesysType 
 ; 可执行代码
    
-    RESB 18
+    TIMES 18 DB 0
 
 entry:
 	MOV	AX,0		
@@ -49,7 +49,7 @@ msg:
 	DB	0x0a		
 	DB	0
 
-	RESB 510-($-$$)
+	TIMES 510-($-$$) DB 0
 
 	DB	0x55, 0xaa
 
