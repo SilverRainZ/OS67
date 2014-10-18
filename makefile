@@ -14,12 +14,14 @@ default:
 floppy.img: floppy.asm bootsect.bin loader.bin makefile
 	$(NASM) floppy.asm -f bin -l floppy.lst -o floppy.img
 
-bootsect.bin: bootsect.asm makefile 
+bootsect.bin: bootsect.asm makefile init.bin
 	$(NASM) bootsect.asm -f bin -l bootsect.lst -o bootsect.bin
 
 loader.bin: loader.asm makefile
 	$(NASM) loader.asm -f bin -l loader.lst -o loader.bin
 
+init.bin: init.asm makefile
+	$(NASM) init.asm -f bin -l init.lst -o init.bin
 	
 install:
 	$(MAKE) floppy.img
