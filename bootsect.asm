@@ -1,13 +1,15 @@
 <<<<<<< HEAD
 ;boot sector
-%INCLUDE "textmode.inc"
 [BITS 16]
+<<<<<<< HEAD
 OS_TEMP_STACK   EQU     0x7e00
 OS_LOADER   EQU     0x8000
 VRAM_TEXTMODE   EQU 0xb800
 =======
 
 >>>>>>> parent of 6d7202a... 修正bootsect的大小, 迁移GDT到loader.
+=======
+>>>>>>> parent of 323ebdf... TextMode
 ORG	0x7c00		
 
 BS_jmpBoot      JMP	entry
@@ -36,6 +38,7 @@ TIMES 18 DB 0
 ; executable code 
 entry:
 <<<<<<< HEAD
+<<<<<<< HEAD
     XOR AX,AX
     MOV DS,AX
     MOV SS,AX   ; segment is 0
@@ -47,10 +50,13 @@ entry:
 
     
 =======
+=======
+>>>>>>> parent of 323ebdf... TextMode
 	MOV	AX,0		
 	MOV	SS,AX
 	MOV	SP,0x7c00
 	MOV	DS,AX
+<<<<<<< HEAD
 	MOV	ES,AX
 
 	MOV	SI,msg1
@@ -111,6 +117,19 @@ LABEL_BEGIN:
 	LGDT	[GdtPtr]
 	CLI
 >>>>>>> parent of 6d7202a... 修正bootsect的大小, 迁移GDT到loader.
+=======
+	MOV	ES,AX   ; BIOS interrupt expects DS
+
+	MOV	SI,msg
+loop:
+    LODSB   ; DS:SI -> AL
+    OR AL,AL
+	JZ  loadloader 
+	MOV	AH,0x0e		
+	MOV	BX,15		
+	INT	0x10		
+	JMP	loop
+>>>>>>> parent of 323ebdf... TextMode
 
 	IN	AL, 0x92    ; turn on A20 line
 	OR	AL, 00000010b
