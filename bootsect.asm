@@ -26,6 +26,18 @@ BS_FileSysType  DB	"FAT12   "	    ; FilesysType
 
 TIMES 18 DB 0
 
+temp_print16:
+loop:
+    LODSB   ; DS:SI -> AL
+    OR AL,AL
+	JZ done 
+	MOV	AH,0x0e		
+	MOV	BX,15		
+	INT	0x10		
+	JMP	loop
+done:
+    RET
+
 ; executable code 
 entry:
 	MOV	AX,0		
@@ -35,22 +47,53 @@ entry:
 	MOV	ES,AX   ; BIOS interrupt expects DS
 
 	MOV	SI,msg
-loop:
-    LODSB   ; DS:SI -> AL
-    OR AL,AL
-	JZ  loadloader 
-	MOV	AH,0x0e		
-	MOV	BX,15		
-	INT	0x10		
-	JMP	loop
+    CALL temp_print16
 
+loadloader: ;  read 4 sector to load loader.bin
+    MOV BX,0  ; loaded.bin 's addr in mem
+    MOV AX,0x0800
+    MOV ES,AX
+    MOV CH,0
+    MOV DH,1
+    MOV CL,15
+
+readloop:
+	MOV	SI,0	; err counter 
+retry:
+	MOV	AH,0x02 ; read 
+	MOV	AL,4	; sector number  
+	MOV	DL,0x00 ; Driver A:
+	INT	0x13
+    JNC succ 
+	ADD	SI,1
+	CMP	SI,5	
+	JAE	error
+	MOV	AH,0x00
+	MOV	DL,0x00	; Driver A
+	INT	0x13	; reset
+	JMP	retry	
+
+
+error:		
+	MOV	SI,msg_err
+    CALL temp_print16
+    JMP $
+succ:	
+	MOV	SI,msg_succ
+    CALL temp_print16
+    JMP 0x8000 
 msg:
     DB	"bootsect loaded."
     DB  13,10
     DB	0
-
-loadloader:
-    JMP $
+msg_err:
+    DB	"loader load error."
+    DB  13,10
+    DB	0
+msg_succ:
+    DB	"loader load success."
+    DB  13,10
+    DB	0
 
 TIMES 510 - ($-$$) DB 0
 DB	0x55, 0xaa

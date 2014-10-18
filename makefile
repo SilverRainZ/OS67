@@ -10,6 +10,7 @@ DEL = del
 
 default:
 	$(MAKE) install
+	$(MAKE) run 
 
 floppy.img: floppy.asm bootsect.bin loader.bin makefile
 	$(NASM) floppy.asm -f bin -l floppy.lst -o floppy.img

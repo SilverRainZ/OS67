@@ -1,26 +1,38 @@
 ; a loader to load kernel & others
 [BITS 16]
-ORG 0x8000 
+ORG 0x8000
 JMP loader
 
-label1 ;-----------------------
-msg:
+_msg1:
     DB "loader loaded."
+    DB 13,10
+    DB 0
 
-len EQU ($ - msg) 
+_temp_print16:
+_loop:
+    LODSB
+    OR AL,AL
+	JZ _done 
+	MOV	AH,0x0e		
+	MOV	BX,15		
+	INT	0x10		
+	JMP	_loop
+_done:
+    RET
+
 loader:
-    MOV	AX,0
-    MOV	ES,AX
-    MOV	AX,msg
-    MOV	BP,AX	    ; ES:BP addr
-    MOV	CX,0x000F
-    MOV	AX,0x1301	;AH = 0x13，AL = 0x01
-    MOV	BX,0x000c	;Page Number BH = 0 黑底红字 BL = 0x0c
-    MOV	DL,0
-    INT	0x10
+    MOV AX,0
+    MOV SS,AX
+    MOV DS,AX
+    MOV ES,AX
+    MOV AL,byte [_msg1]
+    MOV AH,0x0e
+    MOV BX,15
+    MOV DS,AX
+    MOV SI,_msg1
+    CALL _temp_print16
     JMP $
-
-label2 ;------------------------
+ 
 %INCLUDE "pm.inc"
 ProtectMode:
 [SECTION .gdt]
@@ -49,7 +61,7 @@ LABEL_BEGIN:
     XOR	EAX, EAX
     MOV	AX, CS
     SHL	EAX, 4
-    ADD	EAX, LABEL_SEG_CODE32
+    ADD	EAX, LABEL_SEG_CODE32 ; get code segment's addr
     MOV	word [LABEL_DESC_CODE32 + 2], AX
     SHR	EAX, 16
     MOV	byte [LABEL_DESC_CODE32 + 4], AL
@@ -59,7 +71,7 @@ LABEL_BEGIN:
     XOR	EAX, EAX
     MOV	AX, DS
     SHL	EAX, 4
-    ADD	EAX, LABEL_GDT		; eAX <- gdt 基地址
+    ADD	EAX, LABEL_GDT		; EAX <- gdt 基地址
     MOV	dword [GdtPtr + 2], EAX	; [GdtPtr + 2] <- gdt 基地址
 
     LGDT	[GdtPtr]
@@ -77,8 +89,8 @@ LABEL_BEGIN:
     ; JMP in ProtectMode!:w
     JMP	dword SelectorCode32:0	; 执行这一句会把 SelectorCode32 装入 cs,
     ; 并跳转到 Code32Selector:0  处
-    ; END of [SECTION .s16]
-
+   ; END of [SECTION .s16]
+ 
 [SECTION .s32]; 32 位代码段. 由实模式跳入.
 [BITS 32]
     LABEL_SEG_CODE32:
@@ -87,7 +99,7 @@ LABEL_BEGIN:
 
     MOV	EDI, (80 * 1 + 0) * 2	; 屏幕第 2 行, 第 1 列。
     MOV	AH, 0x0c			; 0000: 黑底    1100: 红字
-    MOV SI, msg
+    MOV SI, msg2
 loop:
     MOV	AL, [SI]
     CMP AL, 0
@@ -103,6 +115,7 @@ outloop:
     SegCode32Len    EQU	$ - LABEL_SEG_CODE32
     ; END of [SECTION .s32]
 
-msg:
-    DB  "GDT loaded."
+msg2:
+    DB "GDT loaded."
     DB  0
+
