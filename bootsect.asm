@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 ;boot sector
 [BITS 16]
 <<<<<<< HEAD
@@ -10,6 +11,9 @@ VRAM_TEXTMODE   EQU 0xb800
 >>>>>>> parent of 6d7202a... 修正bootsect的大小, 迁移GDT到loader.
 =======
 >>>>>>> parent of 323ebdf... TextMode
+=======
+
+>>>>>>> parent of 6d7202a... 修正bootsect的大小, 迁移GDT到loader.
 ORG	0x7c00		
 
 BS_jmpBoot      JMP	entry
@@ -56,6 +60,7 @@ entry:
 	MOV	SS,AX
 	MOV	SP,0x7c00
 	MOV	DS,AX
+<<<<<<< HEAD
 <<<<<<< HEAD
 	MOV	ES,AX
 
@@ -119,15 +124,20 @@ LABEL_BEGIN:
 >>>>>>> parent of 6d7202a... 修正bootsect的大小, 迁移GDT到loader.
 =======
 	MOV	ES,AX   ; BIOS interrupt expects DS
+=======
+	MOV	ES,AX
+>>>>>>> parent of 6d7202a... 修正bootsect的大小, 迁移GDT到loader.
 
-	MOV	SI,msg
-loop:
-    LODSB   ; DS:SI -> AL
-    OR AL,AL
-	JZ  loadloader 
+	MOV	SI,msg1
+putloop:
+	MOV	AL,[SI]
+	ADD	SI,1		
+	CMP	AL,0
+	JE  ProtectMode
 	MOV	AH,0x0e		
 	MOV	BX,15		
 	INT	0x10		
+<<<<<<< HEAD
 	JMP	loop
 >>>>>>> parent of 323ebdf... TextMode
 
@@ -152,6 +162,78 @@ LABEL_SEG_CODE32:
     MOV	AX, SelectorVideo
     MOV	GS, AX			; 视频段选择子(目的)
 
+=======
+	JMP	putloop
+
+ProtectMode:
+%INCLUDE "pm.inc"	; 常量, 宏, 以及一些说明
+
+[SECTION .gdt]
+LABEL_GDT:	        Descriptor 0, 0, 0           ; 空描述符
+LABEL_DESC_CODE32:  Descriptor 0, SegCode32Len - 1, DA_C + DA_32; 非一致代码段
+LABEL_DESC_VIDEO:   Descriptor 0xb8000, 0xffff, DA_DRW	     ; 显存首地址
+; GDT 结束
+
+GdtLen	EQU	$ - LABEL_GDT	; GDT长度
+GdtPtr	DW	GdtLen - 1	    ; GDT界限
+		DD	0		        ; GDT基地址
+
+; GDT 选择子
+SelectorCode32	EQU	LABEL_DESC_CODE32 - LABEL_GDT
+SelectorVideo	EQU	LABEL_DESC_VIDEO - LABEL_GDT
+; END of [SECTION .gdt]
+
+[SECTION .s16]
+[BITS	16]
+LABEL_BEGIN:
+	MOV	AX, CS
+	MOV	DS, AX
+	MOV	ES, AX
+	MOV	SS, AX
+	MOV	SP, 0x0100
+	
+	; 初始化 32 位代码段描述符
+	XOR	EAX, EAX
+	MOV	AX, CS
+	SHL	EAX, 4
+	ADD	EAX, LABEL_SEG_CODE32
+	MOV	word [LABEL_DESC_CODE32 + 2], AX
+	shr	EAX, 16
+	MOV	byte [LABEL_DESC_CODE32 + 4], AL
+	MOV	byte [LABEL_DESC_CODE32 + 7], AH
+	
+	; 为加载 GDTR 作准备
+	XOR	EAX, EAX
+	MOV	AX, DS
+	SHL	EAX, 4
+	ADD	EAX, LABEL_GDT		; eAX <- gdt 基地址
+	MOV	dword [GdtPtr + 2], EAX	; [GdtPtr + 2] <- gdt 基地址
+	
+	LGDT	[GdtPtr]
+	CLI
+
+	IN	AL, 0x92    ; turn on A20 line
+	OR	AL, 00000010b
+	OUT	0x92, AL
+	
+	; 准备切换到保护模式
+	MOV	EAX, CR0
+	OR	EAX, 1
+	MOV	CR0, EAX
+	
+	; JMP in ProtectMode!:w
+	JMP	dword SelectorCode32:0	; 执行这一句会把 SelectorCode32 装入 cs,
+    ; 并跳转到 Code32Selector:0  处
+    ; END of [SECTION .s16]
+
+[SECTION .s32]; 32 位代码段. 由实模式跳入.
+[BITS 32]
+
+LABEL_SEG_CODE32:
+    MOV	AX, SelectorVideo
+    MOV	GS, AX			; 视频段选择子(目的)
+
+>>>>>>> parent of 6d7202a... 修正bootsect的大小, 迁移GDT到loader.
     MOV	EDI, (80 * 1 + 0) * 2	; 屏幕第 2 行, 第 1 列。
     MOV	AH, 0x0c			; 0000: 黑底    1100: 红字
     MOV SI, msg2
