@@ -55,7 +55,7 @@ loadloader: ;  read 4 sector to load loader.bin
     MOV ES,AX
     MOV CH,0
     MOV DH,1
-    MOV CL,15
+    MOV CL,16
 
 readloop:
 	MOV	SI,0	; err counter 
