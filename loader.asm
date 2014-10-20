@@ -87,6 +87,7 @@ LABEL_SEG_CODE32:
     MOV	GS, AX	; 视频段选择子(目的)
     MOV	EDI,(160 * 2) + 0  	; 160 * 50  line 3 column 1 
     MOV	AH, 00001011b	; 0000: black 1100: cyan , i love this beautiful word
+    XOR ESI,ESI ; careful !
     MOV SI, msg_GDT
     CALL temp_print32 
     JMP $
@@ -101,7 +102,7 @@ loop:
     CMP AL, 0
     JE outloop
     MOV	[GS:EDI], AX
-    ADD EDI, 2
+    ADD EDI,2
     JMP loop
 
 outloop:
