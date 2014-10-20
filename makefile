@@ -6,11 +6,11 @@ CC = gcc
 DEL = del
 VM =  "D:\Program Files\Oracle\VirtualBox\VirtualBox.exe" --comment "CDDS" --startvm "15140001-0014-433b-be28-8699f80f4d22"
 DBG = bochsdbg
+BOCHS = bochs
 DEL = del
 
 default:
 	$(MAKE) install
-	$(MAKE) run 
 
 floppy.img: floppy.asm bootsect.bin loader.bin makefile
 	$(ASM) floppy.asm -f bin -l floppy.lst -o floppy.img
@@ -29,8 +29,10 @@ run:
 	$(VM)
 
 dbg:
-	$(DBG) -q -f bochsrc.bxrc -log boshsout.log
+	$(DBG) -q -f DBG_bochsrc.bxrc -log boshsout.log
 
+bochs:
+	$(BOCHS) -q -f bochsrc.bxrc 
 clean: 
 	$(DEL) *.bin
 	$(DEL) *.img

@@ -3,11 +3,6 @@
 ORG 0x8000
 JMP loader
 
-msg_load:
-    DB "loader loaded."
-    DB 13,10
-    DB 0
-
 temp_print16:
 _loop:
     LODSB
@@ -21,10 +16,12 @@ _done:
     RET
 
 loader:
-    MOV SI,msg_load
+    MOV SI,msg_loader
     CALL temp_print16
-    JMP LABEL_BEGIN 
+    JMP LABEL_BEGIN
+
 %INCLUDE "pm.inc"
+
 ProtectMode:
 [SECTION .gdt]
     LABEL_GDT:	        Descriptor 0, 0, 0           ; 空描述符
@@ -84,29 +81,42 @@ LABEL_BEGIN:
  
 [SECTION .s32]; 32 位代码段. 由实模式跳入.
 [BITS 32]
-    LABEL_SEG_CODE32:
-    MOV	AX, SelectorVideo
-    MOV	GS, AX			; 视频段选择子(目的)
 
-    MOV	EDI, (80 * 3 + 0) * 2	; 屏幕第 2 行, 第 1 列。
-    MOV	AH, 0x0c			; 0000: 黑底    1100: 红字
-    MOV SI, msg2
+LABEL_SEG_CODE32:
+    MOV	AX, SelectorVideo
+    MOV	GS, AX	; 视频段选择子(目的)
+    MOV	EDI,(160 * 2) + 0  	; 160 * 50  line 3 column 1 
+    MOV	AH, 00001011b	; 0000: black 1100: cyan , i love this beautiful word
+    MOV SI, msg_GDT
+    CALL temp_print32 
+    JMP $
+
+temp_print32:
+ADD EDI,160
+PUSH EDI
 loop:
-    MOV	AL, [SI]
+    LODSB
+    ;MOV AL,[SI]
+    ;ADD SI,1
     CMP AL, 0
-    JE  outloop
+    JE outloop
     MOV	[GS:EDI], AX
-    ADD SI, 1 
     ADD EDI, 2
     JMP loop
 
 outloop:
-    JMP	$
+    POP EDI
+    RET
 
-    SegCode32Len    EQU	$ - LABEL_SEG_CODE32
-    ; END of [SECTION .s32]
+SegCode32Len    EQU	$ - LABEL_SEG_CODE32
 
-msg2:
+msg_loader:
+    DB "loader loaded."
+    DB 13,10
+    DB 0
+msg_GDT:
     DB "GDT loaded."
     DB  0
+
+
 

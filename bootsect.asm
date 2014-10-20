@@ -1,4 +1,4 @@
-;boot sector
+;boot sector FAT12
 [BITS 16]
 ORG	0x7c00		
 
@@ -46,22 +46,28 @@ entry:
 	MOV	DS,AX
 	MOV	ES,AX   ; BIOS interrupt expects DS
 
+    MOV AH,0x01
+    MOV CH,00010000b    ; bit 5 = 1 bit 6 = 0
+    MOV CL,0x0
+    INT 0x10    ; hide cursor
+    
 	MOV	SI,msg
     CALL temp_print16
 
 loadloader: ;  read 4 sector to load loader.bin
-    MOV BX,0  ; loaded.bin 's addr in mem
-    MOV AX,0x0800
+    MOV BX,0  ; loader.bin 's addr in mem
+    MOV AX,0x0800 ; loader's addr
     MOV ES,AX
     MOV CH,0
     MOV DH,1
     MOV CL,16
+; loader.bin 在软盘的第34个扇区,0x4200,换算为C0-H1-S16
 
 readloop:
 	MOV	SI,0	; err counter 
 retry:
 	MOV	AH,0x02 ; read 
-	MOV	AL,4	; sector number  
+	MOV	AL,4	; read 4 sector 
 	MOV	DL,0x00 ; Driver A:
 	INT	0x13
     JNC succ 
