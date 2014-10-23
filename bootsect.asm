@@ -54,6 +54,34 @@ entry:
 	MOV	SI,msg
     CALL temp_print16
 
+getmsg:
+    MOV AX,0x9000
+    MOV DS,AX
+    MOV AH,0x03
+    XOR BH,BH
+    INT 0x10
+    MOV [0],DX  ; cursor pos save in 0x9000 
+ 
+    MOV AH,0x88
+    INT 0x15
+    MOV [2],AX  ; get mem size(extrened mem KB)
+
+    MOV AH,0x0f
+    INT 0x10
+    MOV [4],BX  ; BH = display page
+    MOV [6],AX  ; AL = video mode, AH = window width
+       
+    MOV AH,0x12
+    MOV BL,0x10
+    INT 0x10
+    MOV [8],AX  ; 0x90008 do u know what linus's meaning?
+    MOV [10],BX ; 0x9000A  安装的显示内存 0x900B  显示状态
+    MOV [12],CX ; 0x9000C  显示卡的特性参数
+    
+    MOV AX,0
+    MOV DS,AX   ; revert
+; get message end
+
 loadloader: ;  read 4 sector to load loader.bin
     MOV BX,0  ; loader.bin 's addr in mem
     MOV AX,0x0800 ; loader's addr
@@ -100,7 +128,8 @@ msg_succ:
     DB	"loader load success."
     DB  13,10
     DB	0
-
+msg_temp:
+    DB 0,0,0
 TIMES 510 - ($-$$) DB 0
 DB	0x55, 0xaa
 

@@ -32,10 +32,10 @@ ProtectMode:
     GdtPtr	DW	GdtLen - 1	    ; GDT界限
     DD	0		        ; GDT基地址
 
-    ; GDT 选择子
-    SelectorCode32	EQU	LABEL_DESC_CODE32 - LABEL_GDT
-    SelectorVideo	EQU	LABEL_DESC_VIDEO - LABEL_GDT
-    ; END of [SECTION .gdt]
+; GDT 选择子
+SelectorCode32	EQU	LABEL_DESC_CODE32 - LABEL_GDT
+SelectorVideo	EQU	LABEL_DESC_VIDEO - LABEL_GDT
+; END of [SECTION .gdt]
 
 [SECTION .s16]
 LABEL_BEGIN:
