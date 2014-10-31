@@ -1,7 +1,18 @@
-; a loader to load kernel & others
+; name: loader.asm
+; func: loader kenel; enter pm 32; set temp GDT
+; 
+;
+
+%INCLUDE "pm.inc"
+
 [BITS 16]
 ORG 0x8000
 JMP loader
+
+msg_loader:
+    DB "loader loaded."
+    DB 13,10
+    DB 0
 
 temp_print16:
 _loop:
@@ -21,21 +32,21 @@ loader:
     CALL temp_print16
     JMP LABEL_BEGIN
 
-%INCLUDE "pm.inc"
-
-ProtectMode:
+; ==================================================================
 [SECTION .gdt]
-    LABEL_GDT:	        Descriptor 0, 0, 0           ; 空描述符
-    LABEL_DESC_CODE32:  Descriptor 0, SegCode32Len - 1, DA_C + DA_32; 非一致代码段
-    LABEL_DESC_VIDEO:   Descriptor 0xb8000, 0xffff, DA_DRW	     ; 显存首地址
+    LABEL_GDT:	        Descriptor 0,       0,                  0           ; null
+    LABEL_DESC_CODE32:  Descriptor 0,       SegCode32Len - 1,   DA_C + DA_32; 非一致代码段
+    LABEL_DESC_DATA0:   Descriptor 0,       SegData0Len - 1,    DA_DRW      ; data seg r0
+    LABEL_DESC_VIDEO:   Descriptor 0B8000h, 0ffffh,             DA_DRW      ; video RAM
 
-    GdtLen	EQU	$ - LABEL_GDT	; GDT长度
-    GdtPtr	DW	GdtLen - 1	    ; GDT界限
-    DD	0		        ; GDT基地址
+    GdtLen	EQU	$ - LABEL_GDT	; GDT len
+    GdtPtr	DW	GdtLen - 1	    ; GDT limit
+    DD	0		                ; GDT Base
 
-; GDT 选择子
-SelectorCode32	EQU	LABEL_DESC_CODE32 - LABEL_GDT
-SelectorVideo	EQU	LABEL_DESC_VIDEO - LABEL_GDT
+; GDT Selector 
+    SelectorCode32	EQU	LABEL_DESC_CODE32 - LABEL_GDT
+    SelectorData0   EQU LABEL_DESC_DATA0 - LABEL_GDT
+    SelectorVideo	EQU	LABEL_DESC_VIDEO - LABEL_GDT
 ; END of [SECTION .gdt]
 
 [SECTION .s16]
@@ -46,16 +57,8 @@ LABEL_BEGIN:
     MOV	SS, AX
     MOV	SP, 0x0100
 
-    ;FillDes LABEL_SEG_CODE32, LABEL_DESC_CODE32
-    ; 初始化 32 位代码段描述符
-    XOR	EAX, EAX
-    MOV	AX, CS
-    SHL	EAX, 4
-    ADD	EAX, LABEL_SEG_CODE32 ; get code segment's addr
-    MOV	word [LABEL_DESC_CODE32 + 2], AX
-    SHR	EAX, 16
-    MOV	byte [LABEL_DESC_CODE32 + 4], AL
-    MOV	byte [LABEL_DESC_CODE32 + 7], AH
+    FillDesc CS, LABEL_SEG_CODE32, LABEL_DESC_CODE32
+    FillDesc DS, LABEL_SEG_DATA0, LABEL_DESC_DATA0
 
     ; 为加载 GDTR 作准备
     XOR	EAX, EAX
@@ -76,27 +79,31 @@ LABEL_BEGIN:
     OR	EAX, 1
     MOV	CR0, EAX
 
-    ; JMP in ProtectMode!:w
-    JMP	dword SelectorCode32:0	; 执行这一句会把 SelectorCode32 装入 cs,
-    ; 并跳转到 Code32Selector:0  处
-   ; END of [SECTION .s16]
+    JMP	dword SelectorCode32:0	; special, clear pipe-line and jump 
+; END of [SECTION .s16]
  
 [SECTION .s32]; 32 位代码段. 由实模式跳入.
 [BITS 32]
 
 LABEL_SEG_CODE32:
+    MOV AX, SelectorData0
+    MOV DS, AX
+
     MOV	AX, SelectorVideo
-    MOV	GS, AX	; 视频段选择子(目的)
+    MOV	GS, AX	 
     MOV	EDI,(160 * 2) + 0  	; 160 * 50  line 3 column 1 
     MOV	AH, 00001011b	; 0000: black 1100: cyan , i love this beautiful word
-    XOR ESI,ESI ; careful !
+
+    XOR ESI,ESI         ; be careful !
     MOV SI, msg_GDT
     CALL temp_print32 
+
     JMP $
 
 temp_print32:
-ADD EDI,160
-PUSH EDI
+    ADD EDI, 160
+    PUSH EDI
+    CLD
 loop:
     LODSB
     ;MOV AL,[SI]
@@ -113,13 +120,13 @@ outloop:
 
 SegCode32Len    EQU	$ - LABEL_SEG_CODE32
 
-msg_loader:
-    DB "loader loaded."
-    DB 13,10
-    DB 0
-msg_GDT:
+[SECTION .data0]
+LABEL_SEG_DATA0:
+
+_msg_GDT:
     DB "GDT loaded."
     DB  0
+msg_GDT EQU _msg_GDT - $$
 
-
+SegData0Len  EQU $ - LABEL_SEG_DATA0
 

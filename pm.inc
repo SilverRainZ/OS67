@@ -41,9 +41,9 @@ SA_TIL		EQU	4	; ┛
 ;        Limit: dd (low 20 bits available)
 ;        Attr:  dw (lower 4 bits of higher byte are always 0)
 %macro Descriptor 3
-	DW	%2 & 0xffff				; 段界限1
+	DW	%2 & 0xffff			    ; 段界限1
 	DW	%1 & 0xffff				; 段基址1
-	DB	(%1 >> 16) & 0xff			; 段基址2
+	DB	(%1 >> 16) & 0xff		; 段基址2
 	DW	((%2 >> 8) & 0xf00) | (%3 & 0xf0ff)	; 属性1 + 段界限2 + 属性2
 	DB	(%1 >> 24) & 0xff			; 段基址3
 %endmacro ; 共 8 字节
@@ -61,13 +61,14 @@ SA_TIL		EQU	4	; ┛
 	DW	((%2 >> 16) & 0xffff)			; 偏移2
 %endmacro ; 共 8 字节
 
-%macro FillDes 2
+; usage segment reg, selector, gdt entry
+%macro FillDesc 3
     xor	eax, eax
-	mov	ax, ds
+	mov	ax, %1 
 	shl	eax, 4
-	add	eax, %1 
-	mov	word [%2 + 2], ax
+	add	eax, %2 
+	mov	word [%3 + 2], ax
 	shr	eax, 16
-	mov	byte [%2 + 4], al
-	mov	byte [%2 + 7], ah
+	mov	byte [%3 + 4], al
+	mov	byte [%3 + 7], ah
 %endmacro
