@@ -7,7 +7,7 @@ toolSet/
 *.o
 *.lst
 *.swp
-!con.bat
+*.bat
 *.log
 
 
