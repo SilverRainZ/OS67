@@ -16,6 +16,7 @@ _done:
     RET
 
 loader:
+    XOR ESI, ESI
     MOV SI,msg_loader
     CALL temp_print16
     JMP LABEL_BEGIN
@@ -45,6 +46,7 @@ LABEL_BEGIN:
     MOV	SS, AX
     MOV	SP, 0x0100
 
+    ;FillDes LABEL_SEG_CODE32, LABEL_DESC_CODE32
     ; 初始化 32 位代码段描述符
     XOR	EAX, EAX
     MOV	AX, CS
