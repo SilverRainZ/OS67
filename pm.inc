@@ -2,6 +2,7 @@
 
 ; 描述符类型
 DA_32		EQU	0x4000	; 32 位段
+DA_LIMIT_4K	EQU	8000h	; 段界限粒度为 4K 字节
 
 DA_DPL0		EQU	  0x00	; DPL = 0
 DA_DPL1		EQU	  0x20	; DPL = 1
@@ -35,6 +36,12 @@ SA_RPL3		EQU	3	; ┛
 SA_TIG		EQU	0	; ┓TI
 SA_TIL		EQU	4	; ┛
 
+; constant for Pageing
+PG_P		EQU	1	; 页存在属性位
+PG_RWR		EQU	0	; R/W 属性位值, 读/执行
+PG_RWW		EQU	2	; R/W 属性位值, 读/写/执行
+PG_USS		EQU	0	; U/S 属性位值, 系统级
+PG_USU		EQU	4	; U/S 属性位值, 用户级
 
 ; usage: Descriptor Base, Limit, Attr
 ;        Base:  dd
