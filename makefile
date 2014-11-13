@@ -6,7 +6,7 @@ CC = gcc
 DEL = del
 DBG = bochsdbg
 VM = bochs
-DEL = del
+DEL = rm 
 
 default:
 	$(MAKE) install
