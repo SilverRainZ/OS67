@@ -6,8 +6,12 @@
 %INCLUDE "pm.inc"
 
 [BITS 16]
-org 0x8000
-jmp loader
+ALIGN 4
+[SECTION .text]
+
+global start
+start:
+    jmp loader
 
 msg_loader:
     db "loader loaded."
@@ -32,11 +36,11 @@ loader:
     call temp_print16
     jmp BEGIN
 
-; ==================================================================
+
 PageDirBase		equ	0x200000	; 页目录开始地址: 2M
 PageTblBase		equ	0x201000	; 页表开始地址: 2M+4K
 
-[SECTION .gdt]
+;[SECTION .gdt]
 GDT:
 DESC_NULL:        Descriptor 0,       0,                  0             ; null
 DESC_CODE32_R0:   Descriptor 0,       SegCode32Len - 1,   DA_C+DA_32    ; 非一致代码段
@@ -62,7 +66,7 @@ Selec_PageDir	equ	DESC_PAGE_DIR	  - DESC_NULL
 Selec_PageTbl	equ	DESC_PAGE_TBL	  - DESC_NULL
 ; END of [SECTION .gdt]
 
-[SECTION .s16]
+;[SECTION .s16]
 BEGIN:
     mov	ax, cs
     mov	ds, ax
@@ -98,7 +102,7 @@ BEGIN:
     jmp	dword Selec_Code32_R0:0	; special, clear pipe-line and jump 
 ; END of [SECTION .s16]
  
-[SECTION .s32]; 32bit code seg, jmp form real mode.
+;[SECTION .s32]; 32bit code seg, jmp form real mode.
 [BITS 32]
 
 SEG_CODE32_R0:
@@ -126,7 +130,8 @@ SEG_CODE32_R0:
     mov si, msg_Paged
     cld
     call temp_print32 
-
+    extern main
+    call main
     jmp $
 
 SetupPaging: 
@@ -204,12 +209,12 @@ msg_Paged equ _msg_Paged - $$
    
 SegData0Len  equ $ - SEG_DATA_R0
 
-[SECTION .stack]
+[SECTION .bss]
 SEG_STACK_R0:   ; ring 0 stack segment 
-    times 512 db 0
+    resb 512
 TopOfStack_R0 equ $ - SEG_STACK_R0 - 1
 
 SEG_STACK_R3:   ; ring 3 stack segment
-	times 512 db 0
+    resb 512	
 TopOfStack_R3 equ $ - SEG_STACK_R3 - 1
 
