@@ -28,7 +28,7 @@ start:
     mov si, msg_pm  
     call temp_print32 
     
-    jmp _osmain
+    jmp _osmain ; never return, 对吧, 亲爱的10567?
 
     xor esi,esi         
     mov si, msg_return  
@@ -55,4 +55,4 @@ outloop:
 msg_pm:
     db "in protect mode now.", 0
 msg_return:
-    db "oh no!", 0
+    db "I loved you, No.67.", 0

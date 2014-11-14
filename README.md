@@ -15,6 +15,6 @@ A Simple Operate System.
   `make clean` to clear the temp files;<br> 
   `make dbg` to debug it;<br>
  
- #### I hope I can finish it!
+#### I hope I can finish it!
 
 

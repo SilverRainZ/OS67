@@ -3,7 +3,7 @@ console.bat
 *.*~
 *~
 lst/
-tmp/
+bin/
 *.img
 *.bin
 *.o

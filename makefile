@@ -48,15 +48,16 @@ dbg:
 
 # using del *.* or * is dangerous
 clean: 
-	@$(DEL) bin\*.bin
-	@$(DEL) bin\*.lst
-	@$(DEL) bin\*.o
-	@$(DEL) bin\*.bin
-	@$(DEL) bin\kernel
-	@$(DEL) bin\floppy.img
+	$(DEL) bin\*.bin
+	$(DEL) bin\*.lst
+	$(DEL) bin\*.o
+	$(DEL) bin\*.bin
+	$(DEL) bin\*.tmp
+	$(DEL) bin\kernel
+	$(DEL) bin\floppy.img
 
 log:
-	@$(DEL) lst\*.lst
-	@$(DEL) lst\*.log
+	$(DEL) lst\*.lst
+	$(DEL) lst\*.log
 
 .PHONY: install run dbg clean log

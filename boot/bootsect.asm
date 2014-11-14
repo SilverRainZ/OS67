@@ -146,11 +146,11 @@ succ:
 
     xor	eax, eax
     mov	ax, ds
-    SHL	eax, 4
+    shl	eax, 4
     add	eax, GDT		; eax <- gdt base 
     mov	dword [GdtPtr + 2], eax	; [GdtPtr + 2] <- gdt base 
 
-    lgdt	[GdtPtr]
+    lgdt [GdtPtr]
     cli
 
 	mov	si,msg_gdt
@@ -166,7 +166,7 @@ succ:
 
     ; shift to protectmode  
     mov	eax, cr0
-    or	eax, 1
+    or eax, 1
     mov	cr0, eax
 
     jmp	dword Selec_Code32_R0:0	; special, clear pipe-line and jump 
