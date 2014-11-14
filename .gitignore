@@ -1,13 +1,14 @@
 #Temp File
+console.bat
 *.*~
 *~
-toolSet/
+lst/
+tmp/
 *.img
 *.bin
 *.o
 *.lst
 *.swp
-*.bat
 *.log
 
 

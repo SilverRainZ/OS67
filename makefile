@@ -7,37 +7,55 @@ DEL = del
 DBG = bochsdbg
 VM = bochs
 DEL = del
+LD = ld
+OBJCPY = objcopy
+CFLAG = -Wall -Werror -nostdinc -fno-builtin -fno-stack-protector \
+		 -finline-functions -finline-small-functions -findirect-inlining \
+		 -finline-functions-called-once
+OBJS = bin/loader.o bin/main.o
 
 default:
 	$(MAKE) install
 
-floppy.img: floppy.asm bootsect.bin loader.bin makefile
-	$(AS) floppy.asm -f bin -l floppy.lst -o floppy.img
+bin/floppy.img: boot/floppy.asm bin/bootsect.bin bin/kernel 
+	$(AS) -I ./bin/ -f bin -l lst/floppy.lst $< -o $@ 
 
-bootsect.bin: bootsect.asm makefile 
-	$(AS) bootsect.asm -f bin -l bootsect.lst -o bootsect.bin
+bin/bootsect.bin: boot/bootsect.asm 
+	$(AS) -I ./boot/ -f bin -l lst/bootsect.lst $< -o $@ 
 
-loader.bin: loader.asm makefile main
-	$(AS) loader.asm -f bin -l loader.lst -o loader.bin
+bin/loader.o : kern/loader.asm makefile 
+	$(AS) -I ./boot/ -f elf -l lst/loader.lst $< -o $@ 
 
-main: main.c
-	$(CC) -S -o main.lst main.c 
-	$(CC) -c -o main.o  main.c 
-	
+bin/kernel.tmp: kern/link.ld $(OBJS) 
+	$(LD) -T$< -static -o $@ $(OBJS)
+
+bin/kernel: bin/kernel.tmp
+	$(OBJCPY) -O binary $< $@ 
+
+bin/main.o: kern/main.c
+	$(CC) $(CFLAG) -c $^ -o $@  
+		
 install:
-	$(MAKE) floppy.img
+	$(MAKE) bin/floppy.img
 
-run:
-	$(VM) -q -f bochsrc.bxrc 
+# maybe a bug of MinGW32-make.exe, you can't use bochs -q -f xxxx directly
+run:	
+	call set/_bochs.bat
 
 dbg:
-	$(DBG) -q -f DBG_bochsrc.bxrc -log boshsout.log
+	call set/_bochs.bat dbg
 
+# using del *.* or * is dangerous
 clean: 
-	$(DEL) *.bin
-	$(DEL) *.img
-	$(DEL) *.lst
-	$(DEL) *.o
-	$(DEL) *.*~
-	$(DEL) *~
+	@$(DEL) bin\*.bin
+	@$(DEL) bin\*.lst
+	@$(DEL) bin\*.o
+	@$(DEL) bin\*.bin
+	@$(DEL) bin\kernel
+	@$(DEL) bin\floppy.img
 
+log:
+	@$(DEL) lst\*.lst
+	@$(DEL) lst\*.log
+
+.PHONY: install run dbg clean log
