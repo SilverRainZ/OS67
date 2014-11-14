@@ -13,6 +13,7 @@ CFLAG = -Wall -Werror -nostdinc -fno-builtin -fno-stack-protector \
 		 -finline-functions -finline-small-functions -findirect-inlining \
 		 -finline-functions-called-once
 OBJS = bin/loader.o bin/main.o
+DEL = del 
 
 default:
 	$(MAKE) install
