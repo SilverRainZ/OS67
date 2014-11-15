@@ -11,8 +11,8 @@ LD = ld
 OBJCPY = objcopy
 CFLAG = -Wall -Werror -nostdinc -fno-builtin -fno-stack-protector \
 		 -finline-functions -finline-small-functions -findirect-inlining \
-		 -finline-functions-called-once
-OBJS = bin/loader.o bin/main.o
+		 -finline-functions-called-once -I./kern
+OBJS = bin/loader.o bin/main.o bin/vga.o
 DEL = del 
 
 default:
@@ -33,7 +33,7 @@ bin/kernel.tmp: kern/link.ld $(OBJS)
 bin/kernel: bin/kernel.tmp
 	$(OBJCPY) -O binary $< $@ 
 
-bin/main.o: kern/main.c
+bin/%.o: kern/%.c
 	$(CC) $(CFLAG) -c $^ -o $@  
 		
 install:

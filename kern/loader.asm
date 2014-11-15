@@ -20,7 +20,7 @@ start:
     mov ss, ax
     mov esp, 0xfff
 
-    mov	edi,(160 * 1) + 0  	; 160 * 50  line 3 column 1 
+    mov	edi,(160 * 2) + 0  	; 160 * 50  line 3 column 1 
     mov	ah, 00001100b	    ; red  
     ; mov	ah, 00001011b	; 0000: black 1011: cyan , i love this beautiful word
 
@@ -53,6 +53,6 @@ outloop:
     ret
 
 msg_pm:
-    db "in protect mode now.", 0
+    db "In protect mode now.", 0
 msg_return:
     db "I loved you, No.67.", 0

@@ -1,8 +1,10 @@
+#include <sys.h>
+
 int osmain(void)
 {
-    char *video_memory = (char *)0xb8000;
-    int i;
-    char a = 'A';
-    for (i = 0; i < 100; i += 2) video_memory[i] = (a++)%256;
+    init_vga();
+    cls();
+    puts("FFF");
+
     for (;;);
 }

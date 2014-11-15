@@ -31,7 +31,7 @@ GDT:
 DESC_NULL:        Descriptor 0,       0,                  0             ; null
 DESC_CODE32_R0:   Descriptor 0x8000,  0xfff,              DA_C+DA_32    ; uncomfirm 
 DESC_DATA_R0:     Descriptor 0,       0xffffffff,         DA_DRW+DA_32  ; 4G seg 
-DESC_VIDEO_R0:    Descriptor 0xb8000, 0xffff,             DA_DRW+DA_32  ; video RAM
+DESC_VIDEO_R0:    Descriptor 0xb8000, 0xffff,             DA_DRW+DA_32  ; video RAM DA_32
 DESC_STACK_R0:    Descriptor 0x7c00,  0xfff,              DA_DRWA+DA_32
 
 GdtLen	equ	$ - GDT	; GDT len
@@ -77,6 +77,9 @@ entry:
    ; int 0x10    ; cls
    ; mov	si,msg
    ; call temp_print16
+    mov ah, 0x0
+    mov al, 0x03 ; 80*25 16 color
+    int 0x10
 
 getmsg:
     mov ax,0x9000
