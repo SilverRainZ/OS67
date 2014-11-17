@@ -31,7 +31,7 @@ struct vga_char *vgamem;
 int cur_x, cur_y;
 void init_vga(){
     cur_x = 0;
-    cur_y = 4;
+    cur_y = 5;
     vgamem = (struct vga_char *)0xb8000;
 }
 
@@ -60,8 +60,7 @@ void putchar(unsigned char ch){
     }
 }
 
-void puts(char *str){
+void puts(unsigned char *str){
     int i = 0;
     for (i = 0; i < 6; i ++) putchar(str[i]);
-    putchar('A');
 }

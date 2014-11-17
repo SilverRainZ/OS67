@@ -29,7 +29,7 @@ times 18 db 0
 
 GDT:
 DESC_NULL:        Descriptor 0,       0,                  0             ; null
-DESC_CODE32_R0:   Descriptor 0x8000,  0xfff,              DA_C+DA_32    ; uncomfirm 
+DESC_CODE32_R0:   Descriptor 0x8000,  0xffff,             DA_C+DA_32    ; uncomfirm 
 DESC_DATA_R0:     Descriptor 0,       0xffffffff,         DA_DRW+DA_32  ; 4G seg 
 DESC_VIDEO_R0:    Descriptor 0xb8000, 0xffff,             DA_DRW+DA_32  ; video RAM DA_32
 DESC_STACK_R0:    Descriptor 0x7c00,  0xfff,              DA_DRWA+DA_32
@@ -81,6 +81,9 @@ entry:
     mov al, 0x03 ; 80*25 16 color
     int 0x10
 
+    mov si, msg_boot
+    call temp_print16
+
 getmsg:
     mov ax,0x9000
     mov ds,ax
@@ -109,6 +112,7 @@ getmsg:
     mov ds,ax   ; revert
 ; get message end
 
+    
 loadloader: ;  read 4 sector to load loader.bin
     mov bx,0  ; loader.bin 's addr in mem
     mov ax,0x0800 ; loader's addr
@@ -167,6 +171,7 @@ succ:
 	mov	si,msg_a20
     call temp_print16
 
+
     ; shift to protectmode  
     mov	eax, cr0
     or eax, 1
@@ -174,16 +179,16 @@ succ:
 
     jmp	dword Selec_Code32_R0:0	; special, clear pipe-line and jump 
 
-msg:
-    db	"bootsect loaded.",13,10,0
+msg_boot:
+    db	"Bootsector loaded...",13,10,0
 msg_err:
-    db	"loader load error.",13,10,0
+    db	"Loader load error!",13,10,0
 msg_succ:
-    db	"loader load success.",13,10,0
+    db	"Loader load success...",13,10,0
 msg_gdt:
-    db	"gdt loaded.",13,10,0
+    db	"Temp GDT loaded...",13,10,0
 msg_a20:
-    db	"a20 line on.",13,10,0
+    db	"A20 line on...",13,10,0
 msg_temp:
     db 0,0,0
 

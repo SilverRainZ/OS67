@@ -6,7 +6,7 @@
 ;org 0x8000
 [BITS 32]
 ALIGN 4
-[extern _osmain]
+[extern osmain]
 [SECTION .text]
 
 [global start]
@@ -20,7 +20,7 @@ start:
     mov ss, ax
     mov esp, 0xfff
 
-    mov	edi,(160 * 2) + 0  	; 160 * 50  line 3 column 1 
+    mov	edi,(160 * 3) + 0  	; 160 * 50  line 3 column 1 
     mov	ah, 00001100b	    ; red  
     ; mov	ah, 00001011b	; 0000: black 1011: cyan , i love this beautiful word
 
@@ -28,7 +28,7 @@ start:
     mov si, msg_pm  
     call temp_print32 
     
-    jmp _osmain ; never return, 对吧, 亲爱的10567?
+    jmp osmain ; never return, 对吧, 亲爱的10567?
 
     xor esi,esi         
     mov si, msg_return  
@@ -56,3 +56,7 @@ msg_pm:
     db "In protect mode now.", 0
 msg_return:
     db "I loved you, No.67.", 0
+
+[SECTION .data]
+
+[SECTION .rdata]

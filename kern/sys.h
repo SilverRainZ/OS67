@@ -4,5 +4,5 @@
 extern void init_vga();
 extern void cls();
 extern void putchar(unsigned char ch);
-extern void puts(char *str);
+extern void puts(unsigned char *str);
 #endif

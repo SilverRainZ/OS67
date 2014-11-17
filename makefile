@@ -1,5 +1,6 @@
 # makefile
 
+.PHONY: install run dbg clean log
 MAKE = make -r
 AS = nasm
 CC = gcc
@@ -9,11 +10,11 @@ VM = bochs
 DEL = del
 LD = ld
 OBJCPY = objcopy
-CFLAG = -Wall -Werror -nostdinc -fno-builtin -fno-stack-protector \
+CFLAGS = -Wall -Werror -nostdinc -fno-builtin -fno-stack-protector \
 		 -finline-functions -finline-small-functions -findirect-inlining \
-		 -finline-functions-called-once -I./kern
+		 -finline-functions-called-once -I./kern -m32
 OBJS = bin/loader.o bin/main.o bin/vga.o
-DEL = del 
+DEL = rm 
 
 default:
 	$(MAKE) install
@@ -27,37 +28,36 @@ bin/bootsect.bin: boot/bootsect.asm
 bin/loader.o : kern/loader.asm makefile 
 	$(AS) -I ./boot/ -f elf -l lst/loader.lst $< -o $@ 
 
-bin/kernel.tmp: kern/link.ld $(OBJS) 
-	$(LD) -T$< -static -o $@ $(OBJS)
+bin/kernel: kern/link.ld $(OBJS) 
+	$(LD) -T$< -melf_i386 -static -o $@ $(OBJS)
 
-bin/kernel: bin/kernel.tmp
-	$(OBJCPY) -O binary $< $@ 
+# bin/kernel: bin/kernel.tmp
+# 	$(OBJCPY) -O binary $< $@ 
 
 bin/%.o: kern/%.c
-	$(CC) $(CFLAG) -c $^ -o $@  
+	$(CC) $(CFLAGS) -c $^ -o $@  
+	$(CC) $(CFLAGS) -S $^ -o lst/$*.asm  
 		
 install:
 	$(MAKE) bin/floppy.img
 
 # maybe a bug of MinGW32-make.exe, you can't use bochs -q -f xxxx directly
-run:	
-	call set/_bochs.bat
+run:
+	$(VM) -q -f set/bochsrc.bxrc
 
 dbg:
-	call set/_bochs.bat dbg
+	$(VM) -q -f set/bochsrc.bxrc # unused
 
 # using del *.* or * is dangerous
 clean: 
-	$(DEL) bin\*.bin
-	$(DEL) bin\*.lst
-	$(DEL) bin\*.o
-	$(DEL) bin\*.bin
-	$(DEL) bin\*.tmp
-	$(DEL) bin\kernel
-	$(DEL) bin\floppy.img
+	$(DEL) bin/*
+#	 bin/*.lst \
+#	 bin/*.o \
+#	 bin/*.bin \
+#	 bin/*.tmp \
+#	 bin/kernel \
+#	 bin/floppy.img
 
 log:
-	$(DEL) lst\*.lst
-	$(DEL) lst\*.log
+	$(DEL) lst/*
 
-.PHONY: install run dbg clean log
