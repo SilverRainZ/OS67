@@ -2,7 +2,6 @@
 int osmain(void)
 {
     init_vga();
-    unsigned char a[] = "12345\n";
-    puts(a);
+    puts("Welcome to OS67\n\r\0");
     for (;;);
 }

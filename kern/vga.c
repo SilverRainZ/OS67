@@ -29,7 +29,7 @@ struct vga_char{
 struct vga_char *vgamem;
 
 int cur_x, cur_y;
-void init_vga(){
+void init_vga() {
     cur_x = 0;
     cur_y = 5;
     vgamem = (struct vga_char *)0xb8000;
@@ -46,7 +46,7 @@ void cls(){
     cur_x = cur_y = 0;
 }
 
-void putchar(unsigned char ch){
+void putchar(char ch){
     switch (ch){
         case '\r': cur_x = 0; break;
         case '\n': cur_y++; break;
@@ -60,7 +60,14 @@ void putchar(unsigned char ch){
     }
 }
 
-void puts(unsigned char *str){
+void puts(char *str){
     int i = 0;
-    for (i = 0; i < 6; i ++) putchar(str[i]);
+    while (str[i] != '\0') putchar(str[i++]);
 }
+
+void scroll(){
+   
+}
+
+
+

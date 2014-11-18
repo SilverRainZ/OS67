@@ -10,9 +10,9 @@ VM = bochs
 DEL = del
 LD = ld
 OBJCPY = objcopy
-CFLAGS = -Wall -Werror -nostdinc -fno-builtin -fno-stack-protector \
+CFLAGS = -Wall -Werror -nostdinc -fno-builtin -fno-stack-protector -funsigned-char \
 		 -finline-functions -finline-small-functions -findirect-inlining \
-		 -finline-functions-called-once -I./kern -m32
+		 -finline-functions-called-once -I./kern -m32 -g
 OBJS = bin/loader.o bin/main.o bin/vga.o
 DEL = rm 
 
