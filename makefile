@@ -14,7 +14,7 @@ CFLAGS = -Wall -Werror -nostdinc -fno-builtin -fno-stack-protector -funsigned-ch
 		 -finline-functions -finline-small-functions -findirect-inlining \
 		 -finline-functions-called-once -I./kern -m32 -g
 OBJS = bin/loader.o bin/main.o bin/vga.o
-DEL = rm 
+DEL = rm -f
 
 default:
 	$(MAKE) install
@@ -50,13 +50,12 @@ dbg:
 
 # using del *.* or * is dangerous
 clean: 
-	$(DEL) bin/*
-#	 bin/*.lst \
-#	 bin/*.o \
-#	 bin/*.bin \
-#	 bin/*.tmp \
-#	 bin/kernel \
-#	 bin/floppy.img
+	 $(DEL) bin/*.lst 
+	 $(DEL) bin/*.o 
+	 $(DEL) bin/*.bin 
+	 $(DEL) bin/*.tmp 
+	 $(DEL) bin/kernel 
+	 $(DEL) bin/floppy.img
 
 log:
 	$(DEL) lst/*
