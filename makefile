@@ -50,12 +50,12 @@ dbg:
 
 # using del *.* or * is dangerous
 clean: 
-	 $(DEL) bin/*.lst 
-	 $(DEL) bin/*.o 
-	 $(DEL) bin/*.bin 
-	 $(DEL) bin/*.tmp 
-	 $(DEL) bin/kernel 
-	 $(DEL) bin/floppy.img
+	$(DEL) bin/*.lst 
+	$(DEL) bin/*.o 
+	$(DEL) bin/*.bin 
+	$(DEL) bin/*.tmp 
+	$(DEL) bin/kernel 
+	$(DEL) bin/floppy.img
 
 log:
 	$(DEL) lst/*
