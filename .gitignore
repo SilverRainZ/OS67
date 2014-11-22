@@ -4,13 +4,14 @@ console.bat
 *~
 lst/
 bin/
+.directory
 *.img
 *.bin
 *.o
 *.lst
 *.swp
 *.log
-.directory
+*.ini
 
 
 
