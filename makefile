@@ -43,10 +43,10 @@ install:
 
 # maybe a bug of MinGW32-make.exe, you can't use bochs -q -f xxxx directly
 run:
-	$(VM) -q -f set/bochsrc.bxrc
+	$(VM) -q -f set/bochsrc.bxrc    # debug with shell
 
 dbg:
-	$(VM) -q -f set/bochsrc.bxrc # unused
+	$(VM) -q -f set/dbg_bochsrc.bxrc # debug with X GUI
 
 # using del *.* or * is dangerous
 clean: 
