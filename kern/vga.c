@@ -73,8 +73,8 @@ void putchar(unsigned char ch){
                      cur_x = (cur_x + 1)%80;
                  }
     }
-    move_cur();
     scroll();
+    move_cur();
 }
 
 void puts(unsigned char *str){
