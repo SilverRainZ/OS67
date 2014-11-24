@@ -73,7 +73,7 @@ void putchar(unsigned char ch){
                      cur_x = (cur_x + 1)%80;
                  }
     }
-    scroll();
+    scroll();   // you should scroll before updata the cursor, or error
     move_cur();
 }
 

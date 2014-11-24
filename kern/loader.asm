@@ -28,7 +28,7 @@ start:
     mov si, msg_pm  
     call temp_print32 
     
-    jmp osmain ; never return, 对吧, 亲爱的10567?
+    jmp osmain ; never return? 
 
     xor esi,esi         
     mov si, msg_return  
@@ -50,6 +50,21 @@ loop:
 
 outloop:
     pop edi
+    ret
+
+global gdt_flush
+extern gp
+
+gdt_flush:     ; function used in C
+    lgdt [gp]
+    mov ax, 0x10
+    mov ds, ax
+    mov es, ax
+    mov fs, ax
+    mov gs, ax
+    mov ss, ax
+    jmp 0x08:flush2
+flush2:
     ret
 
 msg_pm:

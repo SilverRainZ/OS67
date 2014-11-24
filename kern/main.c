@@ -10,6 +10,7 @@ int osmain(void)
 {
     init_vga();
     puts((unsigned char *)"Welcome to OS67.\n\r\0");
+    setcolor(COL_CYAN, COL_BROWN);
     puts((unsigned char *)"Welcome to OS67.\n\r\0");
     int i;
     for (i = 0; i < 28; i++){
