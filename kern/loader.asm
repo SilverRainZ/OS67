@@ -18,7 +18,7 @@ start:
     mov gs, ax
     mov ax, 0x20
     mov ss, ax
-    mov esp, 0xfff
+    mov esp, 0x8fff
 
     mov	edi,(160 * 3) + 0  	; 160 * 50  line 3 column 1 
     mov	ah, 00001100b	    ; red  
@@ -72,6 +72,3 @@ msg_pm:
 msg_return:
     db "I loved you, No.67.", 0
 
-[SECTION .data]
-
-[SECTION .rdata]

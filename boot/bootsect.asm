@@ -29,10 +29,11 @@ times 18 db 0
 
 GDT:
 DESC_NULL:        Descriptor 0,       0,                  0             ; null
-DESC_CODE32_R0:   Descriptor 0x8000,  0xffffffff,         DA_C+DA_32    ; uncomfirm 
-DESC_DATA_R0:     Descriptor 0,       0xffffffff,         DA_DRW+DA_32  ; 4G seg 
-DESC_VIDEO_R0:    Descriptor 0xb8000, 0xffff,             DA_DRW+DA_32  ; video RAM DA_32
-DESC_STACK_R0:    Descriptor 0,       0xffffffff,         DA_DRWA+DA_32
+DESC_CODE32_R0:   Descriptor 0x8000,  0x8000000-0x8000,   DA_C+DA_32    ; uncomfirm 
+DESC_DATA_R0:     Descriptor 0,       0x7ffffff,          DA_DRW+DA_32  ; 4G seg 
+DESC_VIDEO_R0:    Descriptor 0xb8000, 0xffff,             DA_DRW+DA_32  ; vram 
+DESC_STACK_R0:    Descriptor 0,       0x7ffffff,          DA_DRWA+DA_32
+; mem size is 128M
 
 GdtLen    equ    $ - GDT    ; GDT len
 GdtPtr    dw    GdtLen - 1  ; GDT limit
