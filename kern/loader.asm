@@ -52,6 +52,12 @@ outloop:
     pop edi
     ret
 
+msg_pm:
+    db "In protect mode now.", 0
+msg_return:
+    db "I loved you, No.67.", 0
+
+
 global gdt_flush
 extern gp
 
@@ -67,8 +73,14 @@ gdt_flush:     ; function used in C
 flush2:
     ret
 
-msg_pm:
-    db "In protect mode now.", 0
-msg_return:
-    db "I loved you, No.67.", 0
+global idt_load ; function used in C
+extern idtp
+
+idt_load:
+    lidt [idtp]
+    ret
+
+
+
+
 

@@ -39,4 +39,6 @@ extern void outportb(unsigned short _port, unsigned char _data);
 extern void gdt_set_gate(int num, unsigned long base, unsigned long limit, unsigned char access, unsigned char gran);
 extern void init_gdt();
 
+/* idt.c */
+extern void init_idt();
 #endif
