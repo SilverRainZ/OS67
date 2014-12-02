@@ -63,7 +63,7 @@ gdt_flush:     ; function used in C
     mov fs, ax
     mov gs, ax
     mov ss, ax
-    jmp 0x08:flush2
+    jmp 0x08:flush2 - 0x8000 ; temporary
 flush2:
     ret
 
