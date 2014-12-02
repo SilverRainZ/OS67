@@ -8,19 +8,13 @@ void delay(){   // lol, we have no sleep()
 }
 int osmain(void)
 {
-    init_gdt();
-    init_idt();
     init_vga();
-    puts((unsigned char *)"Welcome to OS67.\n\r\0");
-    setcolor(COL_CYAN, COL_BROWN);
-    puts((unsigned char *)"Welcome to OS67.\n\r\0");
-    int i;
-    for (i = 0; i < 28; i++){
-        putchar(i + '0');
-        putchar('\n');
-        delay();
-    }
+    init_gdt();
+    puts((unsigned char *)"A new GDT installed...\n\r\0");
+    init_idt();
+    puts((unsigned char *)"IDT installed...\n\r\0");
+    puts((unsigned char *)"Welcome to OS67...\n\r\0");
     //vga_test(); 
-    
+
     for (;;);
 }
