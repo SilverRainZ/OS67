@@ -37,6 +37,6 @@ extern void outportb(unsigned short _port, unsigned char _data);
 
 /* gdt.c */
 extern void gdt_set_gate(int num, unsigned long base, unsigned long limit, unsigned char access, unsigned char gran);
-extern void gdt_install();
+extern void init_gdt();
 
 #endif

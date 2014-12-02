@@ -8,6 +8,7 @@ void delay(){   // lol, we have no sleep()
 }
 int osmain(void)
 {
+    init_gdt();
     init_vga();
     puts((unsigned char *)"Welcome to OS67.\n\r\0");
     setcolor(COL_CYAN, COL_BROWN);

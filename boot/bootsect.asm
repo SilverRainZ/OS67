@@ -29,10 +29,9 @@ times 18 db 0
 
 GDT:
 DESC_NULL:        Descriptor 0,       0,                  0             ; null
-DESC_CODE32_R0:   Descriptor 0x8000,  0x8000000-0x8000,   DA_C+DA_32    ; uncomfirm 
+DESC_CODE32_R0:   Descriptor 0x8000,  0x7ffffff,          DA_C+DA_32    ; uncomfirm 
 DESC_DATA_R0:     Descriptor 0,       0x7ffffff,          DA_DRW+DA_32  ; 4G seg 
 DESC_VIDEO_R0:    Descriptor 0xb8000, 0xffff,             DA_DRW+DA_32  ; vram 
-DESC_STACK_R0:    Descriptor 0,       0x7ffffff,          DA_DRWA+DA_32
 ; mem size is 128M
 
 GdtLen    equ    $ - GDT    ; GDT len
@@ -43,27 +42,26 @@ dd    0                     ; GDT Base
 Selec_Code32_R0 equ     DESC_CODE32_R0 - DESC_NULL
 Selec_Data_R0   equ     DESC_DATA_R0   - DESC_NULL 
 Selec_Video_R0  equ     DESC_VIDEO_R0  - DESC_NULL
-Selec_Stack_R0  equ     DESC_STACK_R0  - DESC_NULL
 
 temp_print16:
 loop:
     lodsb   ; ds:si -> al
     or al,al
     jz done 
-    mov    ah,0x0e        
-    mov    bx,15        
-    int    0x10        
-    jmp    loop
+    mov ah,0x0e        
+    mov bx,15        
+    int 0x10        
+    jmp loop
 done:
     ret
 
 ;============================================================
 entry:
-    mov    ax,0        
-    mov    ss,ax
-    mov    sp,0x7c00
-    mov    ds,ax
-    mov    es,ax   ; bios interrupt expects ds
+    mov ax,0        
+    mov ss,ax
+    mov sp,0x7c00
+    mov ds,ax
+    mov es,ax   ; bios interrupt expects ds
    ; mov ah,0x01
    ; mov ch,00010000b    ; bit 5 = 1 bit 6 = 0
    ; mov cl,0x0
@@ -85,32 +83,30 @@ entry:
     mov si, msg_boot
     call temp_print16
 
+    ; store messgae at 0x500
+    ; error ds = 0x500, mov [0],reg
 getmsg:
-    mov ax,0x9000
-    mov ds,ax
     mov ah,0x03
     xor bh,bh
     int 0x10
-    mov [0],dx  ; cursor pos save in 0x9000 
+    mov [0x500],dx  ; cursor pos save in 0x9000 
  
     mov ah,0x88
     int 0x15
-    mov [2],ax  ; get mem size(extrened mem kb)
+    mov [0x502],ax  ; get mem size(extrened mem kb)
 
     mov ah,0x0f
     int 0x10
-    mov [4],bx  ; bh = display page
-    mov [6],ax  ; al = video mode, ah = window width
+    mov [0x504],bx  ; bh = display page
+    mov [0x506],ax  ; al = video mode, ah = window width
        
     mov ah,0x12
     mov bl,0x10
     int 0x10
-    mov [8],ax  ; 0x90008 do u know what linus's meaning?
-    mov [10],bx ; 0x9000a  安装的显示内存 0x900b  显示状态
-    mov [12],cx ; 0x9000c  显示卡的特性参数
+    mov [0x508],ax  ; 0x90008 do u know what linus's meaning?
+    mov [0x510],bx ; 0x9000a  安装的显示内存 0x900b  显示状态
+    mov [0x512],cx ; 0x9000c  显示卡的特性参数
     
-    mov ax,0
-    mov ds,ax   ; revert
 ; get message end
 
     
