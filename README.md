@@ -1,20 +1,28 @@
 OS67
 ===============================
-67 is a magic number :)
+OS67 is a simple operate system.
+67 is the magic number :)
 
 A Simple Operate System.
 
-####Developemt 
-  MinGW-32;<br> 
-  nasm 2.11.05;<br> 
-  bochs 2.6.6<br>
-  
-####Compile 
-  `make install` to compile;<br> 
-  `make run` to run this system;<br> 
-  `make clean` to clear the temp files;<br> 
-  `make dbg` to debug it;<br>
- 
-#### I hope I can finish it!
+####Requirements
+nasm<br>
+gcc<br>
+ld<br>
+make<br>
+bochs<br>
+     
+####Compile  
+git clone https://github.com/LastAvenger/OS67.git<br>
+mkdir lst<br>
+mkdir bin<br>
+`make` to compile;<br> 
+`make run` & `make vb` to run it wiht bochs and Virtual Box;<br> 
+
+####Existing bugs
+  when we run it with Virtual Box, error VINF_EM_TRIPLE_FAULT occured<br>
+    
+
+####Just for fun. 
 
 

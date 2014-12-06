@@ -10,7 +10,7 @@ db 0xf0,0xff,0xff
 db 0x03,0x40,0x00,0x05,0x60,0x00,0x07,0x80,0x00,0x09,0xa0,0x00,0xff,0x0f        
                         ; name      offset  len     describe
 times 0x2600 - ($-$$) db 0  ; root dir
-db "loader  "           ; dir_name  0       0x0b    name&extname 
+db "kernel  "           ; dir_name  0       0x0b    name&extname 
 db "bin"                
 db 0x20                 ; dir_attr  0xb     1       attribute
 times 10 db 0           ; resrrve   0xc`    10

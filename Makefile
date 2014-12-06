@@ -5,8 +5,8 @@ MAKE = make -r
 AS = nasm
 CC = gcc
 DEL = del
-DBG = bochsdbg
-VM = bochs
+DBG = bochs
+VM = /usr/lib/virtualbox/VirtualBox --comment "OS67" --startvm "656a1a52-5a3b-4091-ae1a-437cb9c5284d"
 DEL = del
 LD = ld
 OBJCPY = objcopy
@@ -41,14 +41,15 @@ bin/%.o: kern/%.c
 install:
 	$(MAKE) bin/floppy.img
 
-# maybe a bug of MinGW32-make.exe, you can't use bochs -q -f xxxx directly
+vb:
+	$(VM)   # run with virtualbox
+    
 run:
-	$(VM) -q -f set/bochsrc.bxrc    # debug with shell
+	$(DBG) -q -f set/bochsrc.bxrc    # debug with shell
 
 dbg:
-	$(VM) -q -f set/dbg_bochsrc.bxrc # debug with X GUI
+	$(DBG) -q -f set/dbg_bochsrc.bxrc # debug with X GUI
 
-# using del *.* or * is dangerous
 clean: 
 	$(DEL) bin/*.lst 
 	$(DEL) bin/*.o 
