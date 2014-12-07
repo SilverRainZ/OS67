@@ -351,7 +351,7 @@ isr_common_stub:
     mov gs, ax
     mov eax, esp
     push eax
-    mov eax, fault_handler
+    mov eax, fault_handler - 0x8000
     call eax
     pop eax
     pop gs

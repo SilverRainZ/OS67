@@ -47,7 +47,7 @@ extern void isr31();
 *  hex. */
 void init_isrs()
 {
-    idt_set_gate(0, (unsigned long)isr0, 0x08, 0x8E);
+    idt_set_gate(0, (unsigned long)(isr0 - 0x8000), 0x08, 0x8E);
     idt_set_gate(1, (unsigned long)isr1, 0x08, 0x8E);
     idt_set_gate(2, (unsigned long)isr2, 0x08, 0x8E);
     idt_set_gate(3, (unsigned long)isr3, 0x08, 0x8E);
@@ -135,11 +135,10 @@ char *exception_messages[] =
 *  happening and messing up kernel data structures */
 void fault_handler(struct regs *r)
 {
-    puts((unsigned char *)"dddd");
     if (r->int_no < 32)
     {
         puts((unsigned char *)exception_messages[r->int_no]);
-        puts((unsigned char *)"Exception. System Halted!\n");
+        puts((unsigned char *)"Exception. System Halted!\n\r\0");
         for (;;);
     }
 }

@@ -96,7 +96,7 @@ readloop:
 
 retry:
     mov ah,0x02  ; read 
-    mov al,8    ; read 4 sector 
+    mov al,8*3   ; read 12 sector 
     mov dl,0x00 ; driver a:
     int 0x13
     jnc succ 
