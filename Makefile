@@ -12,8 +12,8 @@ LD = ld
 OBJCPY = objcopy
 CFLAGS = -Wall -Werror -nostdinc -fno-builtin -fno-stack-protector -funsigned-char \
 		 -finline-functions -finline-small-functions -findirect-inlining \
-		 -finline-functions-called-once -I./kern -m32 
-OBJS = bin/loader.o bin/main.o bin/vga.o bin/func.o bin/gdt.o bin/idt.o bin/isrs.o
+		 -finline-functions-called-once -I./kern/inc -m32 
+OBJS = bin/loader.o bin/main.o bin/vga.o bin/func.o bin/gdt.o bin/idt.o bin/isrs.o bin/irq.o
 DEL = rm -f
 
 default:

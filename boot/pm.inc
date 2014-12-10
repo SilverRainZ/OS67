@@ -1,8 +1,9 @@
 ; vim: set ft=asm:
+; reference from <Orange's>
 
 ; 描述符类型
 DA_32		EQU	0x4000	; 32 位段
-DA_LIMIT_4K	EQU	8000h	; 段界限粒度为 4K 字节
+DA_LIMIT_4K	EQU	0x8000	; 段界限粒度为 4K 字节
 
 DA_DPL0		EQU	  0x00	; DPL = 0
 DA_DPL1		EQU	  0x20	; DPL = 1
