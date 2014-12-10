@@ -9,7 +9,7 @@ A Simple Operate System.
 * gcc + nasm + ld + make <br>
 * bochs<br>
      
-####Compile  
+####How to compile  
           git clone https://github.com/LastAvenger/OS67.git
           cd OS67
           mkdir lst
@@ -19,7 +19,7 @@ A Simple Operate System.
           make dbg   # debug
 
 ####Existing bugs
-* when we run it with Virtual Box, error VINF_EM_TRIPLE_FAULT occured<br>
+* when we run it with Virtual Box, fault VINF_EM_TRIPLE_FAULT occured<br>
     
 ####Just for fun. 
 
