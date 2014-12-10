@@ -145,7 +145,7 @@ succ:
     mov cr0,eax
 
     ; special, clear pipe-line and jump 
-    jmp dword Selec_Code32_R0:0   
+    jmp dword Selec_Code32_R0:0x8000   
 
 msg_boot:
     db "Bootsector loaded...",13,10,0
@@ -161,10 +161,10 @@ msg_temp:
     db 0,0,0
 
 GDT:
-DESC_NULL:        Descriptor 0,       0,                  0             ; null
-DESC_CODE32_R0:   Descriptor 0x8000,  0x7ffffff,          DA_C+DA_32    ; uncomfirm 
-DESC_DATA_R0:     Descriptor 0,       0x7ffffff,          DA_DRW+DA_32  ; 4G seg 
-DESC_VIDEO_R0:    Descriptor 0xb8000, 0xffff,             DA_DRW+DA_32  ; vram 
+DESC_NULL:        Descriptor 0,       0,        0             ; null
+DESC_CODE32_R0:   Descriptor 0,       0x7ffffff,DA_C+DA_32    ; uncomfirm 
+DESC_DATA_R0:     Descriptor 0,       0x7ffffff,DA_DRW+DA_32  ; 4G seg 
+DESC_VIDEO_R0:    Descriptor 0xb8000, 0xffff,   DA_DRW+DA_32  ; vram 
 
 GdtLen  equ $ - GDT     ; GDT len
 GdtPtr  dw  GdtLen - 1  ; GDT limit

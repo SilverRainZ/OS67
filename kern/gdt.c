@@ -44,8 +44,8 @@ void init_gdt(){
     // null descriptor
     gdt_set_gate(0, 0, 0, 0, 0);  
 
-    // type: code addr: 0x8000 limit: 128M gran: 4KB bit 32bit 
-    gdt_set_gate(1, 0x8000, 0xffffffff, 0x9a, 0xcf);
+    // type: code addr: 0 limit: 128M gran: 4KB bit 32bit 
+    gdt_set_gate(1, 0, 0xffffffff, 0x9a, 0xcf);
 
     // type: data addr: 0 limit: 128M gran: 4KB bit 32bit 
     gdt_set_gate(2, 0, 0xffffffff, 0x92, 0xcf);

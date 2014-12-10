@@ -21,7 +21,7 @@ start:
     mov ss,ax
     mov esp,0x7c00
 
-    mov	edi,(160*3)+0  	; 160 * 50  line 3 column 1 
+    mov	edi,(160*3)+0  	; 160*50 line 3 column 1 
     mov	ah,00001100b   ; red  
 
     xor esi,esi         ; be careful !
@@ -61,7 +61,7 @@ msg_return:
 global gdt_flush
 extern gp
 
-gdt_flush:     ; function used in C
+gdt_flush:      ; function used in C
     lgdt [gp]
     mov ax,0x10
     mov ds,ax
@@ -69,7 +69,7 @@ gdt_flush:     ; function used in C
     mov fs,ax
     mov gs,ax
     mov ss,ax
-    jmp 0x08:flush2 - 0x8000 ; temporary
+    jmp 0x08:flush2 ; temporary
 flush2:
     ret
 
@@ -351,7 +351,7 @@ isr_common_stub:
     mov gs,ax
     mov eax,esp
     push eax
-    mov eax,fault_handler - 0x8000
+    mov eax,fault_handler
     call eax
     pop eax
     pop gs

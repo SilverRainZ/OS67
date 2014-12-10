@@ -47,7 +47,7 @@ extern void isr31();
 *  hex. */
 void init_isrs()
 {
-    idt_set_gate(0, (unsigned long)(isr0 - 0x8000), 0x08, 0x8E);
+    idt_set_gate(0, (unsigned long)isr0, 0x08, 0x8E);
     idt_set_gate(1, (unsigned long)isr1, 0x08, 0x8E);
     idt_set_gate(2, (unsigned long)isr2, 0x08, 0x8E);
     idt_set_gate(3, (unsigned long)isr3, 0x08, 0x8E);

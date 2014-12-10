@@ -20,13 +20,12 @@ int osmain(void)
     setcolor(COL_D_GREY, COL_CYAN);
     puts((unsigned char *)"Welcome to OS67...\n\r\0");
     int i;
-    i = 3;
-    i = i/(i - 3);
 
     for (i = 0; i < 26; i++){
         putchar('A' + i);
         putchar('\n');
         delay();
+        if (i == 3) __asm__("int $10"); // ISR test
     }
     //vga_test(); 
 

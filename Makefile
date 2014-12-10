@@ -12,7 +12,7 @@ LD = ld
 OBJCPY = objcopy
 CFLAGS = -Wall -Werror -nostdinc -fno-builtin -fno-stack-protector -funsigned-char \
 		 -finline-functions -finline-small-functions -findirect-inlining \
-		 -finline-functions-called-once -I./kern -m32 -g
+		 -finline-functions-called-once -I./kern -m32 
 OBJS = bin/loader.o bin/main.o bin/vga.o bin/func.o bin/gdt.o bin/idt.o bin/isrs.o
 DEL = rm -f
 
