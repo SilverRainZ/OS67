@@ -11,6 +11,7 @@ A Simple Operate System.
      
 ####Compile  
           git clone https://github.com/LastAvenger/OS67.git
+          cd OS67
           mkdir lst
           mkdir bin
           make       # compile

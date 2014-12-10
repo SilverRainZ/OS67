@@ -47,7 +47,8 @@ db 0xff,0x0f        ; end of file
 
 ; ###File
                         ; name      offset  len     describe
-times 0x2600 - ($-$$) db 0  ; root dir
+times 0x2600 - ($-$$) \
+db 0                    ; root dir
 db "kernel  "           ; dir_name  0       0x0b    name&extname 
 db "bin"                
 db 0x20                 ; dir_attr  0xb     1       attribute

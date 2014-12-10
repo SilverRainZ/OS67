@@ -122,7 +122,7 @@ succ:
     mov ax,ds
     shl eax,4
     add eax,GDT        ; eax <- gdt base 
-    mov dword [GdtPtr + 2],eax    ; [GdtPtr + 2] <- gdt base 
+    mov dword [GdtPtr+2],eax    ; [GdtPtr + 2] <- gdt base 
 
     lgdt [GdtPtr]
     cli

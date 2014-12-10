@@ -88,43 +88,42 @@ void init_isrs()
 *  corresponds to each and every exception. We get the correct
 *  message by accessing like:
 *  exception_message[interrupt_number] */
-char *exception_messages[] =
-{
-    "Division By Zero",
-    "Debug",
-    "Non Maskable Interrupt",
-    "Breakpoint",
-    "Into Detected Overflow",
-    "Out of Bounds",
-    "Invalid Opcode",
-    "No Coprocessor",
+char *exception_messages[] = {
+    "Division By Zero\0",
+    "Debug\0",
+    "Non Maskable Interrupt\0",
+    "Breakpoint\0",
+    "Into Detected Overflow\0",
+    "Out of Bounds\0",
+    "Invalid Opcode\0",
+    "No Coprocessor\0",
 
-    "Double Fault",
-    "Coprocessor Segment Overrun",
-    "Bad TSS",
-    "Segment Not Present",
-    "Stack Fault",
-    "General Protection Fault",
-    "Page Fault",
-    "Unknown Interrupt",
+    "Double Fault\0",
+    "Coprocessor Segment Overrun\0",
+    "Bad TSS\0",
+    "Segment Not Present\0",
+    "Stack Fault\0",
+    "General Protection Fault\0",
+    "Page Fault\0",
+    "Unknown Interrupt\0",
 
-    "Coprocessor Fault",
-    "Alignment Check",
-    "Machine Check",
-    "Reserved",
-    "Reserved",
-    "Reserved",
-    "Reserved",
-    "Reserved",
+    "Coprocessor Fault\0",
+    "Alignment Check\0",
+    "Machine Check\0",
+    "Reserved\0",
+    "Reserved\0",
+    "Reserved\0",
+    "Reserved\0",
+    "Reserved\0",
 
-    "Reserved",
-    "Reserved",
-    "Reserved",
-    "Reserved",
-    "Reserved",
-    "Reserved",
-    "Reserved",
-    "Reserved"
+    "Reserved\0",
+    "Reserved\0",
+    "Reserved\0",
+    "Reserved\0",
+    "Reserved\0",
+    "Reserved\0",
+    "Reserved\0",
+    "Reserved\0"
 };
 
 /* All of our Exception handling Interrupt Service Routines will
@@ -137,8 +136,9 @@ void fault_handler(struct regs *r)
 {
     if (r->int_no < 32)
     {
+        setcolor(COL_RED, COL_BLACK);
         puts((unsigned char *)exception_messages[r->int_no]);
-        puts((unsigned char *)"Exception. System Halted!\n\r\0");
+        puts((unsigned char *)" Exception.\n\rSystem Halted!\n\r\0");
         for (;;);
     }
 }
