@@ -35,59 +35,53 @@ extern void isr28();
 extern void isr29();
 extern void isr30();
 extern void isr31();
+extern void isr_unknown();
 
-/* This is a very repetitive function... it's not hard, it's
-*  just annoying. As you can see, we set the first 32 entries
-*  in the IDT to the first 32 ISRs. We can't use a for loop
-*  for this, because there is no way to get the function names
-*  that correspond to that given entry. We set the access
-*  flags to 0x8E. This means that the entry is present, is
-*  running in ring 0 (kernel level), and has the lower 5 bits
-*  set to the required '14', which is represented by 'E' in
-*  hex. */
+// present, ring 0
 void isrs_init()
 {
-    idt_set_gate(0, (unsigned long)isr0, 0x08, 0x8E);
-    idt_set_gate(1, (unsigned long)isr1, 0x08, 0x8E);
-    idt_set_gate(2, (unsigned long)isr2, 0x08, 0x8E);
-    idt_set_gate(3, (unsigned long)isr3, 0x08, 0x8E);
-    idt_set_gate(4, (unsigned long)isr4, 0x08, 0x8E);
-    idt_set_gate(5, (unsigned long)isr5, 0x08, 0x8E);
-    idt_set_gate(6, (unsigned long)isr6, 0x08, 0x8E);
-    idt_set_gate(7, (unsigned long)isr7, 0x08, 0x8E);
+    idt_set_gate(0, (unsigned long)isr0, 0x08, 0x8e);
+    idt_set_gate(1, (unsigned long)isr1, 0x08, 0x8e);
+    idt_set_gate(2, (unsigned long)isr2, 0x08, 0x8e);
+    idt_set_gate(3, (unsigned long)isr3, 0x08, 0x8e);
+    idt_set_gate(4, (unsigned long)isr4, 0x08, 0x8e);
+    idt_set_gate(5, (unsigned long)isr5, 0x08, 0x8e);
+    idt_set_gate(6, (unsigned long)isr6, 0x08, 0x8e);
+    idt_set_gate(7, (unsigned long)isr7, 0x08, 0x8e);
 
-    idt_set_gate(8, (unsigned long)isr8, 0x08, 0x8E);
-    idt_set_gate(9, (unsigned long)isr9, 0x08, 0x8E);
-    idt_set_gate(10, (unsigned long)isr10, 0x08, 0x8E);
-    idt_set_gate(11, (unsigned long)isr11, 0x08, 0x8E);
-    idt_set_gate(12, (unsigned long)isr12, 0x08, 0x8E);
-    idt_set_gate(13, (unsigned long)isr13, 0x08, 0x8E);
-    idt_set_gate(14, (unsigned long)isr14, 0x08, 0x8E);
-    idt_set_gate(15, (unsigned long)isr15, 0x08, 0x8E);
+    idt_set_gate(8, (unsigned long)isr8, 0x08, 0x8e);
+    idt_set_gate(9, (unsigned long)isr9, 0x08, 0x8e);
+    idt_set_gate(10, (unsigned long)isr10, 0x08, 0x8e);
+    idt_set_gate(11, (unsigned long)isr11, 0x08, 0x8e);
+    idt_set_gate(12, (unsigned long)isr12, 0x08, 0x8e);
+    idt_set_gate(13, (unsigned long)isr13, 0x08, 0x8e);
+    idt_set_gate(14, (unsigned long)isr14, 0x08, 0x8e);
+    idt_set_gate(15, (unsigned long)isr15, 0x08, 0x8e);
 
-    idt_set_gate(16, (unsigned long)isr16, 0x08, 0x8E);
-    idt_set_gate(17, (unsigned long)isr17, 0x08, 0x8E);
-    idt_set_gate(18, (unsigned long)isr18, 0x08, 0x8E);
-    idt_set_gate(19, (unsigned long)isr19, 0x08, 0x8E);
-    idt_set_gate(20, (unsigned long)isr20, 0x08, 0x8E);
-    idt_set_gate(21, (unsigned long)isr21, 0x08, 0x8E);
-    idt_set_gate(22, (unsigned long)isr22, 0x08, 0x8E);
-    idt_set_gate(23, (unsigned long)isr23, 0x08, 0x8E);
+    idt_set_gate(16, (unsigned long)isr16, 0x08, 0x8e);
+    idt_set_gate(17, (unsigned long)isr17, 0x08, 0x8e);
+    idt_set_gate(18, (unsigned long)isr18, 0x08, 0x8e);
+    idt_set_gate(19, (unsigned long)isr19, 0x08, 0x8e);
+    idt_set_gate(20, (unsigned long)isr20, 0x08, 0x8e);
+    idt_set_gate(21, (unsigned long)isr21, 0x08, 0x8e);
+    idt_set_gate(22, (unsigned long)isr22, 0x08, 0x8e);
+    idt_set_gate(23, (unsigned long)isr23, 0x08, 0x8e);
 
-    idt_set_gate(24, (unsigned long)isr24, 0x08, 0x8E);
-    idt_set_gate(25, (unsigned long)isr25, 0x08, 0x8E);
-    idt_set_gate(26, (unsigned long)isr26, 0x08, 0x8E);
-    idt_set_gate(27, (unsigned long)isr27, 0x08, 0x8E);
-    idt_set_gate(28, (unsigned long)isr28, 0x08, 0x8E);
-    idt_set_gate(29, (unsigned long)isr29, 0x08, 0x8E);
-    idt_set_gate(30, (unsigned long)isr30, 0x08, 0x8E);
-    idt_set_gate(31, (unsigned long)isr31, 0x08, 0x8E);
+    idt_set_gate(24, (unsigned long)isr24, 0x08, 0x8e);
+    idt_set_gate(25, (unsigned long)isr25, 0x08, 0x8e);
+    idt_set_gate(26, (unsigned long)isr26, 0x08, 0x8e);
+    idt_set_gate(27, (unsigned long)isr27, 0x08, 0x8e);
+    idt_set_gate(28, (unsigned long)isr28, 0x08, 0x8e);
+    idt_set_gate(29, (unsigned long)isr29, 0x08, 0x8e);
+    idt_set_gate(30, (unsigned long)isr30, 0x08, 0x8e);
+    idt_set_gate(31, (unsigned long)isr31, 0x08, 0x8e);
+
+    int i;
+    for (i = 32; i < 256; i++){
+        idt_set_gate(i,(unsigned long)isr_unknown, 0x08, 0x8e);
+    }
 }
 
-/* This is a simple string array. It contains the message that
-*  corresponds to each and every exception. We get the correct
-*  message by accessing like:
-*  exception_message[interrupt_number] */
 char *exception_messages[] = {
     "Division By Zero\0",
     "Debug\0",
@@ -126,19 +120,14 @@ char *exception_messages[] = {
     "Reserved\0"
 };
 
-/* All of our Exception handling Interrupt Service Routines will
-*  point to this function. This will tell us what exception has
-*  happened! Right now, we simply halt the system by hitting an
-*  endless loop. All ISRs disable interrupts while they are being
-*  serviced as a 'locking' mechanism to prevent an IRQ from
-*  happening and messing up kernel data structures */
 void fault_handler(struct regs *r)
 {
-    if (r->int_no < 32)
-    {
-        setcolor(COL_RED, COL_BLACK);
+    setcolor(COL_RED, COL_BLACK);
+    if (r->int_no < 32){
         puts((unsigned char *)exception_messages[r->int_no]);
         puts((unsigned char *)" Exception.\n\rSystem Halted!\n\r\0");
-        for (;;);
+    }else{
+        puts((unsigned char *)"Unkonwn Interrupt, System Halted!\n\r\0");
     }
+    for (;;);
 }

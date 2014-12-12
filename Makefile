@@ -6,14 +6,16 @@ AS = nasm
 CC = gcc
 DEL = del
 DBG = bochs
-VM = /usr/lib/virtualbox/VirtualBox --comment "OS67" --startvm "656a1a52-5a3b-4091-ae1a-437cb9c5284d"
+VM = /usr/lib/virtualbox/VirtualBox --comment "OS67" \
+     --startvm "656a1a52-5a3b-4091-ae1a-437cb9c5284d"
 DEL = del
 LD = ld
 OBJCPY = objcopy
 CFLAGS = -Wall -Werror -nostdinc -fno-builtin -fno-stack-protector -funsigned-char \
 		 -finline-functions -finline-small-functions -findirect-inlining \
 		 -finline-functions-called-once -I./kern/inc -m32 
-OBJS = bin/loader.o bin/main.o bin/vga.o bin/func.o bin/gdt.o bin/idt.o bin/isrs.o bin/irq.o
+OBJS = bin/loader.o bin/main.o bin/vga.o bin/func.o bin/gdt.o bin/idt.o \
+       bin/isrs.o bin/irq.o bin/timer.o
 DEL = rm -f
 
 default:

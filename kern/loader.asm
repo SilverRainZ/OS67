@@ -112,6 +112,7 @@ global isr28
 global isr29
 global isr30
 global isr31
+global isr_unknown
 
 ;  0: Divide By Zero Exception
 isr0:
@@ -331,6 +332,11 @@ isr31:
     push byte 31
     jmp isr_common_stub
 
+isr_unknown:
+    cli
+    push byte 0
+    push byte 255
+    jmp isr_common_stub
 
 ; this func exists in isrs.c 
 extern fault_handler

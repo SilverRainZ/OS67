@@ -1,9 +1,8 @@
 OS67
 ===============================
-OS67 is a simple operate system.
-67 is the magic number :)
-
 A Simple Operate System.
+
+67 is the magic number :)
 
 ####Requirements
 * gcc + nasm + ld + make <br>
@@ -20,7 +19,13 @@ A Simple Operate System.
 
 ####Existing bugs
 * when we run it with Virtual Box, fault VINF_EM_TRIPLE_FAULT occured<br>
-    
+
+####Reference
+* Bran's Kernel Developments Toturial
+* 「30天自制操作系统」
+* 「Orange's 一个操作系统的诞生」
+* wiki.OSDev.org
+
 ####Just for fun. 
 
 
