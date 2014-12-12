@@ -33,7 +33,7 @@ void idt_set_gate(unsigned char num, unsigned long base, unsigned short sel, uns
     idt[num].flags = flags;
 }
 
-void init_idt(){
+void idt_init(){
     idtp.limit = (sizeof (struct idt_entry) * 256) - 1;
     idtp.base = (unsigned int)&idt;
 

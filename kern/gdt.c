@@ -36,7 +36,7 @@ void gdt_set_gate(int num, unsigned long base, unsigned long limit, unsigned cha
     gdt[num].access = access;
 }
 
-void init_gdt(){
+void gdt_init(){
     /* Setup the GDT pointer and limit */
     gp.limit = (sizeof(struct gdt_entry) * 256) - 1;
     gp.base = (unsigned int)&gdt;

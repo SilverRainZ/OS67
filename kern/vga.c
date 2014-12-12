@@ -39,7 +39,7 @@ void scroll(){
     }
 }
 
-void init_vga() {
+void vga_init() {
     cur_x = 0;
     cur_y = 5; // a ugly practice 
     move_cur();

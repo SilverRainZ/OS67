@@ -65,7 +65,7 @@ void irq_remap(void)
 /* We first remap the interrupt controllers, and then we install
 *  the appropriate ISRs to the correct entries in the IDT. This
 *  is just like installing the exception handlers */
-void irq_install()
+void irq_init()
 {
     irq_remap();
 
@@ -92,7 +92,7 @@ void irq_install()
 *  the 'fault_handler' in 'isrs.c'. The IRQ Controllers need
 *  to be told when you are done servicing them, so you need
 *  to send them an "End of Interrupt" command (0x20). There
-*  are two 8259 chips: The first exists at 0x20, the second
+*  are two 8259 chips: The first exists at 0x20,:vs  the second
 *  exists at 0xA0. If the second controller (an IRQ from 8 to
 *  15) gets an interrupt, you need to acknowledge the
 *  interrupt at BOTH controllers, otherwise, you only send

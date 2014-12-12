@@ -20,7 +20,7 @@
 #define COL_WHITE   15
 // L_ == Light D_ == Dark
 
-extern void init_vga();
+extern void vga_init();
 extern void cls();
 extern void putchar(unsigned char ch);
 extern void puts(unsigned char *str);
@@ -37,10 +37,10 @@ extern void outportb(unsigned short _port, unsigned char _data);
 
 /* gdt.c */
 extern void gdt_set_gate(int num, unsigned long base, unsigned long limit, unsigned char access, unsigned char gran);
-extern void init_gdt();
+extern void gdt_init();
 
 /* idt.c */
-extern void init_idt();
+extern void idt_init();
 extern void idt_set_gate(unsigned char num, unsigned long base, unsigned short sel, unsigned char flags);
 
 
@@ -52,11 +52,11 @@ struct regs{
     unsigned int int_no, err_code;    
     unsigned int eip, cs, eflags, useresp, ss;  
 };    
-extern void init_isrs();
+extern void isrs_init();
 
 /* irq.c */
 extern void irq_install_handler(int irq, void (*handler)(struct regs *r));
 extern void irq_uninstall_handler(int irq);
-extern void irq_install();
+extern void irq_init();
 
 #endif

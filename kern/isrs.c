@@ -45,7 +45,7 @@ extern void isr31();
 *  running in ring 0 (kernel level), and has the lower 5 bits
 *  set to the required '14', which is represented by 'E' in
 *  hex. */
-void init_isrs()
+void isrs_init()
 {
     idt_set_gate(0, (unsigned long)isr0, 0x08, 0x8E);
     idt_set_gate(1, (unsigned long)isr1, 0x08, 0x8E);
