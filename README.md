@@ -20,11 +20,12 @@ A Simple Operate System.
 ####Existing bugs
 * when we run it with Virtual Box, fault VINF_EM_TRIPLE_FAULT occured<br>
 
-####Reference
-* Bran's Kernel Developments Toturial
+####References
+*  Bran's Kernel Developments Toturial
+*  wiki.osdev.org
 * 「30天自制操作系统」
 * 「Orange's 一个操作系统的诞生」
-* wiki.OSDev.org
+
 
 ####Just for fun. 
 
