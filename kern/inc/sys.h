@@ -22,9 +22,9 @@
 
 extern void vga_init();
 extern void cls();
-extern void putchar(unsigned char ch);
-extern void puts(unsigned char *str);
-extern void setcolor (unsigned char b_color, unsigned char f_color);
+extern void putchar(char ch);
+extern void puts(char *str);
+extern void setcolor (char b_color, char f_color);
 extern void vga_test();
 
 /* func.c */

@@ -22,13 +22,13 @@ default:
 	$(MAKE) install
 
 bin/floppy.img: boot/floppy.asm bin/bootsect.bin bin/kernel 
-	$(AS) -I ./bin/ -f bin -l lst/floppy.lst $< -o $@ 
+	$(AS) -I ./bin/ -f bin -l lst/floppy.asm $< -o $@ 
 
 bin/bootsect.bin: boot/bootsect.asm 
-	$(AS) -I ./boot/ -f bin -l lst/bootsect.lst $< -o $@ 
+	$(AS) -I ./boot/ -f bin -l lst/bootsect.asm $< -o $@ 
 
 bin/loader.o : kern/loader.asm Makefile 
-	$(AS) -I ./boot/ -f elf -l lst/loader.lst $< -o $@ 
+	$(AS) -I ./boot/ -f elf -l lst/loader.asm $< -o $@ 
 
 bin/kernel: kern/link.ld $(OBJS) 
 	$(LD) -T$< -melf_i386 -static -o $@ $(OBJS)

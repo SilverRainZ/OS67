@@ -1,4 +1,3 @@
-; vim: set ft=asm:
 ; reference from <Orange's>
 
 ; 描述符类型
@@ -40,7 +39,7 @@ SA_TIL		EQU	4	; ┛
 ; constant for Pageing
 PG_P		EQU	1	; 页存在属性位
 PG_RWR		EQU	0	; R/W 属性位值, 读/执行
-PG_RWW		EQU	2	; R/W 属性位值, 读/写/执行
+PG_RWW		EQU	2	; R/W 属性位值, 读/写/执行 
 PG_USS		EQU	0	; U/S 属性位值, 系统级
 PG_USU		EQU	4	; U/S 属性位值, 用户级
 

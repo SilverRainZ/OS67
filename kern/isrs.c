@@ -1,7 +1,7 @@
 /*set up the ISRs */
 
 #include <sys.h>
-
+#define DECLARE_ISR
 /* int 0-31 is used to service exceptions! */
 extern void isr0();
 extern void isr1();
@@ -124,10 +124,10 @@ void fault_handler(struct regs *r)
 {
     setcolor(COL_RED, COL_BLACK);
     if (r->int_no < 32){
-        puts((unsigned char *)exception_messages[r->int_no]);
-        puts((unsigned char *)" Exception.\n\rSystem Halted!\n\r\0");
+        puts(exception_messages[r->int_no]);
+        puts(" Exception.\n\rSystem Halted!\n\r\0");
     }else{
-        puts((unsigned char *)"Unkonwn Interrupt, System Halted!\n\r\0");
+        puts("Unkonwn Interrupt, System Halted!\n\r\0");
     }
     for (;;);
 }

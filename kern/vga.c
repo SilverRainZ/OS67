@@ -1,12 +1,15 @@
-/* control the display of unsigned char, you must invoke init_vga before use other func
+/* control the display of char, 
+ * you must invoke init_vga before use other func
  */
 #include <sys.h>
 
-// it is strange that i can't use unsignd unsigned char vgamem = 0xb8000, it can only disp blank unsigned char
+/* it is strange that i can't use 
+ * char* vgamem = 0xb8000, 
+ * it can only disp blank char */
 struct vga_char{
-    unsigned char _char: 8;
-    unsigned char f_color: 4;
-    unsigned char b_color: 4;
+    char _char: 8;
+    char f_color: 4;
+    char b_color: 4;
 };
 struct vga_char *vgamem;
 struct vga_char color;  // use vag_char structure to store color
@@ -61,7 +64,7 @@ void cls(){
     move_cur();
 }
 
-void putchar(unsigned char ch){
+void putchar(char ch){
     switch (ch){
         case '\r': cur_x = 0; break;
         case '\n': cur_y = cur_y + 1; break;
@@ -77,11 +80,11 @@ void putchar(unsigned char ch){
     move_cur();
 }
 
-void puts(unsigned char *str){
+void puts(char *str){
     for (; *str != '\0'; str++) putchar(*str);
 }
 
-void setcolor(unsigned char f_color, unsigned char b_color){
+void setcolor(char f_color, char b_color){
     color.f_color = f_color;
     color.b_color = b_color;
 }
@@ -89,6 +92,4 @@ void setcolor(unsigned char f_color, unsigned char b_color){
 void vga_test(){
     scroll(); 
 }
-
-
 
