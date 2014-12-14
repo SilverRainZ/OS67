@@ -19,13 +19,18 @@
 #define COL_L_BROWN 14
 #define COL_WHITE   15
 // L_ == Light D_ == Dark
-
+struct tpoint{
+    int x;
+    int y;
+};
 extern void vga_init();
 extern void cls();
+extern void putchar_at(int x, int y, char ch);
 extern void putchar(char ch);
 extern void puts(char *str);
 extern void setcolor (char b_color, char f_color);
-extern void vga_test();
+extern struct tpoint getcur();
+extern void setcur(int x, int y);
 
 /* func.c */
 extern void *memcpy(void *dest, const void *src, int count);

@@ -22,16 +22,13 @@ int osmain(void)
     setcolor(COL_D_GREY, COL_CYAN);
     puts("Welcome to OS67...\n\r\0");
     timer_init(); 
-    __asm__ __volatile__ ("sti");
-
+    __asm__("sti");
     int i;
     for (i = 0; i < 26; i++){
         putchar('A' + i);
         putchar('\n');
         delay();
-        __asm__("int $3");
     }
     //vga_test(); 
-    for (;;);
     return 0;
 }

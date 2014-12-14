@@ -13,14 +13,15 @@ void timer_phase(int hz){
     /*设置除数的高字节  */
 } 
 void timer_handler(struct regs *r){
-    /* Increment our 'tick count' */
     timer_ticks++;
-
     /* Every 18 clocks (approximately 1 second), we will
      *  display a message on the screen */
     if (timer_ticks % 18 == 0)
     {
-        puts((unsigned char *)"One second has passed\n\r\0");
+        struct tpoint p = getcur();
+        setcur(70,20);
+        putchar('A'+timer_ticks%26);
+        setcur(p.x, p.y);
     }
 }
 
