@@ -1,7 +1,7 @@
 #include <sys.h>
 void delay(){   // lol, we have no sleep()
     int i = 0;
-    for (i = 0; i < 50000; i++){
+    for (i = 0; i < 1000000; i++){
         i++;
         i--;
     }
@@ -23,13 +23,14 @@ int osmain(void)
     puts("Welcome to OS67...\n\r\0");
 
     timer_init(); 
-    //sti();
+    kb_init();
+    sti();
+    for (;;);
     int i;
     for (i = 0; i < 26; i++){
         putchar('A' + i);
         putchar('\n');
         delay();
     }
-    for (;;);
     return 0;
 }

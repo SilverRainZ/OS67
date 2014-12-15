@@ -19,7 +19,7 @@ void timer_handler(struct regs *r){
     if (timer_ticks % 18 == 0)
     {
         struct tpoint p = getcur();
-        setcur(70,20);
+        setcur(78,23);
         putchar('A'+timer_ticks%26);
         setcur(p.x, p.y);
     }

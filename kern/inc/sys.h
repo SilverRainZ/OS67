@@ -70,4 +70,8 @@ extern void irq_init();
 /* timer.c */
 extern void timer_init();
 extern void timer_wait();
+
+/* kb.c */
+extern void kb_init();
+
 #endif
