@@ -69,6 +69,8 @@ void putchar(char ch){
     switch (ch){
         case '\r': cur.x = 0; break;
         case '\n': cur.y = cur.y + 1; break;
+        case '\b': cur.y -= (cur.x == 0)?1:0;
+                   cur.x = (cur.x + 80 - 1)%80; break;
         default: {
                      vgamem[cur.y*80 + cur.x]._char = ch;
                      vgamem[cur.y*80 + cur.x].f_color = color.f_color;

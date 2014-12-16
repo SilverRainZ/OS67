@@ -21,8 +21,9 @@ int osmain(void)
 
     setcolor(COL_D_GREY, COL_CYAN);
     puts("Welcome to OS67...\n\r\0");
+    setcolor(COL_L_GREY, COL_BLACK);
 
-    timer_init(); 
+    //timer_init(); 
     kb_init();
     sti();
     for (;;);
