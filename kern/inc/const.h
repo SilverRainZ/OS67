@@ -3,6 +3,8 @@
 
 #define OK      1
 #define ERROR   0 
+
+typedef char bool;
 #define TRUE    1
 #define FALSE   0
 

@@ -3,6 +3,7 @@
  */
 #include <sys.h>
 #include <const.h>
+#include <lib.h>
 
 /* it is strange that i can't use 
  * char* vgamem = 0xb8000, 

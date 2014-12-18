@@ -1,11 +1,13 @@
 #ifndef __SYSTEM_H
 #define __SYSTEM_H
+
 /* asm.c */
 extern unsigned char inportb(unsigned short _port);
 extern void outportb(unsigned short _port, unsigned char _data);
 extern void cli();
 extern void sti();
 extern void hlt();
+
 /* vga.c */
 #define COL_BLACK   0
 #define COL_BLUE    1
@@ -37,11 +39,6 @@ extern void setcolor (char b_color, char f_color);
 extern struct tpoint getcur();
 extern void setcur(int x, int y);
 
-/* func.c */
-extern void *memcpy(void *dest, const void *src, int count);
-extern void *memset(void *dest, char val, int count);
-extern unsigned short *memsetw(unsigned short *dest, unsigned short val, int count);
-extern int strlen(const char *str);
 
 /* gdt.c */
 extern void gdt_set_gate(int num, unsigned long base, unsigned long limit, unsigned char access, unsigned char gran);

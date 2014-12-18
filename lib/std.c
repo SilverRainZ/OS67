@@ -1,5 +1,4 @@
-/* some func */
-#include <sys.h>
+#include <lib.h>
 
 void *memcpy(void *dest, const void *src, int count){
     const char *sp = (const char *)src;
@@ -20,9 +19,6 @@ unsigned short *memsetw(unsigned short *dest, unsigned short val, int count){
     return dest;
 }
 
-int strlen(const char *str){
-    int len;
-    for(len = 0; *str != '\0'; str++) len++;
-    return len;
+void printf(char *fmt, ...){
+    //TODO
 }
-

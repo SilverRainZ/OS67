@@ -14,8 +14,9 @@ OBJCPY = objcopy
 CFLAGS = -Wall -Werror -nostdinc -fno-builtin -fno-stack-protector -funsigned-char \
 		 -finline-functions -finline-small-functions -findirect-inlining \
 		 -finline-functions-called-once -I./kern/inc -m32 
-OBJS = bin/loader.o bin/main.o bin/vga.o bin/func.o bin/gdt.o bin/idt.o \
-       bin/isrs.o bin/irq.o bin/timer.o bin/asm.o bin/kb.o
+OBJS = bin/loader.o bin/main.o bin/vga.o bin/gdt.o bin/idt.o \
+	   bin/isrs.o bin/irq.o bin/timer.o bin/asm.o bin/kb.o \
+	   bin/string.o	bin/std.o bin/queue.o 	
 DEL = rm -f
 
 default:
@@ -27,19 +28,23 @@ bin/floppy.img: boot/floppy.asm bin/bootsect.bin bin/kernel
 bin/bootsect.bin: boot/bootsect.asm 
 	$(AS) -I ./boot/ -f bin -l lst/bootsect.asm $< -o $@ 
 
-bin/loader.o : kern/loader.asm Makefile 
+bin/loader.o : kern/loader.asm
 	$(AS) -I ./boot/ -f elf -l lst/loader.asm $< -o $@ 
 
-bin/kernel: kern/link.ld $(OBJS) 
+bin/kernel: set/link.ld $(OBJS) 
 	$(LD) -T$< -melf_i386 -static -o $@ $(OBJS)
 
 # bin/kernel: bin/kernel.tmp
 # 	$(OBJCPY) -O binary $< $@ 
 
+bin/%.o: lib/%.c
+	$(CC) $(CFLAGS) -c $^ -o $@  
+	$(CC) $(CFLAGS) -S $^ -o lst/$*.asm  
+
 bin/%.o: kern/%.c
 	$(CC) $(CFLAGS) -c $^ -o $@  
 	$(CC) $(CFLAGS) -S $^ -o lst/$*.asm  
-		
+
 install:
 	$(MAKE) bin/floppy.img
 
