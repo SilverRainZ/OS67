@@ -16,7 +16,7 @@ CFLAGS = -Wall -Werror -nostdinc -fno-builtin -fno-stack-protector -funsigned-ch
 		 -finline-functions-called-once -I./kern/inc -m32 
 OBJS = bin/loader.o bin/main.o bin/vga.o bin/gdt.o bin/idt.o \
 	   bin/isrs.o bin/irq.o bin/timer.o bin/asm.o bin/kb.o \
-	   bin/string.o	bin/std.o bin/queue.o 	
+	   bin/string.o	bin/std.o bin/queue.o bin/printf.o
 DEL = rm -f
 
 default:
