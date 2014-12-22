@@ -3,10 +3,10 @@
 #include <const.h>
 
 typedef char *va_list;
+
 /* integer to array 
  * modify from
  * http://blog.csdn.net/wesley1991/article/details/5430350 */
-
 char* itoa(int value, char *str, int radix){
     char reverse[36];   
     char *p = reverse;
@@ -36,19 +36,21 @@ int vsprintf(char *buf, const char *fmt, va_list args){
         fmt++;  // *fmt = '%'
         switch (*fmt){
             case 'd':
-                itoa(p_next_arg,p,10);
-                p_next_arg += 4;
+                /* NB the pointer */
+                itoa(*(int *)p_next_arg,p,10);
+                p_next_arg += sizeof(int);
                 p += strlen(p);
                 break;
             default:
                 break;
         }
     }
+    *p = '\0';
     return 0;
 }
 int printf(const char *fmt, ...){
     char buf[256];
-    va_list arg = (va_list)((char *)(&fmt) + 4);
+    va_list arg = (va_list)((char *)(&fmt) + sizeof(char *));
     vsprintf(buf, fmt, arg);
     puts(buf);
     return 0;

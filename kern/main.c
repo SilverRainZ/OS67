@@ -8,10 +8,7 @@ void delay(){   // lol, we have no sleep()
         i--;
     }
 }
-void test(){
-    if (strcmp("1234","1234") == 0) puts("equ");
-    else puts("no equ");
-}
+
 int osmain(void)
 {
     vga_init();
@@ -30,7 +27,9 @@ int osmain(void)
     //timer_init(); 
     kb_init();
     sti();
-    test();
+    int mem = (int)*(short *)0x502;
+
+    printf("Memory: %dMB.\n\r",mem/1024 + 1);
     for (;;);
     int i;
     for (i = 0; i < 26; i++){
