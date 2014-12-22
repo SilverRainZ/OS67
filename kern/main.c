@@ -9,6 +9,10 @@ void delay(){   // lol, we have no sleep()
     }
 }
 
+void test(){
+    printf("%d + %d = %d\n\r", 1, 1, 2);
+    printf("Wel%s to %s%d...\n\r","come","OS",67);
+}
 int osmain(void)
 {
     vga_init();
@@ -28,8 +32,8 @@ int osmain(void)
     kb_init();
     sti();
     int mem = (int)*(short *)0x502;
-
     printf("Memory: %dMB.\n\r",mem/1024 + 1);
+    test();
     for (;;);
     int i;
     for (i = 0; i < 26; i++){
