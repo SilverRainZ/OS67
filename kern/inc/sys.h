@@ -1,12 +1,14 @@
 #ifndef __SYSTEM_H
 #define __SYSTEM_H
 
+/* keyword "extern" is no necessary */
+
 /* asm.c */
-extern unsigned char inportb(unsigned short _port);
-extern void outportb(unsigned short _port, unsigned char _data);
-extern void cli();
-extern void sti();
-extern void hlt();
+unsigned char inportb(unsigned short _port);
+void outportb(unsigned short _port, unsigned char _data);
+void cli();
+void sti();
+void hlt();
 
 /* vga.c */
 #define COL_BLACK   0
@@ -30,23 +32,23 @@ struct tpoint{
     int x;
     int y;
 };
-extern void vga_init();
-extern void cls();
-extern void putchar_at(int x, int y, char ch);
-extern void putchar(char ch);
-extern void puts(char *str);
-extern void setcolor (char b_color, char f_color);
-extern struct tpoint getcur();
-extern void setcur(int x, int y);
+void vga_init();
+void cls();
+void putchar_at(int x, int y, char ch);
+void putchar(char ch);
+void puts(char *str);
+void setcolor (char b_color, char f_color);
+struct tpoint getcur();
+void setcur(int x, int y);
 
 
 /* gdt.c */
-extern void gdt_set_gate(int num, unsigned long base, unsigned long limit, unsigned char access, unsigned char gran);
-extern void gdt_init();
+void gdt_set_gate(int num, unsigned long base, unsigned long limit, unsigned char access, unsigned char gran);
+void gdt_init();
 
 /* idt.c */
-extern void idt_init();
-extern void idt_set_gate(unsigned char num, unsigned long base, unsigned short sel, unsigned char flags);
+void idt_init();
+void idt_set_gate(unsigned char num, unsigned long base, unsigned short sel, unsigned char flags);
 
 
 /* isrs.c */
@@ -57,18 +59,18 @@ struct regs{
     unsigned int int_no, err_code;    
     unsigned int eip, cs, eflags, useresp, ss;  
 };    
-extern void isrs_init();
+void isrs_init();
 
 /* irq.c */
-extern void irq_install_handler(int irq, void (*handler)(struct regs *r));
-extern void irq_uninstall_handler(int irq);
-extern void irq_init();
+void irq_install_handler(int irq, void (*handler)(struct regs *r));
+void irq_uninstall_handler(int irq);
+void irq_init();
 
 /* timer.c */
-extern void timer_init();
-extern void timer_wait();
+void timer_init();
+void timer_wait();
 
 /* kb.c */
-extern void kb_init();
+void kb_init();
 
 #endif

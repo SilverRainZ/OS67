@@ -1,4 +1,5 @@
-/* control the display of char, 
+/* vga.c
+ * control the display of char, 
  * you must invoke init_vga before use other func
  */
 #include <sys.h>
@@ -69,9 +70,13 @@ void vga_init(){
 void putchar(char ch){
     switch (ch){
         case '\r': cur.x = 0; break;
-        case '\n': cur.y = cur.y + 1; break;
+        case '\n': cur.y = cur.y + 1; cur.x = 0; break;
         case '\b': cur.y -= (cur.x == 0)?1:0;
-                   cur.x = (cur.x + 80 - 1)%80; break;
+                   cur.x = (cur.x + 80 - 1)%80;
+                   vgamem[cur.y*80 + cur.x]._char = ' ';
+                   vgamem[cur.y*80 + cur.x].f_color = color.f_color;
+                   vgamem[cur.y*80 + cur.x].b_color = color.b_color;
+                   break;
         default: {
                      vgamem[cur.y*80 + cur.x]._char = ch;
                      vgamem[cur.y*80 + cur.x].f_color = color.f_color;

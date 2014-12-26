@@ -3,7 +3,7 @@
 [BITS 16]
 org    0x7c00        
 
-BS_jmpBoot      jmp    entry
+BS_jmpBoot      jmp   entry
                 db    0x90
 BS_OEMName      db    "OS67CDDS"        ; OEM name / 8 B
 BPB_BytsPerSec  dw    512               ; 一个扇区512字节 
@@ -65,7 +65,10 @@ getmsg:
  
     mov ah,0x88
     int 0x15
-    mov [0x502],ax  ; get mem size(extrened mem kb)
+    mov [0x502],ax  
+    ; get mem size(extrened mem kb)
+    ; the max mem size you can get is 64 mb,
+    ; int 0x15 ah = 0x88 is outdataed.
 
     mov ah,0x0f
     int 0x10
@@ -89,14 +92,14 @@ loadloader:     ; read 4 sector to load loader.bin
     mov ch,0
     mov dh,1
     mov cl,16
-; loader.bin 在软gg盘的第34个扇区,0x4200,换算为c0-h1-s16
+; kernel 在软gg盘的第34个扇区,0x4200,换算为c0-h1-s16
 
 readloop:
     mov si,0    ; err counter 
 
 retry:
-    mov ah,0x02  ; read 
-    mov al,8*3   ; read 12 sector 
+    mov ah,0x02 ; read 
+    mov al,8*3  ; read 12 sector 
     mov dl,0x00 ; driver a:
     int 0x13
     jnc succ 

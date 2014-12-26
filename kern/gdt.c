@@ -1,4 +1,6 @@
-/* set the new gdt, the new gdt table has 256 entry */
+/* gdt.c 
+ * set the new gdt, the new gdt table has 256 entrys
+ */
 
 #include <sys.h>
 #include <pm.h>

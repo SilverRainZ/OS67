@@ -1,3 +1,4 @@
+; loader.asm
 ; jmp to C kernel, achieve some function in asm 
 ; 
 

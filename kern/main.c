@@ -12,6 +12,7 @@ void delay(){   // lol, we have no sleep()
 void test(){
     printf("%d + %d = %d\n\r", 1, 1, 2);
     printf("Wel%s to %s%d...\n\r","come","OS",67);
+    printf("Author: %s %s\n\r","LastAvengers","2014-12.24");
 }
 int osmain(void)
 {

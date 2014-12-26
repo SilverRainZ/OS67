@@ -1,3 +1,5 @@
+/* timer.c */
+
 #include <sys.h>
 
 int timer_ticks = 0;

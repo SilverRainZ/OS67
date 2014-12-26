@@ -1,4 +1,5 @@
-/*set up the ISRs */
+/* isrs.c
+ * set up the ISRs */
 
 #include <sys.h>
 #define DECLARE_ISR

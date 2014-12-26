@@ -1,4 +1,6 @@
- /* install idt, 256 entry tab, we use it to control interrupt */
+ /* idt.c 
+  * install idt, 256 entrys table, 
+  * we use it to control interrupt */
 
 #include <sys.h>
 #include <pm.h>
