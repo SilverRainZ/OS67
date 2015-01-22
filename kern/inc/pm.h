@@ -70,6 +70,4 @@ struct idt_ptr{
     unsigned int base;
 } __attribute__((packed));
 
-
-
 #endif

@@ -44,8 +44,7 @@ unsigned char kb_map[128] =
     0,	/* All other keys are undefined */
 };
 
-void kb_handler(struct regs *r)
-{
+void kb_handler(struct regs *r){
     unsigned char scancode;
 
     /* Read from the keyboard's data buffer */
@@ -53,8 +52,7 @@ void kb_handler(struct regs *r)
 
     /* If the top bit of the byte we read from the keyboard is
      *  set, that means that a key has just been released */
-    if (scancode & 0x80)
-    {
+    if (scancode & 0x80){
         /* You can use this one to see if the user released the
          *  shift, alt, or control keys... */
     }

@@ -50,7 +50,6 @@ void gdt_init();
 void idt_init();
 void idt_set_gate(unsigned char num, unsigned long base, unsigned short sel, unsigned char flags);
 
-
 /* isrs.c */
 // this defines what the stack looks like after an ISR was running
 struct regs{
