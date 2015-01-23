@@ -23,21 +23,18 @@ extern void irq15();
 
 /* This array is actually an array of function pointers. We use
 *  this to handle custom IRQ handlers for a given IRQ */
-void *irq_routines[16] =
-{
+void *irq_routines[16] ={
     0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0
 };
 
 /* This installs a custom IRQ handler for the given IRQ */
-void irq_install_handler(int irq, void (*handler)(struct regs *r))
-{
+void irq_install_handler(int irq, void (*handler)(struct regs *r)){
     irq_routines[irq] = handler;
 }
 
 /* This clears the handler for a given IRQ */
-void irq_uninstall_handler(int irq)
-{
+void irq_uninstall_handler(int irq){
     irq_routines[irq] = 0;
 }
 
@@ -49,8 +46,7 @@ void irq_uninstall_handler(int irq)
 *  Interrupt Controller (PICs - also called the 8259's) in
 *  order to make IRQ0 to 15 be remapped to IDT entries 32 to
 *  47 */
-void irq_remap(void)
-{
+void irq_remap(void){
     outportb(0x20, 0x11);
     outportb(0xA0, 0x11);
     outportb(0x21, 0x20);
@@ -66,8 +62,7 @@ void irq_remap(void)
 /* We first remap the interrupt controllers, and then we install
 *  the appropriate ISRs to the correct entries in the IDT. This
 *  is just like installing the exception handlers */
-void irq_init()
-{
+void irq_init(){
     irq_remap();
 
     idt_set_gate(32, (unsigned)irq0, 0x08, 0x8E);
@@ -99,8 +94,7 @@ void irq_init()
 *  interrupt at BOTH controllers, otherwise, you only send
 *  an EOI command to the first controller. If you don't send
 *  an EOI, you won't raise any more IRQs */
-void irq_handler(struct regs *r)
-{
+void irq_handler(struct regs *r){
     /* This is a blank function pointer */
     void (*handler)(struct regs *r);
 

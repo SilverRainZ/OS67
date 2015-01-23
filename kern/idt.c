@@ -6,7 +6,7 @@
 #include <pm.h>
 #include <lib.h>
 
-struct idt_entry idt[256];
+static struct idt_entry idt[256];
 struct idt_ptr idtp;
 // exist in loader.asm
 extern void idt_load();

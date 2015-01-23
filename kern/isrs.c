@@ -121,8 +121,7 @@ char *exception_messages[] = {
     "Reserved\0"
 };
 
-void fault_handler(struct regs *r)
-{
+void fault_handler(struct regs *r){
     setcolor(COL_RED, COL_BLACK);
     if (r->int_no < 32){
         puts(exception_messages[r->int_no]);
