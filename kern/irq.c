@@ -1,6 +1,8 @@
 /* irq.c */
-
-#include <sys.h>
+#include <type.h>
+#include <asm.h>
+#include <pm.h>
+#include <isr.h>
 
 /* These are own ISRs that point to our special IRQ handler
 *  instead of the regular 'fault_handler' function */

@@ -1,7 +1,8 @@
 /* timer.c */
-
-#include <sys.h>
-
+#include <asm.h>
+#include <isr.h>
+#include <vga.h>
+#include <timer.h>
 int timer_ticks = 0;
 
 void timer_phase(int hz){ 

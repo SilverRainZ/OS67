@@ -2,13 +2,12 @@
   * install idt, 256 entrys table, 
   * we use it to control interrupt */
 
-#include <sys.h>
+#include <type.h>
 #include <pm.h>
-#include <lib.h>
+#include <string.h>
 
 static struct idt_entry idt[256];
 struct idt_ptr idtp;
-// exist in loader.asm
 extern void idt_load();
 
 void idt_set_gate(unsigned char num, unsigned long base, unsigned short sel, unsigned char flags){

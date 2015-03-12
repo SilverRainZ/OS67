@@ -1,6 +1,14 @@
-#include <sys.h>
-#include <const.h>
-#include <lib.h>
+#include <type.h>
+#include <asm.h>
+#include <pm.h>
+#include <isr.h>
+#include <vga.h>
+#include <timer.h>
+#include <kb.h>
+#include <string.h>
+#include <printk.h>
+#include <pmm.h>
+
 void delay(){   // lol, we have no sleep()
     int i = 0;
     for (i = 0; i < 1000000; i++){
@@ -10,9 +18,9 @@ void delay(){   // lol, we have no sleep()
 }
 
 void test(){
-    printf("%d + %d = %d\n\r", 1, 1, 2);
-    printf("Wel%s to %s%d...\n\r","come","OS",67);
-    printf("Author: %s %s\n\r","LastAvengers","2014-12.24");
+    printk("%d + %d = %d\n\r", 1, 1, 2);
+    printk("Wel%s to %s%d...\n\r","come","OS",67);
+    printk("Author: %s %s\n\r","LastAvengers","2014-12.24");
 }
 int osmain(void)
 {
@@ -33,7 +41,8 @@ int osmain(void)
     kb_init();
     sti();
     int mem = (int)*(short *)0x502;
-    printf("Memory: %dMB.\n\r",mem/1024 + 1);
+    printk("Memory: %dMB.\n\r",mem/1024 + 1);
+    show_mem_map();
     test();
     for (;;);
     int i;

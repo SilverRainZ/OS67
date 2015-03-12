@@ -1,8 +1,9 @@
-/* kb.c
- * control the keyboard.
- */
-#include <sys.h>
-#include <lib.h>
+/* kb.c */
+#include <type.h>
+#include <vga.h>
+#include <asm.h>
+#include <isr.h>
+#include <kb.h>
 
 static unsigned char kb_map[128] =
 {

@@ -2,10 +2,10 @@
  * set the new gdt, the new gdt table has 256 entrys
  */
 
-#include <sys.h>
+#include <type.h>
 #include <pm.h>
 
-static struct gdt_entry gdt[256];  // we support 256 gdt entry
+static struct gdt_entry gdt[256];  // we hava 256 gdt entry
 struct gdt_ptr gp;
 
 extern void gdt_flush();    // extern func in loader.asm

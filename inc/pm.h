@@ -70,4 +70,9 @@ struct idt_ptr{
     unsigned int base;
 } __attribute__((packed));
 
+void gdt_set_gate(int num, unsigned long base, unsigned long limit, unsigned char access, unsigned char gran);
+void gdt_init();
+
+void idt_init();
+void idt_set_gate(unsigned char num, unsigned long base, unsigned short sel, unsigned char flags);
 #endif

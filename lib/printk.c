@@ -1,12 +1,12 @@
-/* printf.c
- * this file include a useful funcion printf()
+/* printk.c
+ * this file include a useful funcion printk()
  * suppose %d %x %c %s now
  */
-#include <sys.h>
-#include <lib.h>
-#include <const.h>
+#include <type.h>
+#include <vga.h>
+#include <string.h>
+#include <printk.h>
 
-typedef char *va_list;
 
 /* integer to array , modify from
  * http://blog.csdn.net/wesley1991/article/details/5430350
@@ -29,10 +29,10 @@ char* itoa(int value, char *str, int radix){
     return str;
 }
 
-/* a simple printf, modify from
+/* a simple printk, modify from
  * http://blog.tianya.cn/blogger/post_show.asp?BlogID=462085&PostID=8363874
  */
-int vsprintf(char *buf, const char *fmt, va_list args){
+int vsprintk(char *buf, const char *fmt, va_list args){
     char *p;
     va_list p_next_arg = args;
     for (p = buf; *fmt; fmt++){
@@ -70,11 +70,11 @@ int vsprintf(char *buf, const char *fmt, va_list args){
     *p = '\0';
     return 0;
 }
-int printf(const char *fmt, ...){
+int printk(const char *fmt, ...){
     char buf[256];
     memset(buf, 0, sizeof(buf));
     va_list arg = (va_list)((char *)(&fmt) + sizeof(char *));
-    vsprintf(buf, fmt, arg);
+    vsprintk(buf, fmt, arg);
     puts(buf);
     return 0;
 }

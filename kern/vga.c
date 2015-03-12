@@ -2,9 +2,10 @@
  * control the display of char, 
  * you must invoke init_vga before use other func
  */
-#include <sys.h>
-#include <const.h>
-#include <lib.h>
+#include <vga.h>
+#include <string.h>
+#include <asm.h>
+#include <type.h>
 
 /* it is strange that i can't use 
  * char* vgamem = 0xb8000, 
