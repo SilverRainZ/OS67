@@ -14,12 +14,13 @@
 char* itoa(int value, char *str, int radix){
     char reverse[36];   
     char *p = reverse;
-    bool sign = (value > 0)?TRUE:FALSE;
-    value = (value > 0)?value:-value;
+    bool sign = (value >= 0)?TRUE:FALSE;
+    value = (value >= 0)?value:-value;
     *p++ = '\0';
-    while (value > 0){
+    while (value >= 0){
         *p++ = "0123456789abcdef"[value%radix];
         value /= radix;
+        if (value == 0) break;
     }
     if (!sign) *p = '-';
     else p--;
