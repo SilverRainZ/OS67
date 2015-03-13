@@ -13,6 +13,8 @@ start:
     xor eax,eax
     mov ax,0x10
     mov ds,ax
+    mov ax,0x10
+    mov es,ax
     mov ax,0x18
     mov gs,ax
     mov ax,0x10
@@ -25,6 +27,9 @@ start:
     xor esi,esi         ; be careful !
     mov si,msg_pm  
     call temp_print32 
+
+  ;  sti
+  ;  call get_mem_map
     
     jmp osmain          ; never return? 
 
@@ -54,6 +59,9 @@ msg_pm:
     db "In protect mode now.", 0
 msg_return:
     db "I loved you, No.67.", 0
+
+msg_get_mem_map_err:
+    db "Get memory message error, system halt.", 0
 
 ; function used in kernel 
 

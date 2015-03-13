@@ -41,7 +41,6 @@ int osmain(void)
     kb_init();
     sti();
     pmm_mem_info();
-    test();
     for (;;);
     int i;
     for (i = 0; i < 26; i++){

@@ -3,7 +3,7 @@ floppya: 1_44=bin/floppy.img, status=inserted
 display_library: x
 log:lst/bochsout.log
 clock: sync=realtime, time0=local, rtc_sync=0
-memory: host=32, guest=64
+memory: host=32, guest=128
 #clock sync shoule keep realtime to let timer work proper
 # no floppyb
 

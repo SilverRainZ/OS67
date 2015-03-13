@@ -55,36 +55,38 @@ entry:
     mov si, msg_boot
     call temp_print16
 
-    ; store messgae at 0x500
-    ; error ds = 0x500, mov [0],reg
-getmsg:
-    mov ah,0x03
-    xor bh,bh
-    int 0x10
-    mov [0x500],dx  ; cursor pos save in 0x9000 
- 
-    mov ah,0x88
+;============================================================
+; get memory info 
+ADRS equ 0x500
+MCR_count equ 0x400
+get_mem_map:
+    mov dword [MCR_count], 0
+    mov ax, 0
+    mov es, ax
+    xor ebx, ebx
+    mov di,ADRS
+
+get_mem_map_loop:
+    mov eax, 0xe820
+    mov ecx, 20
+    mov edx, 0x534D4150    ; edx = "SMAP"
     int 0x15
-    mov [0x502],ax  
-    ; get mem size(extrened mem kb)
-    ; the max mem size you can get is 64 mb,
-    ; int 0x15 ah = 0x88 is outdataed.
+    jc get_mem_map_fail
+    add di, 20
+    inc dword [MCR_count]
+    cmp ebx, 0
+    jne get_mem_map_loop 
+    jmp get_mem_map_ok
 
-    mov ah,0x0f
-    int 0x10
-    mov [0x504],bx  ; bh = display page
-    mov [0x506],ax  ; al = video mode, ah = window width
-       
-    mov ah,0x12
-    mov bl,0x10
-    int 0x10
-    mov [0x508],ax  ; 0x90008 do u know what linus's meaning?
-    mov [0x510],bx  ; 0x9000a  安装的显示内存 0x900b  显示状态
-    mov [0x512],cx  ; 0x9000c  显示卡的特性参数
-    
-; get message end
+get_mem_map_fail:
+    mov si,msg_get_mem_map_err
+    call temp_print16
+    hlt
 
-    
+get_mem_map_ok:
+
+;============================================================
+; read kernel form disk
 loadloader:     ; read 4 sector to load loader.bin
     mov bx,0    ; loader.bin 's addr in mem
     mov ax,0x0800   ; loader's addr
@@ -162,6 +164,8 @@ msg_a20:
     db "A20 line on...",13,10,0
 msg_temp:
     db 0,0,0
+msg_get_mem_map_err:
+    db "fail",0
 
 GDT:
 DESC_NULL:        Descriptor 0,       0,        0             ; null
