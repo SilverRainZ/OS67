@@ -40,9 +40,7 @@ int osmain(void)
     //timer_init(); 
     kb_init();
     sti();
-    int mem = (int)*(short *)0x502;
-    printk("Memory: %dMB.\n\r",mem/1024 + 1);
-    show_mem_map();
+    pmm_mem_info();
     test();
     for (;;);
     int i;

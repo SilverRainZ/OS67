@@ -3,5 +3,5 @@
 extern uint8_t _kernstart_[];
 extern uint8_t _kernend_[];
 
-void show_mem_map();
+void pmm_mem_info();
 #endif
