@@ -2,7 +2,12 @@
 #include <printk.h>
 #include <pmm.h>
 
-
+/* these symbol's addr were remaped in ld script*/
+uint8_t kernstart = 0; 
+uint8_t code = 0;
+uint8_t data = 0;
+uint8_t bss = 0;
+uint8_t kernend = 0; 
 
 //static uint32_t pmm_alloc_stack[];
 void pmm_mem_info(){
