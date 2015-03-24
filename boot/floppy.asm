@@ -61,7 +61,7 @@ dd 0x00003000           ; dir_fileszie 0x1c 4       12kib
 times (((224 * 32) + (512 - 1))/512 + 19) * 512 - ($-$$) \
 db 0 ; 0x4200 - ($ - $$)
 INCBIN "kernel"
-
+db 0xba, 0xad, 0xf0, 0x0d
 times 80*18*2*512 - ($-$$) db 0
 ; current section - current line
 ; 80 sector * 18 cylinder * 2 head * 512 byte

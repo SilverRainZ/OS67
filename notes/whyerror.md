@@ -1,6 +1,5 @@
-#2015-3-13 PROVIDE( kernstart = .); doesn't work
-master 88bb2b4
-Q:
-* 仿照浅奕翻译的教程，在ld脚本中使用`PROVIDE( kernstart = .);` 和 `PROVIDE( kernend = .);`来定位内核的位置，但是均得不到正确的结果.
-A:
-* 最终使用`kernstart = . ;` 配合在pmm.h中定义 `uint8_t kernstart`，取得了比较靠谱的结果，但是内核大小达到了20KB? 我的kernel文件才12KB, 怀疑问题出在 floppy.s
+#2015-3-13 PROVIDE( kernstart = .); 无法得到正确内核起始位置
+最终使用`kernstart = . ;` 配合在pmm.h中定义 `uint8_t kernstart`，取得了比较靠谱的结果，但是内核大小达到了20KB? 我的kernel文件才12KB, 怀疑问题出在 floppy.s
+#2015-3-24 内存中内核长度比内核文件长度大得多
+内存中的内核长度是正确的，ld 不会为 bss 段提供空间，所以内核文件比内存中内核长度小，且内核没有加载器，bss段只能放在所有段的最后。
+

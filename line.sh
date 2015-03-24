@@ -1,4 +1,4 @@
-#/user/bin/sh
+#!/user/bin/sh
 cat /dev/null > info          #清空info
 types=("*.asm" "*.c" "*.h" )    #所有要统计的文件类型
 for i in ${types[@]}          #遍历每个文件类型

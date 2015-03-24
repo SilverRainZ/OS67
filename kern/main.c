@@ -41,6 +41,15 @@ int osmain(void)
     kb_init();
     sti();
     pmm_mem_info();
+    pmm_init();
+    uint32_t p = pmm_alloc_page();
+    printk("alloc 4k page: 0x%x\n",p);
+    p = pmm_alloc_page();
+    printk("alloc 4k page: 0x%x\n",p);
+    pmm_free_page(p);
+    printk("free 4k page: 0x%x\n",p);
+    p = pmm_alloc_page();
+    printk("alloc 4k page: 0x%x\n",p);
     for (;;);
     int i;
     for (i = 0; i < 26; i++){

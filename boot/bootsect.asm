@@ -87,22 +87,22 @@ get_mem_map_ok:
 
 ;============================================================
 ; read kernel form disk
-loadloader:     ; read 4 sector to load loader.bin
-    mov bx,0    ; loader.bin 's addr in mem
-    mov ax,0x0800   ; loader's addr
-    mov es,ax
-    mov ch,0
-    mov dh,1
-    mov cl,16
+loadloader:      
+    mov bx,0    
+    mov ax,0x0800 
+    mov es,ax   ; es:bx buffer address point -> 0x8000
+    mov ch,0    ; cylinder
+    mov dh,1    ; head
+    mov cl,16   ; sector
+    mov dl,0x00 ; driver a:
 ; kernel 在软gg盘的第34个扇区,0x4200,换算为c0-h1-s16
 
 readloop:
     mov si,0    ; err counter 
 
 retry:
-    mov ah,0x02 ; read 
-    mov al,8*3  ; read 12 sector 
-    mov dl,0x00 ; driver a:
+    mov ah,0x02 ; int 0x13  ah = 0x02 read sector form dirve
+    mov al,60 ; read 63 
     int 0x13
     jnc succ 
     add si,1

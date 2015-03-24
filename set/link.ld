@@ -3,7 +3,7 @@ ENTRY(start)
 phys = 0x8000;
 SECTIONS
 {
-   .text phys : AT(phys) {
+  .text phys : AT(phys) {
     kernstart = .;
     code = .;
     *(.text)
