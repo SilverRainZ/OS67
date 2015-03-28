@@ -15,7 +15,7 @@ void timer_phase(int hz){
     outportb(0x40, divisor >> 8);    
     /*设置除数的高字节  */
 } 
-void timer_handler(struct regs *r){
+void timer_handler(struct regs_s *r){
     timer_ticks++;
     /* Every 18 clocks (approximately 1 second), we will
      *  display a message on the screen */

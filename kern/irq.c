@@ -31,7 +31,7 @@ void *irq_routines[16] ={
 };
 
 /* This installs a custom IRQ handler for the given IRQ */
-void irq_install_handler(int irq, void (*handler)(struct regs *r)){
+void irq_install_handler(int irq, void (*handler)(struct regs_s *r)){
     irq_routines[irq] = handler;
 }
 
@@ -96,9 +96,9 @@ void irq_init(){
 *  interrupt at BOTH controllers, otherwise, you only send
 *  an EOI command to the first controller. If you don't send
 *  an EOI, you won't raise any more IRQs */
-void irq_handler(struct regs *r){
+void irq_handler(struct regs_s *r){
     /* This is a blank function pointer */
-    void (*handler)(struct regs *r);
+    void (*handler)(struct regs_s *r);
 
     /* Find out if we have a custom handler to run for this
     *  IRQ, and then finally, run it */
