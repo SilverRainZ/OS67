@@ -8,7 +8,6 @@
 #include <string.h>
 #include <printk.h>
 #include <pmm.h>
-
 void delay(){   // lol, we have no sleep()
     int i = 0;
     for (i = 0; i < 1000000; i++){
@@ -17,13 +16,9 @@ void delay(){   // lol, we have no sleep()
     }
 }
 
-void test(){
-    printk("%d + %d = %d\n\r", 1, 1, 2);
-    printk("Wel%s to %s%d...\n\r","come","OS",67);
-    printk("Author: %s %s\n\r","LastAvengers","2014-12.24");
-}
 int osmain(void)
 {
+    // 847d
     vga_init();
     gdt_init();
     puts("GDT installed...\n\r");
@@ -48,6 +43,10 @@ int osmain(void)
     printk("alloc 4k page: 0x%x\n",p);
     pmm_free_page(p);
     printk("free 4k page: 0x%x\n",p);
+    p = pmm_alloc_page();
+    printk("alloc 4k page: 0x%x\n",p);
+    p = pmm_alloc_page();
+    printk("alloc 4k page: 0x%x\n",p);
     p = pmm_alloc_page();
     printk("alloc 4k page: 0x%x\n",p);
     for (;;);
