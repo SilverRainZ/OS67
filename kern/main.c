@@ -8,6 +8,7 @@
 #include <string.h>
 #include <printk.h>
 #include <pmm.h>
+#include <vmm.h>
 void delay(){   // lol, we have no sleep()
     int i = 0;
     for (i = 0; i < 1000000; i++){
@@ -28,33 +29,15 @@ int osmain(void)
     puts("ISRs installed...\n\r");
     irq_init();
     puts("IRQs installed...\n\r");
-
+    pmm_init();
+    //timer_init(); 
     setcolor(COL_D_GREY, COL_CYAN);
     puts("Welcome to OS67...\n\r");
     setcolor(COL_L_GREY, COL_BLACK);
-    //timer_init(); 
-    kb_init();
     sti();
     pmm_mem_info();
-    pmm_init();
-    uint32_t p = pmm_alloc_page();
-    printk("alloc 4k page: 0x%x\n",p);
-    p = pmm_alloc_page();
-    printk("alloc 4k page: 0x%x\n",p);
-    pmm_free_page(p);
-    printk("free 4k page: 0x%x\n",p);
-    p = pmm_alloc_page();
-    printk("alloc 4k page: 0x%x\n",p);
-    p = pmm_alloc_page();
-    printk("alloc 4k page: 0x%x\n",p);
-    p = pmm_alloc_page();
-    printk("alloc 4k page: 0x%x\n",p);
+    vmm_init();
+    kb_init();
     for (;;);
-    int i;
-    for (i = 0; i < 26; i++){
-        putchar('A' + i);
-        putchar('\n');
-        delay();
-    }
     return 0;
 }

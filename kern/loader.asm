@@ -21,20 +21,30 @@ start:
     mov ss,ax
     mov esp,0x7c00
 
+; mov the kernel to 0x100000
+[extern kernstart]
+[extern kernend]
+    mov eax, kernend
+    mov ecx, kernstart
+    sub eax, ecx
+    mov ecx, eax
+    mov esi, 0x8000
+    mov edi, 0x100000
+    cld
+    rep movsb
+    jmp dword 0x08:go
+go:
+
     mov	edi,(160*3)+0   ; 160*50 line 3 column 1 
     mov	ah,00001100b    ; red  
 
-    xor esi,esi         ; be careful !
-    mov si,msg_pm  
+    
+    mov esi,msg_pm  
     call temp_print32 
 
-  ;  sti
-  ;  call get_mem_map
-    
     jmp osmain          ; never return? 
 
-    xor esi,esi         
-    mov si,msg_return  
+    mov esi,msg_return  
     call temp_print32 
     jmp $
 

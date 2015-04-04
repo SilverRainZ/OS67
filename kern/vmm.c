@@ -20,11 +20,12 @@ void vmm_init(){
     }
     //TODO 为什么不映射第0页?
     uint32_t *pte = (uint32_t *)pte_kern;
-    for (i = 0; i < PTE_COUNT*PTE_SIZE; i++){
+    for (i = 1; i < PTE_COUNT*PTE_SIZE; i++){
         pte[i] = (i << 12) | PAGE_PRESENT | PAGE_WRITE;
     }
+    printk("0x%x -- 0x%x\n", pte_kern,&pte_kern[PTE_COUNT][PTE_SIZE]);
     /* register isr */
-    //idt_set_gate(14, (unsigned)page_fault, 0x08, 0x8E);
+    idt_set_gate(14, (unsigned)page_fault, 0x08, 0x8E);
     /* switch page global directory */
     vmm_switch_pgd((uint32_t)pgd_kern);
 }

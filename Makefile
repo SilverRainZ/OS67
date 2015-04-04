@@ -11,6 +11,7 @@ OBJCPY = objcopy
 CFLAGS = -Wall -Werror -nostdinc -fno-builtin -fno-stack-protector -funsigned-char \
 		 -finline-functions -finline-small-functions -findirect-inlining \
 		 -finline-functions-called-once -Iinc -m32 
+#OBJS = $(wildcard bin/*.o)
 OBJS = bin/loader.o bin/main.o bin/vga.o bin/gdt.o bin/idt.o \
 	   bin/isrs.o bin/irq.o bin/timer.o bin/asm.o bin/kb.o \
 	   bin/string.o	bin/queue.o bin/printk.o bin/pmm.o bin/vmm.o
@@ -24,7 +25,7 @@ bin/bootsect.bin: boot/bootsect.asm
 	$(AS) -I ./boot/ -f bin -l lst/bootsect.asm $< -o $@ 
 
 bin/loader.o : kern/loader.asm
-	$(AS) -I ./boot/ -f elf -l lst/loader.asm $< -o $@ 
+	$(AS) -I ./boot/ -f elf32 -l lst/loader.asm $< -o $@ 
 
 # link loader.o and c objfile 
 bin/kernel: set/link.ld $(OBJS) 
