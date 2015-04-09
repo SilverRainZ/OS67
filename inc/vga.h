@@ -27,7 +27,7 @@ void cls();
 void putchar_at(int x, int y, char ch);
 void putchar(char ch);
 void puts(char *str);
-void setcolor(char b_color, char f_color);
+void setcolor(char f_color, char b_color);
 struct tpoint getcur();
 void setcur(int x, int y);
 #endif

@@ -9,6 +9,8 @@
 #include <printk.h>
 #include <pmm.h>
 #include <vmm.h>
+#include <dbg.h>
+
 void delay(){   // lol, we have no sleep()
     int i = 0;
     for (i = 0; i < 1000000; i++){
@@ -38,6 +40,9 @@ int osmain(void)
     pmm_mem_info();
     vmm_init();
     kb_init();
+    printk("main:0x%x\n",osmain);
+    printk("main:0x%x\n",panic);
+    assert(0,"TEST");
     for (;;);
     return 0;
 }
