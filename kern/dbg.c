@@ -13,7 +13,7 @@ void print_cur_status(){
 			"mov %%ss, %3;"
 			: "=m"(reg1), "=m"(reg2), "=m"(reg3), "=m"(reg4));
 
-    printk("%d: @ring %d\n", round, reg1 & 0x3);
+    printk("%d: @ring%d\n", round, reg1 & 0x3);
 	printk("%d: cs = %x\n", round, reg1);
 	printk("%d: ds = %x\n", round, reg2);
 	printk("%d: es = %x\n", round, reg3);
@@ -22,7 +22,6 @@ void print_cur_status(){
 	++round;
 }
 
-//TODO
 void print_stack_trace(){
     uint32_t *ebp, *eip;
     __asm__ __volatile__("mov %%ebp, %0":"=r"(ebp));
@@ -34,14 +33,14 @@ void print_stack_trace(){
 }
 
 void panic(const char *msg){
-    setcolor(COL_RED, COL_BLACK);
+    setcolor(COL_L_RED, COL_BLACK);
     printk("*** Kernel panic %s ***\n", msg);
     printk("Current CPU status:\n");
     print_cur_status();
 
-    printk("Call stack:\n");
-    print_stack_trace();
-
+    //i can't get the name of funciton form call stack, so don't use it
+    //printk("Call stack:\n");
+    //print_stack_trace();
     for (;;);
 }
 

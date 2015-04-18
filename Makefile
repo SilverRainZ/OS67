@@ -10,7 +10,7 @@ LD = ld
 OBJCPY = objcopy
 CFLAGS = -Wall -Werror -nostdinc -fno-builtin -fno-stack-protector -funsigned-char \
 		 -finline-functions -finline-small-functions -findirect-inlining \
-		 -finline-functions-called-once -Iinc -m32 
+		 -finline-functions-called-once -Iinc -m32 -ggdb -gstabs+
 #OBJS = $(wildcard bin/*.o)
 OBJS = bin/loader.o bin/main.o bin/vga.o bin/gdt.o bin/idt.o \
 	   bin/isrs.o bin/irq.o bin/timer.o bin/asm.o bin/kb.o \
@@ -30,13 +30,13 @@ bin/loader.o : kern/loader.asm
 
 # link loader.o and c objfile 
 bin/kernel: set/link.ld $(OBJS) 
-	$(LD) -T$< -melf_i386 -static -o $@ $(OBJS)
+	$(LD) -T$< -melf_i386 -static -o $@ $(OBJS) -M>lst/map.map
 
 # bin/kernel: bin/kernel.tmp
 # 	$(OBJCPY) -O binary $< $@ 
 
 # compile c file in all directory
-bin/%.o: lib/%.c
+bin/%.o: libs/%.c
 	$(CC) $(CFLAGS) -c $^ -o $@  
 	$(CC) $(CFLAGS) -S $^ -o lst/$*.asm  
 

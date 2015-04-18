@@ -21,7 +21,6 @@ void delay(){   // lol, we have no sleep()
 
 int osmain(void)
 {
-    // 847d
     vga_init();
     gdt_init();
     puts("GDT installed...\n\r");
@@ -40,9 +39,6 @@ int osmain(void)
     pmm_mem_info();
     vmm_init();
     kb_init();
-    printk("main:0x%x\n",osmain);
-    printk("main:0x%x\n",panic);
-    assert(0,"TEST");
     for (;;);
     return 0;
 }

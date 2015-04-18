@@ -150,7 +150,7 @@ succ:
     mov cr0,eax
 
     ; special, clear pipe-line and jump 
-    jmp dword Selec_Code32_R0:0x8000   
+    jmp dword Selec_Code32_R0:0x8000
 
 msg_boot:
     db "Bootsector loaded...",13,10,0
