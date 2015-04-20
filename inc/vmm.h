@@ -37,6 +37,7 @@ void vmm_switch_pgd(uint32_t pgd);
 void map(pgd_t *pgd, uint32_t va, uint32_t pa, uint32_t flags);
 void unmap(pgd_t *pgd, uint32_t va);
 bool get_mapping(pgd_t *pgd, uint32_t va, uint32_t *pa);
+void vmm_test();
 
 /* isr 14 */
 void page_fault(struct regs_s *regs);

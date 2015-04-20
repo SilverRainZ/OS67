@@ -102,7 +102,7 @@ readloop:
 
 retry:
     mov ah,0x02 ; int 0x13  ah = 0x02 read sector form dirve
-    mov al,60 ; read 63 
+    mov al,60 ; read 60 sector
     int 0x13
     jnc succ 
     add si,1

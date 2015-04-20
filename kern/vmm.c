@@ -15,6 +15,7 @@ static pte_t pte_kern[PTE_COUNT][PTE_SIZE] __attribute__((aligned(PAGE_SIZE)));
 
 void vmm_init(){
     uint32_t i, j;
+    /*phyical addr = virtual addr */
     for (i = 0, j = 0; i < PTE_COUNT; i++, j++){
         pgd_kern[i] = (uint32_t)pte_kern[j] | PAGE_PRESENT | PAGE_WRITE;
     }
@@ -23,16 +24,24 @@ void vmm_init(){
     for (i = 1; i < PTE_COUNT*PTE_SIZE; i++){
         pte[i] = (i << 12) | PAGE_PRESENT | PAGE_WRITE;
     }
-    printk("0x%x -- 0x%x\n", pte_kern,&pte_kern[PTE_COUNT][PTE_SIZE]);
+
     /* register isr */
     idt_set_gate(14, (unsigned)page_fault, 0x08, 0x8E);
+
     /* switch page global directory */
     vmm_switch_pgd((uint32_t)pgd_kern);
+
+    /* enable paging */
+    uint32_t cr0;
+    __asm__ volatile ("mov %%cr0, %0" : "=r" (cr0));
+	cr0 |= 0x80000000;
+	__asm__ volatile ("mov %0, %%cr0" : : "r" (cr0));
 }
 
 void vmm_switch_pgd(uint32_t pgd){
-    __asm__ volatile ("mov %0, %%cr3"::"r"(pgd));
+    __asm__ volatile ("mov %0, %%cr3": :"r"(pgd));
 }
+
 void map(pgd_t *pgd, uint32_t va, uint32_t pa, uint32_t flags){
     uint32_t pgd_idx = PGD_INDEX(va);
     uint32_t pte_idx = PTE_INDEX(va);
@@ -41,12 +50,15 @@ void map(pgd_t *pgd, uint32_t va, uint32_t pa, uint32_t flags){
     /* if pte == NULL */
     if (!pte){
         pte = (pte_t *)pmm_alloc_page();
-        pgd[pgd_idx] = (uint32_t)pte;
+        pgd[pgd_idx] = (uint32_t)pte | PAGE_PRESENT | PAGE_WRITE;
 
         memset(pte, 0, PAGE_SIZE);
     } 
     //TODO ? & PAGE_MASK 
     pte[pte_idx] = (pa & PAGE_MASK) | flags;
+
+    /* reflush page talbe cache  */
+    __asm__ volatile ("invlpg (%0)" : : "a" (va));
 }
 
 void unmap(pgd_t *pgd, uint32_t va){
@@ -59,7 +71,8 @@ void unmap(pgd_t *pgd, uint32_t va){
     }
     /* unmap this poge */
     pte[pte_idx] = 0;
-    /* flush page table cache */
+
+    /* reflush page table cache */
     __asm__ volatile ("invlpg (%0)"::"a"(va));
 }
 
@@ -76,6 +89,23 @@ bool get_mapping(pgd_t *pgd, uint32_t va, uint32_t *pa){
         return TRUE;
     }
     return FALSE;
+}
+
+void vmm_test(){
+    int *badfood = (int *)0xc000;
+    printk("virtual addr 0xc000: %x\n", *badfood);
+    map(pgd_kern, 0x1000, 0xc000, PAGE_PRESENT);
+    badfood = (int *)0x1000;
+
+    uint32_t pa = 0;
+    get_mapping(pgd_kern, 0x1000, &pa);
+
+    vmm_switch_pgd((uint32_t)pgd_kern);
+
+    printk("%x is mapped to: %x\n", (int)badfood, (int)pa);
+    printk("virtual addr 0x1000: %x\n", *badfood);
+    badfood = (int *)0xc0000000; 
+    printk("virtual addr 0xc000: %x\n", *badfood);
 }
 
 void page_fault(struct regs_s *regs){

@@ -39,6 +39,8 @@ int osmain(void)
     pmm_mem_info();
     vmm_init();
     kb_init();
+    vmm_test();
+
     for (;;);
     return 0;
 }
