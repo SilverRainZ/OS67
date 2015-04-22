@@ -32,6 +32,9 @@ typedef uint32_t pte_t;
 /* 512M */
 #define PTE_COUNT 128
 
+/* export page dirctroy */
+extern pgd_t pgd_kern[PGD_SIZE];
+
 void vmm_init();
 void vmm_switch_pgd(uint32_t pgd);
 void map(pgd_t *pgd, uint32_t va, uint32_t pa, uint32_t flags);

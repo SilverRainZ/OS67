@@ -10,6 +10,7 @@
 #include <pmm.h>
 #include <vmm.h>
 #include <dbg.h>
+#include <heap.h>
 
 void delay(){   // lol, we have no sleep()
     int i = 0;
@@ -39,7 +40,9 @@ int osmain(void)
     pmm_mem_info();
     vmm_init();
     kb_init();
-    vmm_test();
+    //vmm_test();
+    heap_init();
+    heap_test();
 
     for (;;);
     return 0;

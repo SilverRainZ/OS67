@@ -3,19 +3,21 @@
  * suppose %d %x %c %s now
  */
 //TODO %f doesn't work now, don't use it
-#define __DEBUG
+//#define __DEBUG
 
 #ifdef __DEBUG
 #include <stdio.h>
 #include <string.h>
 #undef NULL
+
 #include "../inc/type.h"
 #include "../inc/printk.h"
 int main(){
-    printk("big int test: %d\n", 0xbaadf00d);
+    printk("big int test: %x\n", 0xbaadf00d);
     printk("double test: %f and %f\n",305.53, 123.45);
     return 0;
 }
+
 #else
 #include <type.h>
 #include <vga.h>

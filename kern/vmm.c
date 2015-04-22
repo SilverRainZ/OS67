@@ -54,7 +54,7 @@ void map(pgd_t *pgd, uint32_t va, uint32_t pa, uint32_t flags){
 
         memset(pte, 0, PAGE_SIZE);
     } 
-    //TODO ? & PAGE_MASK 
+
     pte[pte_idx] = (pa & PAGE_MASK) | flags;
 
     /* reflush page talbe cache  */
@@ -93,7 +93,7 @@ bool get_mapping(pgd_t *pgd, uint32_t va, uint32_t *pa){
 
 void vmm_test(){
     int *badfood = (int *)0xc000;
-    printk("virtual addr 0xc000: %x\n", *badfood);
+    printk("valut at 0xc000: %x\n", *badfood);
     map(pgd_kern, 0x1000, 0xc000, PAGE_PRESENT);
     badfood = (int *)0x1000;
 
@@ -103,14 +103,15 @@ void vmm_test(){
     vmm_switch_pgd((uint32_t)pgd_kern);
 
     printk("%x is mapped to: %x\n", (int)badfood, (int)pa);
-    printk("virtual addr 0x1000: %x\n", *badfood);
-    badfood = (int *)0xc0000000; 
-    printk("virtual addr 0xc000: %x\n", *badfood);
+    printk("value at 0x1000: %x\n", *badfood);
+
+    //badfood = (int *)0xc0000000; 
+    //printk("virtual addr 0xc000: %x\n", *badfood);    // page fault test
 }
 
 void page_fault(struct regs_s *regs){
     uint32_t cr2;
     __asm__ volatile ("mov %%cr2, %0":"=r"(cr2));
-    printk("page fault...");
-    hlt();
+    printk("Page Fault Excetpion\nSystem Halted!\n");
+    for (;;) hlt();
 }
