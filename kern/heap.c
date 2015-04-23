@@ -86,16 +86,10 @@ void *kmalloc(uint32_t len){
 
     while (cur_header){
         if (cur_header->allocated == 0 && cur_header->length >= len){
-
-            printk("found compatiable chunk: 0x%x\n",(uint32_t)cur_header);
-
             split_chunk(cur_header, len);
             cur_header->allocated = 1;
             return (void *)((uint32_t)cur_header + sizeof(struct header));
         }
-
-        printk("current chunk: 0x%x\n",(uint32_t)cur_header);
-
         prev_header = cur_header;
         cur_header = cur_header->next;
     }
@@ -108,8 +102,6 @@ void *kmalloc(uint32_t len){
         chunk_start = HEAP_START;
         heap_first = (struct header *)chunk_start;
     }
-
-    printk("new chunk start: 0x%x\n",(uint32_t)chunk_start);
 
     alloc_chunk(chunk_start, len);
     cur_header = (struct header*)chunk_start;
@@ -132,18 +124,27 @@ void kfree(void *p){
     glue_chunk(h);
 }
 
+void print_chunk_list(){
+    struct header *cur = heap_first;
+    while (cur){
+        printk("cur->allocated: %d  ->base 0x%x  ->len %d\n",cur->allocated, (uint32_t)cur, cur->length);
+        cur = cur->next;
+    }
+}
+
 void heap_test(){
     void *addr1 = kmalloc(50);
     printk("kmalloc 50 byte in 0x%x\n", addr1);
     void *addr2 = kmalloc(500);
     printk("kmalloc 500 byte in 0x%x\n", addr2);
-    return;
     void *addr3 = kmalloc(5000);
     printk("kmalloc 5000 byte in 0x%x\n", addr3);
     void *addr4 = kmalloc(5000);
     printk("kmalloc 5000 byte in 0x%x\n", addr4);
     void *addr5 = kmalloc(50000);
     printk("kmalloc 50000 byte in 0x%x\n", addr5);
+
+    print_chunk_list();
 
     printk("free mem in 0x%x\n",addr1);
     kfree(addr1);
@@ -156,4 +157,3 @@ void heap_test(){
     printk("free mem in 0x%x\n",addr5);
     kfree(addr5);
 }
-

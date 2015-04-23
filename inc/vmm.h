@@ -15,9 +15,9 @@
 #define PAGE_MASK 0xfffff000
 
 /* get specific index of virtual address */
-#define PGD_INDEX(x) (((x) >> 22) && 0x3ff)
-#define PTE_INDEX(x) (((x) >> 12) && 0x3ff)
-#define OFFSET_INDEX(x) ((x) && 0xfff)
+#define PGD_INDEX(x) (((x) >> 22) & 0x3ff)
+#define PTE_INDEX(x) (((x) >> 12) & 0x3ff)
+#define OFFSET_INDEX(x) ((x) & 0xfff)
 
 /* page global directory */
 typedef uint32_t pgd_t;

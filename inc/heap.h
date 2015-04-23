@@ -2,7 +2,7 @@
 #define __HEAP_H
 #include <type.h>
 
-#define HEAP_START 0x00001000
+#define HEAP_START 0xc0000000
 
 struct header{
     struct header *prev;

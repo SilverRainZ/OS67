@@ -10,6 +10,7 @@
 #include <string.h>
 #undef NULL
 
+/* TEST */
 #include "../inc/type.h"
 #include "../inc/printk.h"
 int main(){
@@ -44,6 +45,21 @@ char* itoa(int value, char *str, int radix){
     return str;
 }
 
+char* uitoa(unsigned int value, char *str, int radix){
+    char reverse[36];   
+    char *p = reverse;
+    *p++ = '\0';
+    while (value >= 0){
+        *p++ = "0123456789abcdef"[value%radix];
+        value /= radix;
+        if (value == 0) break;
+    }
+    p--;
+    while (p >= reverse){
+        *str++ = *p--;
+    }
+    return str;
+}
 char* gcvt(double value, int ndigit, char *buf){
     char tmpbuf[72];
     int int_part = (int)value;
@@ -82,7 +98,7 @@ void vsprintk(char *buf, const char *fmt, va_list args){
                 p += strlen(p);
                 break;
             case 'x':
-                itoa(va_arg(p_next_arg, int),p,16);
+                uitoa(va_arg(p_next_arg, unsigned int),p,16);
                 p += strlen(p);
                 break;
             case 'c':
