@@ -20,8 +20,8 @@ A Simple Operate System.
 ####TODO
 - [x] Boot Sector
 - [x] Protect Mode
-- [ ] Paging 
-- [ ] Mem alloc 
+- [x] Paging 
+- [x] Mem alloc 
 - [ ] Process schedule
 - [ ] File System
 - [ ] Executable file
@@ -31,6 +31,7 @@ A Simple Operate System.
 *  wiki.osdev.org
 * 「30天自制操作系统」
 * 「Orange's 一个操作系统的诞生」
+*  hurlex-doc
 
 ####Just for fun. 
 
