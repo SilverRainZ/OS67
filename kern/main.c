@@ -20,6 +20,9 @@ void delay(){   // lol, we have no sleep()
     }
 }
 
+void foo(){
+    assert(0,"test");
+}
 int osmain(void)
 {
     vga_init();
@@ -44,6 +47,7 @@ int osmain(void)
     heap_init();
     heap_test();
 
+    foo();
     for (;;);
     return 0;
 }
