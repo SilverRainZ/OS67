@@ -1,4 +1,4 @@
-#ifdef __SCHED_H
+#ifndef __SCHED_H
 #define __SCHED_H
 
 #include <task.h>
@@ -14,5 +14,5 @@ void schedule();
 void change_task_to(struct proc_ctrl_blk *next);
 void switch_to(struct context *prev, struct context *next);
 
-#endif __SCHED_H
+#endif
 

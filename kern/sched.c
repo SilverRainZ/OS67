@@ -1,6 +1,6 @@
 #include <sched.h>
 #include <heap.h>
-#include <debug.h>
+#include <dbg.h>
 
 struct proc_ctrl_blk *running_porc_head = NULL;
 struct proc_ctrl_blk *wait_porc_head = NULL;
@@ -28,7 +28,7 @@ void change_task_to(struct proc_ctrl_blk *next){
     if (current != next){
         struct proc_ctrl_blk *prev = current;
         current = next;
-        switch_to(&(prev->next), &(current->next));
+        switch_to(&(prev->context), &(current->context));
     }
 }
 

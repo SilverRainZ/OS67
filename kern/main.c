@@ -11,18 +11,26 @@
 #include <vmm.h>
 #include <dbg.h>
 #include <heap.h>
+#include <task.h>
+#include <sched.h>
 
-void delay(){   // lol, we have no sleep()
-    int i = 0;
-    for (i = 0; i < 1000000; i++){
-        i++;
-        i--;
+
+
+char a[] = "1234";
+// 当flag = 0 时候， 读出来的值并不是0
+int flag = 1;
+int thread(void *arg){
+    for (;;){
+        if (flag == 1){
+            printk("A");
+            flag = 0;
+        }
     }
+    return 0;
 }
+uint32_t kern_stack_top;
+char kern_stack[STACK_SIZE] __attribute__((aligned(16)));
 
-void foo(){
-    assert(0,"test");
-}
 int osmain(void)
 {
     vga_init();
@@ -34,20 +42,42 @@ int osmain(void)
     puts("ISRs installed...\n\r");
     irq_init();
     puts("IRQs installed...\n\r");
-    pmm_init();
-    //timer_init(); 
+    timer_init(); 
     setcolor(COL_D_GREY, COL_CYAN);
     puts("Welcome to OS67...\n\r");
     setcolor(COL_L_GREY, COL_BLACK);
-    sti();
-    pmm_mem_info();
+    pmm_init();
+    //pmm_mem_info();
+    puts("pmm\n\r");
+    
     vmm_init();
-    kb_init();
     //vmm_test();
-    heap_init();
-    heap_test();
+    puts("vmm\n\r");
 
-    foo();
+    kern_stack_top = ((uint32_t)kern_stack + STACK_SIZE);
+
+	__asm__ __volatile__ ("mov %0, %%esp\n\t"
+			"xor %%ebp, %%ebp" : : "r" (kern_stack_top));
+
+    puts("shift stack\n\r");
+    kb_init();
+    puts("kb\n\r");
+    printk("%s flag = =%d\n",a, flag);
+    heap_init();
+    puts("heap\n\r");
+    sti();
+    puts("sti\n\r");
+    //heap_test();
+    sched_init();
+    puts("sched\n\r");
+    kernel_thread(thread, NULL);
+    for (;;){
+        if (flag == 1){
+            printk("B");
+            flag = 1;
+        }
+    }
+
     for (;;);
     return 0;
 }

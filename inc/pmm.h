@@ -3,6 +3,10 @@
 
 #include <type.h>
 /* memory type */
+#define STACK_SIZE 8192
+extern uint32_t kern_stack_top;
+
+
 #define ADDR_RANGE_MEMORY   1
 #define ADDR_RANGE_RESERVED 2
 #define ADDR_RANGE_UNDEFINE 3
