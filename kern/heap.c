@@ -79,8 +79,6 @@ void heap_init(){
 void *kmalloc(uint32_t len){
     len += sizeof(struct header);
 
-    printk("required len: %d\n",len);
-
     struct header *cur_header = heap_first;
     struct header *prev_header = NULL;
 

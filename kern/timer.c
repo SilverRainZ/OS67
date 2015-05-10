@@ -4,6 +4,7 @@
 #include <vga.h>
 #include <timer.h>
 #include <sched.h>
+#include <printk.h>
 
 int timer_ticks = 0;
 
@@ -18,18 +19,19 @@ void timer_phase(int hz){
     /*设置除数的高字节  */
 } 
 void timer_handler(struct regs_s *r){
-    timer_ticks++;
-    schedule();
+    //timer_ticks++;
+    puts("|");
     /* Every 18 clocks (approximately 1 second), we will
      *  display a message on the screen */
-    /*
-    if (timer_ticks % 18 == 0)
-    {
+    //if (timer_ticks % 18 == 0){
+        schedule();
+        /*
         struct tpoint p = getcur();
         setcur(78,23);
         putchar('A'+timer_ticks%26);
         setcur(p.x, p.y);
-    }*/
+        */
+   // }
 }
 
 /* This will continuously loop until the given time has

@@ -15,18 +15,34 @@
 #include <sched.h>
 
 
-
 char a[] = "1234";
 // 当flag = 0 时候， 读出来的值并不是0
 int flag = 1;
+
 int thread(void *arg){
-    for (;;){
+   while (1) {
         if (flag == 1){
             printk("A");
             flag = 0;
         }
     }
     return 0;
+}
+void thread_test(){
+   // puts("shift stack\n\r");
+    sched_init();
+   // puts("sched_init()\n\r");
+    kernel_thread(thread, NULL);
+   // puts("kernel_thread\n\r");
+    sti();
+   // puts("sti\n\r");
+    while(1){
+        if (flag == 0){
+            printk("B");
+            flag = 1;
+        }
+    }
+
 }
 uint32_t kern_stack_top;
 char kern_stack[STACK_SIZE] __attribute__((aligned(16)));
@@ -54,29 +70,18 @@ int osmain(void)
     //vmm_test();
     puts("vmm\n\r");
 
+    kb_init();
+    puts("kb\n\r");
+
+    heap_init();
+    //heap_test();
+    puts("heap\n\r");
+
     kern_stack_top = ((uint32_t)kern_stack + STACK_SIZE);
 
 	__asm__ __volatile__ ("mov %0, %%esp\n\t"
 			"xor %%ebp, %%ebp" : : "r" (kern_stack_top));
-
-    puts("shift stack\n\r");
-    kb_init();
-    puts("kb\n\r");
-    printk("%s flag = =%d\n",a, flag);
-    heap_init();
-    puts("heap\n\r");
-    sti();
-    puts("sti\n\r");
-    //heap_test();
-    sched_init();
-    puts("sched\n\r");
-    kernel_thread(thread, NULL);
-    for (;;){
-        if (flag == 1){
-            printk("B");
-            flag = 1;
-        }
-    }
+    thread_test();
 
     for (;;);
     return 0;

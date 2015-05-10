@@ -208,9 +208,12 @@ irq_common_stub:
 
 ; *******************sched.c
 ; switch_to current => next
+; 保存当前进程和上下文以及恢复要切换到的进程的上下文
 [global switch_to]
 switch_to:
-    ; retrieve arg 1: current
+    ; retrieve arg 1:
+    ; esp + 4 处是第一个参数 prev->context
+    ; 将当前进程的上下文保存
     mov eax, [esp+4]
 
     mov [eax+0], esp
@@ -222,7 +225,9 @@ switch_to:
     pop ecx
     mov [eax+20], ecx
 
-    ; retrieve arg 2; next
+    ; retrieve arg 2
+    ; esp + 8 处是第二个参数 current->context
+    ; 恢复上下文
     mov eax, [esp+8]
 
     mov esp, [eax+0] 
