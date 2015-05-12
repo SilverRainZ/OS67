@@ -14,31 +14,28 @@
 #include <task.h>
 #include <sched.h>
 
-
-char a[] = "1234";
-// 当flag = 0 时候， 读出来的值并不是0
 int flag = 1;
 
 int thread(void *arg){
-   while (1) {
+    while (1) {
         if (flag == 1){
-            printk("A");
+            putchar('A');
             flag = 0;
         }
     }
     return 0;
 }
 void thread_test(){
-   // puts("shift stack\n\r");
-    sched_init();
-   // puts("sched_init()\n\r");
+    puts("shift stack\n\r");
+    init_sched();
+    puts("sched_init()\n\r");
     kernel_thread(thread, NULL);
-   // puts("kernel_thread\n\r");
+    puts("kernel_thread\n\r");
     sti();
-   // puts("sti\n\r");
+    puts("sti\n\r");
     while(1){
         if (flag == 0){
-            printk("B");
+            putchar('B');
             flag = 1;
         }
     }
@@ -58,7 +55,7 @@ int osmain(void)
     puts("ISRs installed...\n\r");
     irq_init();
     puts("IRQs installed...\n\r");
-    timer_init(); 
+    //timer_init(); 
     setcolor(COL_D_GREY, COL_CYAN);
     puts("Welcome to OS67...\n\r");
     setcolor(COL_L_GREY, COL_BLACK);
@@ -76,13 +73,21 @@ int osmain(void)
     heap_init();
     //heap_test();
     puts("heap\n\r");
-
-    kern_stack_top = ((uint32_t)kern_stack + STACK_SIZE);
-
+/**
+    kern_stack_top = (uint32_t)kern_stack + STACK_SIZE;
 	__asm__ __volatile__ ("mov %0, %%esp\n\t"
 			"xor %%ebp, %%ebp" : : "r" (kern_stack_top));
-    thread_test();
-
+    //thread_test();
+    init_sched();
+    kernel_thread(thread, NULL);
+    while(1){
+        if (flag == 0){
+            putchar('B');
+            flag = 1;
+        }
+    }
+    **/
+    sti();
     for (;;);
     return 0;
 }

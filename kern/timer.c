@@ -1,4 +1,9 @@
-/* timer.c */
+/* timer.c 
+ * This file is modified form Bram's Kernel Development Tutorial
+ * enable programmable interval timer(PIT)
+ *
+ */
+
 #include <asm.h>
 #include <isr.h>
 #include <vga.h>
@@ -6,7 +11,7 @@
 #include <sched.h>
 #include <printk.h>
 
-int timer_ticks = 0;
+unsigned int timer_ticks = 0;
 
 void timer_phase(int hz){ 
     int divisor = 1193180 / hz; 
@@ -18,27 +23,19 @@ void timer_phase(int hz){
     outportb(0x40, divisor >> 8);    
     /*设置除数的高字节  */
 } 
+
 void timer_handler(struct regs_s *r){
-    //timer_ticks++;
-    puts("|");
-    /* Every 18 clocks (approximately 1 second), we will
-     *  display a message on the screen */
-    //if (timer_ticks % 18 == 0){
-        schedule();
-        /*
-        struct tpoint p = getcur();
-        setcur(78,23);
-        putchar('A'+timer_ticks%26);
-        setcur(p.x, p.y);
-        */
-   // }
+    timer_ticks++;
+    /* trigger when every 18 clocks (approximately 1 second) */
+    if (timer_ticks % 18 == 0){
+        //schedule();
+    }
 }
 
 /* This will continuously loop until the given time has
  *  been reached */
 void timer_wait(int ticks){
     unsigned long eticks;
-
     eticks = timer_ticks + ticks;
     while(timer_ticks < eticks);
 }

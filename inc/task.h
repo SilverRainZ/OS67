@@ -6,47 +6,48 @@
 #include <vmm.h>
 
 typedef int32_t pid_t;
-
-/* 进程状态 */
+// 进程状态描述
+typedef
 enum task_state {
-    TASK_UNINIT = 0,    // 未初始化
-    TASK_SLEEPING = 1,  // 睡眠
-    TASK_RUNABLE = 2,   // 可运行 & 正在运行
-    TASK_ZOMBIE = 3     // 僵死
-};
+	TASK_UNINIT = 0, 	// 未初始化
+	TASK_SLEEPING = 1, 	// 睡眠中
+	TASK_RUNNABLE = 2, 	// 可运行(也许正在运行)
+	TASK_ZOMBIE = 3, 	// 僵尸状态
+} task_state;
 
-/* kernel thread context */
-/* 内核进程上下文 */
+// 内核线程的上下文切换保存的信息
 struct context {
-    uint32_t esp;
-    uint32_t ebp;
-    uint32_t ebx;
-    uint32_t esi;
-    uint32_t edi;
-    uint32_t eflags;
+	uint32_t esp;
+	uint32_t ebp;
+	uint32_t ebx;
+	uint32_t esi;
+	uint32_t edi;
+	uint32_t eflags;
 };
 
+// 进程内存地址结构
 struct mm_struct {
-    pgd_t *pgd_dir;
+	pgd_t *pgd_dir; 	// 进程页表
 };
 
-/* Process Control Block 
- * 进程控制块, 将会放在进程内核栈的最底端， 
- * 注意内核栈是由高至低生长的 */
-struct proc_ctrl_blk {
-    __volatile__ enum task_state state;
-    pid_t pid;
-    void *stack;
-    struct mm_struct *mm;
-    struct context context;     // context 
-    struct proc_ctrl_blk *next;   // next task
+// 进程控制块 PCB 
+struct task_struct {
+	volatile task_state state; 	// 进程当前状态
+	pid_t 	 pid; 			// 进程标识符
+	void  	*stack; 		// 进程的内核栈地址
+	struct mm_struct *mm; 		// 当前进程的内存地址映像
+	struct context context; 	// 进程切换需要的上下文信息
+	struct task_struct *next; 	// 链表指针
 };
 
+// 全局 pid 值
 extern pid_t now_pid;
 
-/* int (*fun)(void *)这个语法是函数指针我竟然不知道  */
+// 内核线程创建
 int32_t kernel_thread(int (*fn)(void *), void *arg);
 
+// 线程退出函数
 void kthread_exit();
 
-#endif
+#endif 
+

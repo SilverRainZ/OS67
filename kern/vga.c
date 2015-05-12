@@ -18,7 +18,7 @@ struct vga_char{
 struct vga_char *vgamem;    // vga[25][80] 
 struct vga_char color;      // use vag_char structure to store color
 
-struct tpoint cur;
+struct point_s cur;
 
 void move_cur(){
     unsigned temp;
@@ -101,7 +101,7 @@ void setcolor(char f_color, char b_color){
     color.b_color = b_color;
 }
 
-struct tpoint getcur(){
+struct point_s getcur(){
     return cur;
 }
 
@@ -114,6 +114,5 @@ void setcur(int x, int y){
 }
 
 void vga_test(){
-    scroll(); 
 }
 

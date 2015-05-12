@@ -206,40 +206,64 @@ irq_common_stub:
     iret
 
 
+[global switch_to]
+
+; 具体的线程切换操作，重点在于寄存器的保存与恢复
+switch_to:
+        mov eax, [esp+4]
+
+        mov [eax+0],  esp
+        mov [eax+4],  ebp
+        mov [eax+8],  ebx
+        mov [eax+12], esi
+        mov [eax+16], edi
+        pushf
+        pop ecx
+        mov [eax+20], ecx
+
+        mov eax, [esp+8]
+
+        mov esp, [eax+0]
+        mov ebp, [eax+4]
+        mov ebx, [eax+8]
+        mov esi, [eax+12]
+        mov edi, [eax+16]
+        mov eax, [eax+20]
+        push eax
+        popf
+ 	
+        ret
 ; *******************sched.c
 ; switch_to current => next
 ; 保存当前进程和上下文以及恢复要切换到的进程的上下文
-[global switch_to]
-switch_to:
-    ; retrieve arg 1:
-    ; esp + 4 处是第一个参数 prev->context
-    ; 将当前进程的上下文保存
-    mov eax, [esp+4]
+;[global switch_to]
+;switch_to:
+;    ; retrieve arg 1:
+;    ; esp + 4 处是第一个参数 prev->context
+;    ; 将当前进程的上下文保存
+;    mov eax, [esp+4]
+;
+;    mov [eax+0], esp
+;    mov [eax+4], ebp
+;    mov [eax+8], ebx
+;    mov [eax+12], esi
+;    mov [eax+16], edi
+;    pushf
+;    pop ecx
+;    mov [eax+20], ecx
+;
+;    ; retrieve arg 2
+;    ; esp + 8 处是第二个参数 current->context
+;    ; 恢复上下文
+;    mov eax, [esp+8]
 
-    mov [eax+0], esp
-    mov [eax+4], ebp
-    mov [eax+8], ebx
-    mov [eax+12], esi
-    mov [eax+16], edi
-    pushf
-    pop ecx
-    mov [eax+20], ecx
-
-    ; retrieve arg 2
-    ; esp + 8 处是第二个参数 current->context
-    ; 恢复上下文
-    mov eax, [esp+8]
-
-    mov esp, [eax+0] 
-    mov ebp, [eax+4] 
-    mov ebx, [eax+8] 
-    mov esi, [eax+12]
-    mov edi, [eax+16]
-    mov eax, [eax+20]
-    push eax
-    popf
-
-    ret
-
-
-
+;    mov esp, [eax+0] 
+;    mov ebp, [eax+4] 
+;    mov ebx, [eax+8] 
+;    mov esi, [eax+12]
+;    mov edi, [eax+16]
+;    mov eax, [eax+20]
+;    push eax
+;    popf
+;
+;    ret

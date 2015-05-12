@@ -2,38 +2,44 @@
 #include <heap.h>
 #include <dbg.h>
 
-/* 可调度进程链表 */
-struct proc_ctrl_blk *running_porc_head = NULL;
-/* 正在等待的进程链表 */
-struct proc_ctrl_blk *wait_porc_head = NULL;
-/* 当前进程 */
-struct proc_ctrl_blk *current = NULL;
+// 可调度进程链表
+struct task_struct *running_proc_head = NULL;
 
-void sched_init(){
-    /* 为当前执行流（osmain）创建PCB，位于栈的最底处 */
-    current = (struct proc_ctrl_blk *)(kern_stack_top - STACK_SIZE);
+// 等待进程链表
+struct task_struct *wait_proc_head = NULL;
 
-    current->state = TASK_RUNABLE;
-    current->pid = now_pid++;
-    current->stack = current;
-    current->mm = NULL;
+// 当前运行的任务
+struct task_struct *current = NULL;
 
-    current->next = current;
-    running_porc_head = current;
+void init_sched()
+{
+	// 为当前执行流创建信息结构体 该结构位于当前执行流的栈最低端
+	current = (struct task_struct *)(kern_stack_top - STACK_SIZE);
+
+	current->state = TASK_RUNNABLE;
+	current->pid = now_pid++;
+	current->stack = current; 	// 该成员指向栈低地址
+	current->mm = NULL; 		// 内核线程不需要该成员
+
+	// 单向循环链表
+	current->next = current;
+
+	running_proc_head = current;
 }
 
-void schedule(){
-    if (current){
-        change_task_to(current->next);
-    }
+void schedule()
+{
+	if (current) {
+		change_task_to(current->next);
+	}
 }
 
-void change_task_to(struct proc_ctrl_blk *next){
-    if (current != next){
-        struct proc_ctrl_blk *prev = current;
-        current = next;
-        switch_to(&(prev->context), &(current->context));
-    }
+void change_task_to(struct task_struct *next)
+{
+	if (current != next) {
+		struct task_struct *prev = current;
+		current = next;
+		switch_to(&(prev->context), &(current->context));
+	}
 }
-
 

@@ -11,44 +11,50 @@
 
 pid_t now_pid = 0;
 
-/* 创建内核进程 */
-int32_t kernel_thread(int (*fn)(void *), void *arg){
-    /* 为新进程申请栈 */
-    struct proc_ctrl_blk *new_task = (struct proc_ctrl_blk *)kmalloc(STACK_SIZE);
-    assert(new_task != NULL ,"kernel_thread malloc fault");
+// 内核线程创建
+int32_t kernel_thread(int (*fn)(void *), void *arg)
+{
+	struct task_struct *new_task = (struct task_struct *)kmalloc(STACK_SIZE);
+	assert(new_task != NULL, "kern_thread: kmalloc error");
 
-    memset(new_task, 0, sizeof(struct proc_ctrl_blk));
-    new_task->state  = TASK_RUNABLE;
-    new_task->stack = current;  //TODO
-    new_task->pid = now_pid++;
-    new_task->mm = NULL;
-    
-    uint32_t *stack_top = (uint32_t *)((uint32_t)new_task + STACK_SIZE);
+	// 将栈低端结构信息初始化为 0 
+	memset(new_task, 0,sizeof(struct task_struct));
 
-    // 压入这三个？
-    *(--stack_top) = (uint32_t)arg;
-    *(--stack_top) = (uint32_t)kthread_exit;
-    *(--stack_top) = (uint32_t)fn;
+	new_task->state = TASK_RUNNABLE;
+	new_task->stack = current;
+	new_task->pid = now_pid++;
+	new_task->mm = NULL;
 
-    new_task->context.esp = (uint32_t)new_task + STACK_SIZE - sizeof(uint32_t)*3;
-    /* 新进程不屏蔽中断  因为要通过时钟中断切换任务 */
-    new_task->context.eflags = 0x200; // block interrupt
+	uint32_t *stack_top = (uint32_t *)((uint32_t)new_task + STACK_SIZE);
 
-    /* 将自分插入running_porc_head循环链表的尾部 */
-    new_task->next = running_porc_head;
-    struct proc_ctrl_blk *tail = running_porc_head;
-    assert(tail != NULL, "Must init sched");
+	*(--stack_top) = (uint32_t)arg;
+	*(--stack_top) = (uint32_t)kthread_exit;
+	*(--stack_top) = (uint32_t)fn;
 
-    while (tail->next != running_porc_head){
-        tail = tail->next;
-    }
-    tail->next = new_task;
+	new_task->context.esp = (uint32_t)new_task + STACK_SIZE - sizeof(uint32_t) * 3;
 
-    return new_task->pid;
+	// 设置新任务的标志寄存器未屏蔽中断，很重要
+	new_task->context.eflags = 0x200;
+	new_task->next = running_proc_head;
+	
+	// 找到当前进任务队列，插入到末尾
+	struct task_struct *tail = running_proc_head;
+	assert(tail != NULL, "Must init sched!");
+
+	while (tail->next != running_proc_head) {
+		tail = tail->next;
+	}
+	tail->next = new_task;
+
+	return new_task->pid;
 }
 
-void kthread_exit(){
-    register uint32_t val asm ("eax");
-    printk("thread exit with value %d\n", val);
-    while (1);
+void kthread_exit()
+{
+	register uint32_t val asm ("eax");
+
+	printk("Thread exited with value %d\n", val);
+
+	while (1);
 }
+

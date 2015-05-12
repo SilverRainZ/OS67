@@ -18,7 +18,7 @@
 #define COL_L_BROWN 14
 #define COL_WHITE   15
 /* L_ == Light D_ == Dark */
-struct tpoint{
+struct point_s{
     int x;
     int y;
 };
@@ -28,6 +28,6 @@ void putchar_at(int x, int y, char ch);
 void putchar(char ch);
 void puts(char *str);
 void setcolor(char f_color, char b_color);
-struct tpoint getcur();
+struct point_s getcur();
 void setcur(int x, int y);
 #endif
