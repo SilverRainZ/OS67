@@ -61,18 +61,14 @@ int osmain(void)
     setcolor(COL_L_GREY, COL_BLACK);
     pmm_init();
     //pmm_mem_info();
-    puts("pmm\n\r");
     
     vmm_init();
     //vmm_test();
-    puts("vmm\n\r");
-
+    
     kb_init();
-    puts("kb\n\r");
 
     heap_init();
-    //heap_test();
-    puts("heap\n\r");
+    heap_test();
 /**
     kern_stack_top = (uint32_t)kern_stack + STACK_SIZE;
 	__asm__ __volatile__ ("mov %0, %%esp\n\t"

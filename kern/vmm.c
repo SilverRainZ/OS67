@@ -1,3 +1,12 @@
+/* vmm.h
+ * This file is modified form hurlex 
+ * 虚拟内存映射
+ * 建立正式的页目录和页表, 映射了512M内存(尽管实际上可能没有这么大)，
+ * 初始时物理地址和虚拟地址相等
+ * 同时实现了对页异常 int 14 的处理 page_fault()
+ * 实现了map和unmap，供kmalloc使用
+ */
+
 #include <type.h>
 #include <vmm.h>
 #include <pmm.h>
@@ -6,20 +15,25 @@
 #include <string.h>
 #include <printk.h>
 #include <asm.h>
+#include <dbg.h>
 
 /* page directory table of kernel */
 pgd_t pgd_kern[PGD_SIZE] __attribute__((aligned(PAGE_SIZE)));
-
 /* page table entry of kernel */
 static pte_t pte_kern[PTE_COUNT][PTE_SIZE] __attribute__((aligned(PAGE_SIZE)));
+/* 由于页目录和页表都aligned(PAGE_SIZE), 
+ * 因此低地址的12位始终为0 */
 
 void vmm_init(){
     uint32_t i, j;
     /*phyical addr = virtual addr */
+    /* 为页目录填充128个页表的地址(高20位), 地址是物理地址，
+     * 当然这里物理地址和虚拟地址相同 */
     for (i = 0, j = 0; i < PTE_COUNT; i++, j++){
         pgd_kern[i] = (uint32_t)pte_kern[j] | PAGE_PRESENT | PAGE_WRITE;
     }
-    //TODO 为什么不映射第0页?
+    /* 为所有的页表项填充映射到的页地址(高20位) 
+     * hurlex 在这里没有映射第0页， 然而我并不知道为什么要这么做 */
     uint32_t *pte = (uint32_t *)pte_kern;
     for (i = 1; i < PTE_COUNT*PTE_SIZE; i++){
         pte[i] = (i << 12) | PAGE_PRESENT | PAGE_WRITE;
@@ -49,9 +63,11 @@ void map(pgd_t *pgd, uint32_t va, uint32_t pa, uint32_t flags){
     pte_t *pte = (pte_t *)(pgd[pgd_idx] & PAGE_MASK);
     /* if pte == NULL */
     if (!pte){
+    /* 只映射了0-512M的内存， 映射更高位的内存时，需要重新申请物理页
+     * 我觉得这样增加了复杂度， 一开始就定义一个最大的1024*1024页表表不就好？*/
         pte = (pte_t *)pmm_alloc_page();
         pgd[pgd_idx] = (uint32_t)pte | PAGE_PRESENT | PAGE_WRITE;
-
+        //assert(0,"pet = NULL");
         memset(pte, 0, PAGE_SIZE);
     } 
 
@@ -66,6 +82,8 @@ void unmap(pgd_t *pgd, uint32_t va){
     uint32_t pte_idx = PTE_INDEX(va);
 
     pte_t *pte = (pte_t *)(pgd[pgd_idx] & PAGE_MASK);
+
+    //assert(pte,"unmap fail.");
     if (!pte){
         return;
     }
@@ -92,6 +110,9 @@ bool get_mapping(pgd_t *pgd, uint32_t va, uint32_t *pa){
 }
 
 void vmm_test(){
+    /* 注意映射的的粒度是一页，把 map(va = 0xc000, pa = 0x1234), 
+     * 你得到的是（0x1000,0x1fff）- (0xc000,0xcfff) 的映射
+     * 完成映射后，物理地址 0x1234 的虚拟地址是 0xc234 */
     int *badfood = (int *)0xc000;
     printk("valut at 0xc000: %x\n", *badfood);
     map(pgd_kern, 0x1000, 0xc000, PAGE_PRESENT);

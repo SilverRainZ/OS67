@@ -1,8 +1,12 @@
+/* sched.c
+ * This file is modified form hurlex 
+ * 简单的任务调度
+ */
 #include <sched.h>
 #include <heap.h>
 #include <dbg.h>
 
-// 可调度进程链表
+ 可调度进程链表
 struct task_struct *running_proc_head = NULL;
 
 // 等待进程链表

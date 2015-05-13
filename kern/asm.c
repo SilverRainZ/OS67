@@ -1,4 +1,6 @@
-/* asm.c */
+/* asm.c
+ * some short, assembly function.
+ */
 #include <type.h>
 #include <asm.h> 
 

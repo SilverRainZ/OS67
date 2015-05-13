@@ -1,3 +1,9 @@
+/*dbg.c
+ * This file is modified form hurlex 
+ * 提供了panic和assert
+ * 由于kernel是纯二进制文件， print_stack_trace并没有太大的作用
+ */
+
 #include <dbg.h> 
 #include <type.h>
 #include <vga.h>

@@ -30,7 +30,7 @@ struct mm_struct {
 	pgd_t *pgd_dir; 	// 进程页表
 };
 
-// 进程控制块 PCB 
+/* 进程控制块 Process Control Block */
 struct task_struct {
 	volatile task_state state; 	// 进程当前状态
 	pid_t 	 pid; 			// 进程标识符
