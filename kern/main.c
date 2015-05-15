@@ -22,25 +22,24 @@ int thread(void *arg){
             putchar('A');
             flag = 0;
         }
+        // TODO 新进程中中断不发生...
     }
     return 0;
 }
+
 void thread_test(){
-    puts("shift stack\n\r");
     init_sched();
-    puts("sched_init()\n\r");
     kernel_thread(thread, NULL);
-    puts("kernel_thread\n\r");
     sti();
-    puts("sti\n\r");
     while(1){
         if (flag == 0){
             putchar('B');
             flag = 1;
         }
     }
-
 }
+
+
 uint32_t kern_stack_top;
 char kern_stack[STACK_SIZE] __attribute__((aligned(16)));
 
@@ -55,35 +54,30 @@ int osmain(void)
     puts("ISRs installed...\n\r");
     irq_init();
     puts("IRQs installed...\n\r");
-    //timer_init(); 
+    timer_init(); 
     setcolor(COL_D_GREY, COL_CYAN);
     puts("Welcome to OS67...\n\r");
     setcolor(COL_L_GREY, COL_BLACK);
     pmm_init();
+    puts("pmm init...\n\r");
     //pmm_mem_info();
     
     vmm_init();
+    puts("vmm init...\n\r");
     //vmm_test();
     
     kb_init();
+    puts("kb init...\n\r");
 
     heap_init();
-    heap_test();
-/**
+    puts("heap init...\n\r");
+    //heap_test();
+    
     kern_stack_top = (uint32_t)kern_stack + STACK_SIZE;
 	__asm__ __volatile__ ("mov %0, %%esp\n\t"
 			"xor %%ebp, %%ebp" : : "r" (kern_stack_top));
-    //thread_test();
-    init_sched();
-    kernel_thread(thread, NULL);
-    while(1){
-        if (flag == 0){
-            putchar('B');
-            flag = 1;
-        }
-    }
-    **/
-    sti();
+    /* 切换新栈 */
+    thread_test();
     for (;;);
     return 0;
 }

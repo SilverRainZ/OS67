@@ -167,7 +167,6 @@ void heap_test(){
     printk("kmalloc 50000 byte in 0x%x\n", addr5);
 
     print_chunk_list();
-    for (;;);
     //TODO 突然有点不明白
 
     printk("free mem in 0x%x\n",addr1);

@@ -25,11 +25,11 @@ void timer_phase(int hz){
 } 
 
 void timer_handler(struct regs_s *r){
+    schedule();
+    /* trigger when every 18 clocks (approximately 1 second) 
     timer_ticks++;
-    /* trigger when every 18 clocks (approximately 1 second) */
     if (timer_ticks % 18 == 0){
-        //schedule();
-    }
+    }*/
 }
 
 /* This will continuously loop until the given time has

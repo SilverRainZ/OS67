@@ -165,8 +165,8 @@ isr_common_stub:
 [global irq%1]
 irq%1:
     cli
-    push byte 0
-    push byte %1+32
+    push 0
+    push %1+32
     jmp irq_common_stub
 %endmacro
 
@@ -190,13 +190,14 @@ irq_common_stub:
     mov es,ax
     mov fs,ax
     mov gs,ax
-    mov eax,esp
+    mov ss,ax
 
+    mov eax,esp
     push eax
     mov eax,irq_handler
     call eax
-    pop eax
 
+    pop eax
     pop gs
     pop fs
     pop es

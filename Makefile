@@ -8,7 +8,7 @@ DEL = rm -f
 DBG = bochs
 LD = ld
 OBJCPY = objcopy
-CFLAGS = -Wall -Werror -nostdinc -fno-builtin -fno-stack-protector -funsigned-char \
+CFLAGS = -c -O0 -Wall -Werror -nostdinc -fno-builtin -fno-stack-protector -funsigned-char \
 		 -finline-functions -finline-small-functions -findirect-inlining \
 		 -finline-functions-called-once -Iinc -m32 -ggdb -gstabs+
 #OBJS = $(wildcard bin/*.o)
