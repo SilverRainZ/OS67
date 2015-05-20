@@ -64,15 +64,16 @@ int osmain(void)
     
     vmm_init();
     puts("vmm init...\n\r");
-    //vmm_test();
+    vmm_test();
     
     kb_init();
-    puts("kb init...\n\r");
+    //puts("kb init...\n\r");
 
     heap_init();
     puts("heap init...\n\r");
-    //heap_test();
+    heap_test();
     
+    for (;;);
     kern_stack_top = (uint32_t)kern_stack + STACK_SIZE;
 	__asm__ __volatile__ ("mov %0, %%esp\n\t"
 			"xor %%ebp, %%ebp" : : "r" (kern_stack_top));

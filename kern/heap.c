@@ -16,9 +16,12 @@ static struct header *heap_first;
 /* current heap address limit */
 static uint32_t heap_max = HEAP_START;
 
-/* 分配一个内存块, 从pmm_alloc_page 取得物理页，
+/* 分配一个内存块, 虚拟地址从start开始, 长度为len
+ * 如果需要的话, 从pmm_alloc_page 取得物理页，
  * 连续地映到start上  并不涉及对header的操作 */
 static void alloc_chunk(uint32_t start, uint32_t len){
+    /* 如果需要内存大于已经申请了的内存从pmm_alloc_page索取内存
+     * 存在这种情况, 这次申请所需的内存完全可以从上次申请余下的内存中取得 */
     while (start + len > heap_max){
         uint32_t page = pmm_alloc_page();
         map(pgd_kern, heap_max, page, PAGE_PRESENT|PAGE_WRITE);
@@ -115,7 +118,8 @@ void *kmalloc(uint32_t len){
     /* 没有合适的 chunk， 从 heap_max 处申请 chunk*/
     uint32_t chunk_start;
     /* 如果prev_header == NULL 说明是第一次申请， heap_max == HEAP_START 
-     * 否则从prev_header末尾开始申请? TODO */
+     * 否则从prev_header末尾开始申请 这样做可以减少内部碎片
+     * (上一个chunk最后一个页中剩余的内存不会被浪费)*/
     if (prev_header){
         chunk_start = (uint32_t)prev_header + prev_header->length;
     }else{
@@ -167,7 +171,6 @@ void heap_test(){
     printk("kmalloc 50000 byte in 0x%x\n", addr5);
 
     print_chunk_list();
-    //TODO 突然有点不明白
 
     printk("free mem in 0x%x\n",addr1);
     kfree(addr1);
