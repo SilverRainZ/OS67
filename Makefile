@@ -1,11 +1,13 @@
 # makefile
 
-.PHONY: install run dbg clean log
+.PHONY: install run bochs qemu clean log
 MAKE = make -r
 AS = nasm
 CC = gcc
 DEL = rm -f
 DBG = bochs
+BOCHS = bochs
+QEMU = qemu
 LD = ld
 OBJCPY = objcopy
 CFLAGS = -c -O0 -Wall -Werror -nostdinc -fno-builtin -fno-stack-protector -funsigned-char \
@@ -26,14 +28,13 @@ bin/bootsect.bin: boot/bootsect.asm
 	$(AS) -I ./boot/ -f bin -l lst/bootsect.asm $< -o $@ 
 
 bin/loader.o : kern/loader.asm
-	$(AS) -I ./boot/ -f elf32 -l lst/loader.asm $< -o $@ 
+	$(AS) -I ./boot/ -f elf32 -g -F stabs -l lst/loader.asm $< -o $@ 
 
 # link loader.o and c objfile 
+# generate a symbol file(kernel.elf) and a flat binary kernel file(kernel)
 bin/kernel: set/link.ld $(OBJS) 
-	$(LD) -T$< -melf_i386 -static -o $@ $(OBJS) -M>lst/map.map
-
-# bin/kernel: bin/kernel.tmp
-# 	$(OBJCPY) -O binary $< $@ 
+	$(LD) -T$< -melf_i386 -static -o $@.elf $(OBJS) -M>lst/map.map
+	$(OBJCPY) -O binary $@.elf $@
 
 # compile c file in all directory
 bin/%.o: libs/%.c
@@ -45,20 +46,33 @@ bin/%.o: kern/%.c
 	$(CC) $(CFLAGS) -S $^ -o lst/$*.asm  
 #----------------------------------------
 
-default:
-	$(MAKE) install
-
-# bulid
-install:
+default: Makefile
 	$(MAKE) bin/floppy.img
 
-# debug with shell
+# copy kernel file to floppy
+install : bin/floppy.img bin/kernel
+	sudo mount bin/floppy.img /mnt/kernel
+	sudo cp bin/kernel /mnt/kernel
+	sleep 1
+	sudo umount /mnt/kernel
+
+# default run with bochs
 run:
 	$(DBG) -q -f set/bochsrc.bxrc 
 
-# debug with X GUI
-dbg:
-	$(DBG) -q -f set/dbg_bochsrc.bxrc 
+# run with qemu 
+run-qemu:
+	$(QEMU) -fda bin/floppy.img -boot a
+
+# debug with Bochs X GUI
+bochs:
+	$(BOCHS) -q -f set/dbg_bochsrc.bxrc 
+
+# debug with qemu
+qemu: 
+	$(QEMU) -S -s -fda bin/floppy.img -boot a &
+	sleep 1
+	cgdb -x set/gdbinit
 
 # clean the binary file
 clean: 

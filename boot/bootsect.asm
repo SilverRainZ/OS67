@@ -93,7 +93,7 @@ loadloader:
     mov es,ax   ; es:bx buffer address point -> 0x8000
     mov ch,0    ; cylinder
     mov dh,1    ; head
-    mov cl,16   ; sector
+    mov cl,17   ; sector
     mov dl,0x00 ; driver a:
 ; kernel 在软gg盘的第34个扇区,0x4200,换算为c0-h1-s16
 
