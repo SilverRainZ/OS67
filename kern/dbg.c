@@ -40,7 +40,8 @@ void print_stack_trace(){
 
 void panic(const char *msg){
     setcolor(COL_L_RED, COL_BLACK);
-    printk("*** Kernel panic %s ***\n", msg);
+    printk("*** Kernel panic ***\n");
+    printk("%s\n", msg);
     printk("Current CPU status:\n");
     print_cur_status();
 

@@ -13,6 +13,7 @@
 #include <heap.h>
 #include <task.h>
 #include <sched.h>
+#include <ide.h>
 
 int flag = 1;
 
@@ -46,32 +47,47 @@ char kern_stack[STACK_SIZE] __attribute__((aligned(16)));
 int osmain(void)
 {
     vga_init();
+
     gdt_init();
     puts("GDT installed...\n\r");
+
     idt_init();
     puts("IDT installed...\n\r");
+
     isrs_init();
     puts("ISRs installed...\n\r");
+
     irq_init();
     puts("IRQs installed...\n\r");
-    timer_init(); 
+
+    //timer_init(); 
+
     setcolor(COL_D_GREY, COL_CYAN);
     puts("Welcome to OS67...\n\r");
     setcolor(COL_L_GREY, COL_BLACK);
+
     pmm_init();
     puts("pmm init...\n\r");
     //pmm_mem_info();
     
     vmm_init();
     puts("vmm init...\n\r");
-    vmm_test();
+    //vmm_test();
     
     kb_init();
     //puts("kb init...\n\r");
 
     heap_init();
     puts("heap init...\n\r");
-    heap_test();
+    //heap_test();
+
+    ide_init();
+    puts("ide init...\n\r");
+    sti();
+    ide_test();
+    puts("reading...\n\r");
+
+    //assert(1 == 2, "test");
     
     for (;;);
     kern_stack_top = (uint32_t)kern_stack + STACK_SIZE;

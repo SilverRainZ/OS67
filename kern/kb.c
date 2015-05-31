@@ -95,7 +95,7 @@ void kb_handler(struct regs_s *r){
     unsigned char scancode;
     kb_map_shift[0] = 0;
     /* Read from the keyboard's data buffer */
-    scancode = inportb(0x60);
+    scancode = inb(0x60);
     /* If the top bit of the byte we read from the keyboard is
      *  set, that means that a key has just been released */
     if (scancode & 0x80){

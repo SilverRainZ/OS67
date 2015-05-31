@@ -17,7 +17,7 @@ CFLAGS = -c -O0 -Wall -Werror -nostdinc -fno-builtin -fno-stack-protector -funsi
 OBJS = bin/loader.o bin/main.o bin/vga.o bin/gdt.o bin/idt.o \
 	   bin/isrs.o bin/irq.o bin/timer.o bin/asm.o bin/kb.o \
 	   bin/string.o	bin/queue.o bin/printk.o bin/pmm.o bin/vmm.o \
-	   bin/dbg.o bin/heap.o bin/task.o bin/sched.o
+	   bin/dbg.o bin/heap.o bin/task.o bin/sched.o bin/ide.o
 
 # create a 1.44MB floppy include kernel and bootsector
 bin/floppy.img: boot/floppy.asm bin/bootsect.bin bin/kernel 
@@ -46,6 +46,12 @@ bin/%.o: kern/%.c
 	$(CC) $(CFLAGS) -S $^ -o lst/$*.asm  
 #----------------------------------------
 
+init:
+	sudo mkdir /mnt/kernel
+	sudo mkdir /mnt/fs
+	mkdir lst
+	mkdir bin
+
 default: Makefile
 	$(MAKE) bin/floppy.img
 
@@ -56,13 +62,18 @@ install : bin/floppy.img bin/kernel
 	sleep 1
 	sudo umount /mnt/kernel
 
+# make a disk with minix file system
+fs:
+	$(DEL) bin/rootfs.img
+	bximage bin/rootfs.img -hd=10M -imgmode=flat -mode=create -q
+	sudo mkfs.minix bin/rootfs.img
+	sudo mount -o loop -t minix bin/rootfs.img /mnt/fs
+	sleep 1
+	sudo umount /mnt/fs
+	
 # default run with bochs
 run:
 	$(DBG) -q -f set/bochsrc.bxrc 
-
-# run with qemu 
-run-qemu:
-	$(QEMU) -fda bin/floppy.img -boot a
 
 # debug with Bochs X GUI
 bochs:

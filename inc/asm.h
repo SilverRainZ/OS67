@@ -1,8 +1,10 @@
 #ifndef __ASM_H
 #define __ASM_H
 #include <type.h>
-uint8_t inportb(uint16_t _port);
-void outportb(uint16_t _port, uint8_t _data);
+uint8_t inb(uint16_t port);
+void outb(uint16_t port, uint8_t data);
+void insl(uint32_t port, void *addr, uint32_t cnt);
+void outsl(uint32_t port, const void *addr, uint32_t cnt);
 void cli();
 void sti();
 void hlt();

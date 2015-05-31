@@ -54,16 +54,16 @@ void irq_uninstall_handler(unsigned char irq){
 *  47 */
 /* in short: map irq 0-15 to int 32-47 */
 void irq_remap(){
-    outportb(0x20, 0x11);
-    outportb(0xA0, 0x11);
-    outportb(0x21, 0x20);
-    outportb(0xA1, 0x28);
-    outportb(0x21, 0x04);
-    outportb(0xA1, 0x02);
-    outportb(0x21, 0x01);
-    outportb(0xA1, 0x01);
-    outportb(0x21, 0x0);
-    outportb(0xA1, 0x0);
+    outb(0x20, 0x11);
+    outb(0xA0, 0x11);
+    outb(0x21, 0x20);
+    outb(0xA1, 0x28);
+    outb(0x21, 0x04);
+    outb(0xA1, 0x02);
+    outb(0x21, 0x01);
+    outb(0xA1, 0x01);
+    outb(0x21, 0x0);
+    outb(0xA1, 0x0);
 }
 
 /* We first remap the interrupt controllers, and then we install
@@ -116,10 +116,10 @@ void irq_handler(struct regs_s *r){
     *  (meaning IRQ8 - 15), then we need to send an EOI to
     *  the slave controller */
     if (r->int_no >= 40){
-        outportb(0xA0, 0x20);
+        outb(0xA0, 0x20);
     }
 
     /* In either case, we need to send an EOI to the master
     *  interrupt controller too */
-    outportb(0x20, 0x20);
+    outb(0x20, 0x20);
 }

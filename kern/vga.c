@@ -31,10 +31,10 @@ void move_cur(){
     *  learn more, you should look up some VGA specific
     *  programming documents. A great start to graphics:
     *  http://www.brackeen.com/home/vga */
-    outportb(0x3D4, 14);
-    outportb(0x3D5, temp >> 8);
-    outportb(0x3D4, 15);
-    outportb(0x3D5, temp);
+    outb(0x3D4, 14);
+    outb(0x3D5, temp >> 8);
+    outb(0x3D4, 15);
+    outb(0x3D5, temp);
 }
 
 void scroll(){

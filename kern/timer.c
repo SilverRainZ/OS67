@@ -16,20 +16,21 @@ unsigned int timer_ticks = 0;
 void timer_phase(int hz){ 
     int divisor = 1193180 / hz; 
     /* 计算除数 */    
-    outportb(0x43, 0x36); 
+    outb(0x43, 0x36); 
     /* 设置指令字节0x36 */    
-    outportb(0x40, divisor & 0xFF);
+    outb(0x40, divisor & 0xFF);
     /* 设置除数的低字节 */    
-    outportb(0x40, divisor >> 8);    
+    outb(0x40, divisor >> 8);    
     /*设置除数的高字节  */
 } 
 
 void timer_handler(struct regs_s *r){
-    schedule();
-    /* trigger when every 18 clocks (approximately 1 second) 
+    //schedule();
+    /* trigger when every 18 clocks (approximately 1 second)  */
+
     timer_ticks++;
     if (timer_ticks % 18 == 0){
-    }*/
+    }
 }
 
 /* This will continuously loop until the given time has

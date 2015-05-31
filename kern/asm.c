@@ -5,15 +5,31 @@
 #include <asm.h> 
 
 /* read a byte from a port */
-inline uint8_t inportb (uint16_t _port){
+inline uint8_t inb (uint16_t port){
     uint8_t rv;
-    __asm__ __volatile__ ("inb %1, %0" : "=a" (rv) : "dN" (_port));
+    __asm__ __volatile__ ("inb %1, %0" : "=a" (rv) : "dN" (port));
     return rv;
 }
 
 /* write a byte to a port */
-inline void outportb (uint16_t _port, uint8_t _data){
-    __asm__ __volatile__ ("outb %1, %0" : : "dN" (_port), "a" (_data));
+inline void outb (uint16_t port, uint8_t data){
+    __asm__ __volatile__ ("outb %1, %0" : : "dN" (port), "a" (data));
+}
+
+inline void insl(uint32_t port, void *addr, uint32_t cnt){
+    __asm__ __volatile__("cld; rep insl" 
+                        : "=D" (addr), "=c" (cnt) 
+                        : "d" (port), "0" (addr), "1" (cnt) 
+                        : "memory", "cc"
+                        );
+}
+
+inline void outsl(uint32_t port, const void *addr, uint32_t cnt) {
+    __asm__ __volatile__("cld; rep outsl" 
+                        : "=S" (addr), "=c" (cnt) 
+                        : "d" (port), "0" (addr), "1" (cnt) 
+                        : "cc"
+                        );
 }
 
 /* clear interrupt */
