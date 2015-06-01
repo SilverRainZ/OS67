@@ -73,11 +73,11 @@ fs:
 	
 # default run with bochs
 run:
-	$(DBG) -q -f set/bochsrc.bxrc 
+	$(DBG) -q -f set/bochsrc.bxrc -rc set/bochsinit
 
 # debug with Bochs X GUI
 bochs:
-	$(BOCHS) -q -f set/dbg_bochsrc.bxrc 
+	$(BOCHS) -q -f set/dbg_bochsrc.bxrc -log lst/bochsdbgout.log
 
 # debug with qemu
 qemu: 
