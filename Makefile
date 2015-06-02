@@ -32,18 +32,15 @@ bin/loader.o : kern/loader.asm
 
 # link loader.o and c objfile 
 # generate a symbol file(kernel.elf) and a flat binary kernel file(kernel)
-bin/kernel: set/link.ld $(OBJS) 
+bin/kernel: script/link.ld $(OBJS) 
 	$(LD) -T$< -melf_i386 -static -o $@.elf $(OBJS) -M>lst/map.map
 	$(OBJCPY) -O binary $@.elf $@
 
 # compile c file in all directory
-bin/%.o: libs/%.c
+bin/%.o: */%.c
 	$(CC) $(CFLAGS) -c $^ -o $@  
 	$(CC) $(CFLAGS) -S $^ -o lst/$*.asm  
 
-bin/%.o: kern/%.c
-	$(CC) $(CFLAGS) -c $^ -o $@  
-	$(CC) $(CFLAGS) -S $^ -o lst/$*.asm  
 #----------------------------------------
 
 init:
@@ -73,17 +70,17 @@ fs:
 	
 # default run with bochs
 run:
-	$(DBG) -q -f set/bochsrc.bxrc -rc set/bochsinit
+	$(DBG) -q -f script/bochsrc.bxrc -rc script/bochsinit
 
 # debug with Bochs X GUI
 bochs:
-	$(BOCHS) -q -f set/dbg_bochsrc.bxrc -log lst/bochsdbgout.log
+	$(BOCHS) -q -f script/dbg_bochsrc.bxrc -log lst/bochsdbgout.log
 
 # debug with qemu
 qemu: 
 	$(QEMU) -S -s -fda bin/floppy.img -boot a &
 	sleep 1
-	cgdb -x set/gdbinit
+	cgdb -x script/gdbinit
 
 # clean the binary file
 clean: 

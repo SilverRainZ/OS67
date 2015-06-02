@@ -9,7 +9,6 @@
 /* Disk message */
 #define SECTOR_SIZE 512
 
-
 /* Status */
 #define IDE_BSY     0x80    // Busy
 #define IDE_DRDY    0x40    // Ready
@@ -29,24 +28,13 @@
 #define IDE_PORT_LBA0       0x1f3   // byte LAB0 register (Read-Write)
 #define IDE_PORT_LBA1       0x1f4   // byte LAB1 register (Read-Write)
 #define IDE_PORT_LBA2       0x1f5   // byte LAB2 register (Read-Write)
-#define IDE_PORT_CURRENT    0x1f6   // byte 101dhhhh d=drive hhhh=head (Read-Write)
+#define IDE_PORT_CURRENT    0x1f6   // byte 101dhhhh d=drive hhhh=head (Read-Write) TODO(?) 
 #define IDE_PORT_STATUS     0x1f7   // byte status register (Read) 
 #define IDE_PORT_CMD        IDE_PORT_STATUS // byte status register (Write)
 #define IDE_PORT_ALTSTATUS  0x3f6   // same as IDE_PORT_STATUS but doesn't clear IRQ
 
-/* IDE_PORT_STATUS 和 IDE_PORT_ALTSTATUS 都是
+/* IDE_PORT_STATUS 和 IDE_PORT_ALTSTATUS 
  * */
-/* buf_s -> flag type */
-#define B_BUSY  0x1 // buffer is locked
-#define B_VALID 0x1 // has been read form disk
-#define B_DIRTY 0x4 // need to be written to disk
-
-struct buf_s {
-    char flags;
-    char dev;
-    uint32_t sector;
-    char data[512];
-};
 
 void ide_init();
 void ide_test();
