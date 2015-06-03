@@ -5,6 +5,7 @@
 #define B_VALID 0x1 // has been read form disk
 #define B_DIRTY 0x4 // need to be written to disk
 
+#define NBUF 128    // size of disk buffer cache
 struct buf {
     char flags;     // B_BUSY B_VALID B_DIRTY
     char dev;       // only one disk, dev = 0

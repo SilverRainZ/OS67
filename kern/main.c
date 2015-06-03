@@ -14,6 +14,8 @@
 #include <task.h>
 #include <sched.h>
 #include <ide.h>
+#include <buf.h>
+#include <fs.h>
 
 int flag = 1;
 
@@ -83,9 +85,12 @@ int osmain(void)
 
     ide_init();
     puts("ide init...\n\r");
+    bcache_init();
+    puts("buffer cache init...\n\r");
     sti();
-    ide_test();
-    puts("reading...\n\r");
+    struct buf *b;
+    b = bread(0,4);
+    ide_print_blk(b);
 
     //assert(1 == 2, "test");
     

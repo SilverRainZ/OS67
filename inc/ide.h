@@ -6,6 +6,7 @@
 #ifndef __IDE_H
 #define __IDE_H
 #include <type.h>
+#include <buf.h>
 /* Disk message */
 #define SECTOR_SIZE 512
 
@@ -38,5 +39,7 @@
 
 void ide_init();
 void ide_test();
+void ide_rw(struct buf *b);
+void ide_print_blk(struct buf *b);
 
 #endif

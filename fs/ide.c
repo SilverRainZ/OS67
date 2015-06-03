@@ -21,7 +21,7 @@
 static struct buf *idequeue = NULL;    // buffer queue of disk request
 
 /* wait for disk until it ready, checkerror when checkerr=1 */
-int ide_wait(int checkerr){
+static int ide_wait(int checkerr){
     int timeout = 20000;
     int r;
     /* 循环检测直到不再IDE_BSY */
@@ -95,7 +95,7 @@ void ide_print_blk(struct buf *b){
     for (i = 0; i < 512; i++) printk("%x ", b->data[i]);
 }
 
-static void ide_rw(struct buf *b){
+void ide_rw(struct buf *b){
     assert(!(b->flags & B_BUSY),"iderw: buffer has been locked.");
     assert(b->flags & B_BUSY,"ide_rw: buf not busy");
     assert((b->flags & (B_VALID|B_DIRTY)) != B_VALID,"ide_rw: nothing to do");
@@ -116,11 +116,4 @@ static void ide_rw(struct buf *b){
         hlt();  // TODO 
     }
     ide_print_blk(b);
-
-}
-struct buf buffer;
-void ide_test(){
-
-    //TODO
-    ide_rw(&buffer);
 }
