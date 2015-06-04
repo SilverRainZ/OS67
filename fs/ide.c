@@ -63,9 +63,8 @@ void ide_handler(struct regs_s *r){
         return; // nothing to do
     }
     /* remove the head of queue */
-    idequeue = b->next;
-    // dirty (?)
-    if ((b->flags & B_DIRTY) && (ide_wait(1) >= 0)){
+    idequeue = b->qnext;
+    if (!(b->flags & B_DIRTY) && (ide_wait(1) >= 0)){
         insl(IDE_PORT_DATA, b->data, 512/4);
     }
 
@@ -83,20 +82,7 @@ void ide_init(){
     ide_wait(0);
 }
 
-
-void ide_print_blk(struct buf *b){
-    printk("flag: ");
-    if (b->flags & B_BUSY) printk("B_BUSY ");
-    if (b->flags & B_DIRTY) printk("B_DIRTY");
-    if (b->flags & B_VALID) printk("B_VALID");
-    printk("\n");
-    printk("dev: %d, lba: %d\n",b->dev, b->lba);
-    int i;
-    for (i = 0; i < 512; i++) printk("%x ", b->data[i]);
-}
-
 void ide_rw(struct buf *b){
-    assert(!(b->flags & B_BUSY),"iderw: buffer has been locked.");
     assert(b->flags & B_BUSY,"ide_rw: buf not busy");
     assert((b->flags & (B_VALID|B_DIRTY)) != B_VALID,"ide_rw: nothing to do");
 
@@ -115,5 +101,37 @@ void ide_rw(struct buf *b){
     while ((b->flags & (B_VALID|B_DIRTY)) != B_VALID) {
         hlt();  // TODO 
     }
-    ide_print_blk(b);
+}
+
+void ide_print_blk(struct buf *b){
+    printk("flag: ");
+    if (b->flags & B_BUSY) printk("B_BUSY ");
+    if (b->flags & B_DIRTY) printk("B_DIRTY");
+    if (b->flags & B_VALID) printk("B_VALID");
+    printk("\n");
+    printk("dev: %d, lba: %d\n",b->dev, b->lba);
+    int i,j;
+    // print 256 elem
+    for (i = 0; i < 256; i += 16){
+        printk("%x: ",b->lba*512 + i);
+        for (j = i; j < i + 16; j++){
+            printk("%x ",b->data[j]);
+        }
+        printk("\n");
+    }
+}
+struct buf buffer;  // used for test
+void ide_test(){
+    buffer.dev = 0;
+    buffer.lba = 2;
+    buffer.flags = B_BUSY;
+    ide_rw(&buffer);
+    ide_print_blk(&buffer);
+    int i = 0;
+    for (i = 0; i < 512; i++){
+        buffer.data[i] = 1;
+    }
+    buffer.flags = B_BUSY|B_DIRTY;
+    ide_rw(&buffer);
+    ide_print_blk(&buffer);
 }
