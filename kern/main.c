@@ -85,12 +85,20 @@ int osmain(void)
 
     ide_init();
     puts("ide init...\n\r");
+
     bcache_init();
     puts("buffer cache init...\n\r");
     sti();
     struct buf *b;
-    b = bread(0,4);
+    b = bread(0,2);
+    int i;
+    for (i = 0; i < 256; i++){
+        b->data[i] = 'a';
+    }
+    bwrite(b);
     ide_print_blk(b);
+    //ide_test();
+    
 
     //assert(1 == 2, "test");
     

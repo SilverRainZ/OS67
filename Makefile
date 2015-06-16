@@ -1,6 +1,6 @@
 # makefile
 
-.PHONY: install run bochs qemu clean log
+.PHONY: install run fs bochs qemu clean log 
 MAKE = make -r
 AS = nasm
 CC = gcc

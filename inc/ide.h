@@ -8,7 +8,6 @@
 #include <type.h>
 #include <buf.h>
 /* Disk message */
-#define SECTOR_SIZE 512
 
 /* Status */
 #define IDE_BSY     0x80    // Busy

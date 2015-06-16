@@ -34,8 +34,7 @@ void bcache_init(){
  */
 static struct buf* bget(char dev, uint32_t lba){
     struct buf *b;
-//loop:   //TODO  why xv6 use loop here
-
+loop:   
     /* is the sector already cached? */
     for (b = bcache.head.next; b != &bcache.head; b = b->next){
         if (b->dev == dev && b->lba == lba){    // found require buffer
@@ -43,9 +42,9 @@ static struct buf* bget(char dev, uint32_t lba){
                 b->flags |= B_BUSY;
                 return b;
             }
-            // if buffer found but B_BUSY, wait for it.
-            // but we have not other porocess now, let kernel panic 
-            panic("bget: buffer busy(TEMP)");
+            // if buffer found but B_BUSY, wait and lookup again
+            //panic("bget: buffer busy(TEMP)");
+            goto loop;
         }
     }
 
