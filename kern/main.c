@@ -89,18 +89,9 @@ int osmain(void)
     bcache_init();
     puts("buffer cache init...\n\r");
     sti();
-    struct buf *b;
-    b = bread(0,2);
-    int i;
-    for (i = 0; i < 256; i++){
-        b->data[i] = 'a';
-    }
-    bwrite(b);
-    ide_print_blk(b);
     //ide_test();
-    
 
-    //assert(1 == 2, "test");
+    show_sb();
     
     for (;;);
     kern_stack_top = (uint32_t)kern_stack + STACK_SIZE;

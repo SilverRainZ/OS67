@@ -52,7 +52,7 @@ struct inode{
 #define IBLOCK(i) ((i)/IPB + 2)     
 
 /* bit number a  block contain (1 byte has 8 bits)*/
-#define BPB (BSZIE*8)
+#define BPB (BSIZE*8)
 
 /* block contain bit b */
 /* 取得包含第b bit的block号, ninodes 只可能是 superblock.ninodes  */
@@ -68,5 +68,6 @@ void brelse(struct buf *b);
 void readsb(int dev, struct superblock *sb);
 uint32_t balloc(int dev);
 void bfree(int dev, uint32_t blkn);
+void show_sb();
 
 #endif
