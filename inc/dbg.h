@@ -12,4 +12,8 @@ void panic(const char *msg);
 void print_cur_status();
 void print_stack_trace();
 
+/********* Debug functions which depend on bochs ****************/
+void bochs_putc(char c);
+void bochs_break();
+
 #endif

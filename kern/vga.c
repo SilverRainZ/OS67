@@ -5,6 +5,7 @@
 #include <vga.h>
 #include <string.h>
 #include <asm.h>
+#include <dbg.h>
 #include <type.h>
 
 /* it is strange that i can't use 
@@ -69,6 +70,9 @@ void vga_init(){
 }
 
 void putchar(char ch){
+    /* writing to the console in bochs */
+    bochs_putc(ch);
+
     switch (ch){
         case '\r': cur.x = 0; break;
         case '\n': cur.y = cur.y + 1; cur.x = 0; break;

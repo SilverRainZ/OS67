@@ -5,14 +5,14 @@
  */
 
 #include <dbg.h> 
+#include <asm.h>
 #include <type.h>
 #include <vga.h>
 #include <printk.h>
 
 /* print current runlevel and register */
 void print_cur_status(){
-    static int round = 0;
-    uint16_t reg1, reg2, reg3, reg4;
+    static int round = 0; uint16_t reg1, reg2, reg3, reg4;
     __asm__ __volatile__( 	"mov %%cs, %0;"
 			"mov %%ds, %1;"
 			"mov %%es, %2;"
@@ -51,3 +51,15 @@ void panic(const char *msg){
     for (;;);
 }
 
+/********* Debug functions which depend on bochs ****************/
+
+/* outputs a character to the debug console */
+void bochs_putc(char c){
+    outb(0xe9, (uint8_t)c);
+}
+
+/* stops simulation and breaks into the debug console */
+void bochs_break(){
+    outw(0x8A00,0x8A00);
+    outw(0x8A00,0x08AE0);
+}
