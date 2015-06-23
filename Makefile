@@ -1,6 +1,6 @@
 # makefile
 
-.PHONY: install run fs bochs qemu clean log 
+.PHONY: init install run fs bochs qemu clean log 
 MAKE = make -r
 AS = nasm
 CC = gcc
@@ -66,6 +66,7 @@ fs:
 	bximage bin/rootfs.img -hd=10M -imgmode=flat -mode=create -q
 	sudo mkfs.minix bin/rootfs.img
 	sudo mount -o loop -t minix bin/rootfs.img /mnt/fs
+	sudo cp usr/README /mnt/fs/README
 	sleep 1
 	sudo umount /mnt/fs
 	
@@ -77,9 +78,9 @@ run:
 bochs:
 	$(BOCHS) -q -f script/dbg_bochsrc.bxrc -log lst/bochsdbgout.log
 
-# debug with qemu
+# debug with qemu and gdb
 qemu: 
-	$(QEMU) -S -s -fda bin/floppy.img -boot a &
+	$(QEMU) -S -s -fda bin/floppy.img -hda bin/rootfs.img -boot a &
 	sleep 1
 	cgdb -x script/gdbinit
 

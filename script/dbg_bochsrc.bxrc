@@ -25,6 +25,13 @@ megs: 512
 # if you use bochs <= 2.4, configure --port-e9-hack
 port_e9_hack: enabled=1
 
+# debug with gdb
+# Bochs has GDB stub support, and its own internal debugger. 
+# These cannot be compiled into the same Bochs binary. 
+# The internal debugger is very useful, its flag is --enable-debugger  <- FUCK!
+
+# gdbstub: enabled=1,port=1234,text_base=0,data_base=0,bss_base=0
+
 #mouse and keyborad
 mouse: enabled=0
 keyboard: type=mf, serial_delay=250, paste_delay=100000, user_shortcut=none

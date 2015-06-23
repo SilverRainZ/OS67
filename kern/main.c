@@ -70,14 +70,14 @@ int osmain(void)
 
     pmm_init();
     puts("pmm init...\n\r");
-    //pmm_mem_info();
+    pmm_mem_info();
     
     vmm_init();
     puts("vmm init...\n\r");
     //vmm_test();
     
     kb_init();
-    //puts("kb init...\n\r");
+    puts("kb init...\n\r");
 
     heap_init();
     puts("heap init...\n\r");
@@ -89,8 +89,8 @@ int osmain(void)
     bcache_init();
     puts("buffer cache init...\n\r");
     sti();
-    //ide_test();
 
+    ide_test();
     show_sb();
     
     for (;;);
