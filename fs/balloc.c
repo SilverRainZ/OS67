@@ -18,16 +18,11 @@ void show_sb(){
 
 /* read the superblock */
 void readsb(int dev, struct superblock *sb){
-    struct buf *b;
+    struct buf *bp;
+    bp = bread(dev, 2);
 
-    b = bread(dev, 1);
-    char *tmp = (char *)sb;
-    int i;
-    // TODO replace with function memmove
-    for (i = 0; i < 512; i++){
-        tmp[i] = b->data[i];
-    }
-    brelse(b);
+    memcpy(sb, bp->data, sizeof(*sb));
+    brelse(bp);
 }
 
 

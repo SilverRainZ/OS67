@@ -49,8 +49,8 @@ loop:
     }
 
     /* not cached: recycle some non-busy and clean buffer */
-    for (b = bcache.head.prev; b != &bcache.head; b++){
-        if (!(b->flags & B_BUSY) == 0 && (b->flags & B_DIRTY) == 0){
+    for (b = bcache.head.prev; b != &bcache.head; b = b->prev){
+        if ((b->flags & B_BUSY) == 0 && (b->flags & B_DIRTY) == 0){
             b->dev = dev;
             b->lba = lba;
             b->flags = B_BUSY;

@@ -111,8 +111,7 @@ void ide_print_blk(struct buf *b){
     printk("\n");
     printk("dev: %d, lba: %d\n",b->dev, b->lba);
     int i,j;
-    // print 256 elem
-    for (i = 0; i < 256; i += 16){
+    for (i = 0; i < 512; i += 16){
         printk("%x: ",b->lba*512 + i);
         for (j = i; j < i + 16; j++){
             printk("%x ",b->data[j]);
@@ -132,6 +131,9 @@ void ide_test(){
         buffer.data[i] = 1;
     }
     buffer.flags = B_BUSY|B_DIRTY;
+    ide_rw(&buffer);
+
+    buffer.flags = B_BUSY;
     ide_rw(&buffer);
     ide_print_blk(&buffer);
 }
