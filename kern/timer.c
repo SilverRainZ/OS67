@@ -16,11 +16,11 @@ unsigned int timer_ticks = 0;
 void timer_phase(int hz){ 
     int divisor = 1193180 / hz; 
     /* 计算除数 */    
-    outb(0x43, 0x36); 
+    outb(PIT_MOD_CMD, 0x36); 
     /* 设置指令字节0x36 */    
-    outb(0x40, divisor & 0xFF);
+    outb(PIT_CH0, divisor & 0xFF);
     /* 设置除数的低字节 */    
-    outb(0x40, divisor >> 8);    
+    outb(PIT_CH0, divisor >> 8);    
     /*设置除数的高字节  */
 } 
 
