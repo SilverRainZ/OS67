@@ -17,7 +17,7 @@
 #include <printk.h>
 #include <dbg.h>
 
-/* 缓冲区定义在 bio.c */
+/* 缓冲区定义在 bcache.c */
 static struct buf *idequeue = NULL;    // buffer queue of disk request
 
 /* wait for disk until it ready, checkerror when checkerr=1 */
@@ -41,7 +41,7 @@ static void ide_start(struct buf *b){
     assert(b, "idestart: buffer is null");
     ide_wait(0);
     outb(IDE_PORT_ALTSTATUS, 0);  // generate interrupt
-    outb(IDE_PORT_SECT_COUNT, 1);  // number of lbas
+    outb(IDE_PORT_SECT_COUNT, 1);  // number of sectors 
     outb(IDE_PORT_LBA0, b->lba & 0xff);
     outb(IDE_PORT_LBA1, (b->lba >> 8) & 0xff);
     outb(IDE_PORT_LBA2, (b->lba >> 16) & 0xff);
@@ -68,7 +68,9 @@ void ide_handler(struct regs_s *r){
         insl(IDE_PORT_DATA, b->data, 512/4);
     }
 
+    /* 缓冲区可用 */
     b->flags |= B_VALID;
+    /* 数据是最新的 */
     b->flags &= ~B_DIRTY;
 
     if (idequeue){

@@ -2,13 +2,13 @@
  * This file is modified form xv6
  */
 #include <type.h>
-#include <buf.h>
 #include <ide.h>
+#include <buf.h>
+#include <fs.h>
 #include <dbg.h>
 #include <printk.h>
 
 static struct bcache{
-    // spin lock lock   // 待实现的锁
     struct buf buf[NBUF];
    /* head of MRU(Most Recently Used) List, head.next is recently used */
     struct buf head; 
@@ -44,6 +44,7 @@ loop:
             }
             // if buffer found but B_BUSY, wait and lookup again
             //panic("bget: buffer busy(TEMP)");
+            // 这里可能会 dead lock 诶...
             goto loop;
         }
     }
@@ -79,7 +80,7 @@ void bwrite(struct buf* b){
 
 /* release a B_BUSY buffer, mov it to the haed of MRU list */
 void brelse(struct buf *b){
-    assert(b->flags & B_BUSY,"bwrite: buffer no busy");
+    assert(b->flags & B_BUSY,"brelse: buffer no busy");
 
     b->next->prev = b->prev;
     b->prev->next = b->next;

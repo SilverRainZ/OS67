@@ -18,7 +18,7 @@ struct superblock{
     // uint32_t nlog;   // i don't want to use log now
 };
 
-#define NDIRECT 12  // (?)
+#define NDIRECT 12  // 一个 i 节点直接管辖的块数目
 
 /* On-disk inodes structure */
 struct dinode{
@@ -45,6 +45,11 @@ struct inode{
     uint32_t size;      // size of file (byte)
     uint32_t addrs[NDIRECT + 1];
 };
+
+/* inode status flag */
+#define I_BUSY 0x1
+#define I_VALID 0x2
+
 /* inode per block */
 #define IPB (BSIZE/sizeof(struct inode))
 
@@ -59,6 +64,7 @@ struct inode{
 #define BBLOCK(b, ninodes) (b/BPB + (ninodes)/IPB + 3)
 
 /******functions in file fs/bcache.c buffer cache *****/
+#define NBUF 128    // length of disk buffer cache
 void bcache_init();
 struct buf* bread(char dev, uint32_t lba);
 void bwrite(struct buf* b);
@@ -69,5 +75,8 @@ void readsb(int dev, struct superblock *sb);
 uint32_t balloc(int dev);
 void bfree(int dev, uint32_t blkn);
 void show_sb();
+
+/******functions in file fs/inode.c  inode alloc *****/
+#define NINODE 500 // length of inodes cache
 
 #endif

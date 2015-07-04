@@ -10,7 +10,6 @@
 #include <dbg.h> 
 
 void show_sb(){
-    // TODO page fault here
     struct superblock sb;
     readsb(0, &sb);
     printk("sb ->size: %d ni: %d nb: %d\n", sb.size, sb.nblocks, sb.ninodes);
@@ -50,6 +49,7 @@ uint32_t balloc(int dev){
             if ((bp->data[bi/8] & m) == 0){ // This block is free
                 bp->data[bi/8] |= m;
                 bwrite(bp);                 // mark this block as uesed in bitmap
+                brelse(bp);
                 bzero(dev, b + bi);         // clear block with zero
                 return b + bi;
             }
