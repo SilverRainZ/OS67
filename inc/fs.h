@@ -19,6 +19,8 @@ struct superblock{
 };
 
 #define NDIRECT 12  // 一个 i 节点直接管辖的块数目
+#define NINDIRECT (BSIZE/sizeof(uint32_t))  // 512/4 = 128
+#define MAXFILE (NDIRECT + NINDIRECT)       // 
 
 /* On-disk inodes structure */
 struct dinode{
@@ -46,9 +48,23 @@ struct inode{
     uint32_t addrs[NDIRECT + 1];
 };
 
+/* file status structure */
+struct stat{
+    uint16_t type;
+    uint32_t dev;
+    uint32_t ino;
+    uint32_t nlink;
+    uint32_t size;
+};
 /* inode status flag */
 #define I_BUSY 0x1
 #define I_VALID 0x2
+
+/* inode type flag */
+#define I_FREE 0x0
+#define I_DIR 0x1
+#define I_FILE 0x2
+#define I_DEV 0x3
 
 /* inode per block */
 #define IPB (BSIZE/sizeof(struct inode))
