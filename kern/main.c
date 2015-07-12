@@ -17,32 +17,6 @@
 #include <buf.h>
 #include <fs.h>
 
-int flag = 1;
-
-int thread(void *arg){
-    while (1) {
-        if (flag == 1){
-            putchar('A');
-            flag = 0;
-        }
-        // TODO 新进程中中断不发生...
-    }
-    return 0;
-}
-
-void thread_test(){
-    init_sched();
-    kernel_thread(thread, NULL);
-    sti();
-    while(1){
-        if (flag == 0){
-            putchar('B');
-            flag = 1;
-        }
-    }
-}
-
-
 uint32_t kern_stack_top;
 char kern_stack[STACK_SIZE] __attribute__((aligned(16)));
 
@@ -74,14 +48,14 @@ int osmain(void)
     
     vmm_init();
     puts("vmm init...\n\r");
-    //vmm_test();
+    vmm_test();
     
     kb_init();
     puts("kb init...\n\r");
 
     heap_init();
     puts("heap init...\n\r");
-    //heap_test();
+    heap_test();
 
     ide_init();
     puts("ide init...\n\r");
@@ -98,7 +72,6 @@ int osmain(void)
 	__asm__ __volatile__ ("mov %0, %%esp\n\t"
 			"xor %%ebp, %%ebp" : : "r" (kern_stack_top));
     /* 切换新栈 */
-    thread_test();
     for (;;);
     return 0;
 }

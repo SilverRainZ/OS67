@@ -153,33 +153,37 @@ void kfree(void *p){
 void print_chunk_list(){
     struct header *cur = heap_first;
     while (cur){
-        printk("cur->allocated: %d  ->base 0x%x  ->len %d\n",cur->allocated, (uint32_t)cur, cur->length);
+        printl("cur->allocated: %d  ->base 0x%x  ->len %d\n",cur->allocated, (uint32_t)cur, cur->length);
         cur = cur->next;
     }
 }
 
 void heap_test(){
+    printl("=== heap_test start ===\n");
+
     void *addr1 = kmalloc(50);
-    printk("kmalloc 50 byte in 0x%x\n", addr1);
+    printl("kmalloc 50 byte in 0x%x\n", addr1);
     void *addr2 = kmalloc(500);
-    printk("kmalloc 500 byte in 0x%x\n", addr2);
+    printl("kmalloc 500 byte in 0x%x\n", addr2);
     void *addr3 = kmalloc(5000);
-    printk("kmalloc 5000 byte in 0x%x\n", addr3);
+    printl("kmalloc 5000 byte in 0x%x\n", addr3);
     void *addr4 = kmalloc(5000);
-    printk("kmalloc 5000 byte in 0x%x\n", addr4);
+    printl("kmalloc 5000 byte in 0x%x\n", addr4);
     void *addr5 = kmalloc(50000);
-    printk("kmalloc 50000 byte in 0x%x\n", addr5);
+    printl("kmalloc 50000 byte in 0x%x\n", addr5);
 
     print_chunk_list();
 
-    printk("free mem in 0x%x\n",addr1);
+    printl("free mem in 0x%x\n",addr1);
     kfree(addr1);
-    printk("free mem in 0x%x\n",addr2);
+    printl("free mem in 0x%x\n",addr2);
     kfree(addr2);
-    printk("free mem in 0x%x\n",addr3);
+    printl("free mem in 0x%x\n",addr3);
     kfree(addr3);
-    printk("free mem in 0x%x\n",addr4);
+    printl("free mem in 0x%x\n",addr4);
     kfree(addr4);
-    printk("free mem in 0x%x\n",addr5);
+    printl("free mem in 0x%x\n",addr5);
     kfree(addr5);
+
+    printl("=== heap_test end ===\n");
 }

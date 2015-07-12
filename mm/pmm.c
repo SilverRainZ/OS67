@@ -23,29 +23,35 @@ static uint32_t pmm_stack_top = 0;     // top of stack
 uint32_t pmm_page_count = 0;
 
 void pmm_mem_info(){
+    printl("=== display memory info start ===\n");
+    printl("MEMORY: 1, RESERVED: 2, UNDEFINE: 3\n");
+
     /* 0x400 和 0x500 中的数据在bootsector.asm 中已经写入 */
     uint32_t MCR_count = *(uint32_t *)0x400;
     struct ARD_entry_s *ARD_entry = (struct ARD_entry_s *)0x500;
     uint32_t memsize = 0;
     int i = 0;
+
     /* do not care about high bit, we assume that the size of
      * memory always less than 512M */
     for (i = 0; i < MCR_count; i++){
-        printk("base addr low: 0x%x  ",ARD_entry[i].base_addr_low);
-        printk("len low: 0x%x  ",ARD_entry[i].len_low);
-        printk("type: 0x%x\n",ARD_entry[i].type);
+        printl("base addr low: 0x%x, len low: 0x%x, type: 0x%x\n",ARD_entry[i].base_addr_low,ARD_entry[i].len_low, ARD_entry[i].type);
         if (ARD_entry[i].type == ADDR_RANGE_MEMORY
                 && ARD_entry[i].base_addr_low + ARD_entry[i].len_low > memsize){
             memsize = ARD_entry[i].base_addr_low + ARD_entry[i].len_low;
         }
     }
-    printk("memory size: %dMB\n",memsize/(1024*1024) + 1);
+    printl("memory size: %dMB\n", memsize/(1024*1024) + 1);
+
     /*get kernel mem map*/
-    printk("kernel start at: 0x%x  end at 0x%x\n", &kernstart, &kernend);
-    printk(".code: 0x%x  ", &code);
-    printk(".data: 0x%x  ", &data);
-    printk(".bss: 0x%x  \n", &bss);
-    printk("kernel's size: %dkb\n", (&kernend - &kernstart)/1024);
+    printl("kernel start at: 0x%x  end at 0x%x\n", &kernstart, &kernend);
+    printl(".code: 0x%x\n", &code);
+    printl(".data: 0x%x\n", &data);
+    printl(".bss: 0x%x\n", &bss);
+    printl("kernel's size(exclude bss): %d KB\n", (&bss - &kernstart)/1024);
+    printl("kernel's size: %d KB\n", (&kernend - &kernstart)/1024);
+
+    printl("=== display memory info end ===\n");
 }
 
 void pmm_init(){
@@ -60,7 +66,9 @@ void pmm_init(){
            uint32_t addr = ARD_entry[i].base_addr_low;
            uint32_t limit = addr + ARD_entry[i].len_low;
            while (addr < limit && addr <= PMM_MAX_SIZE){
-               pmm_free_page(addr);
+               //pmm_free_page(addr);
+               /* 使用 pmm_free_page 会引入大量的 log */
+               pmm_stack[pmm_stack_top++] = addr;   
                addr += PMM_PAGE_SIZE;
                pmm_page_count++;
            }
@@ -70,9 +78,11 @@ void pmm_init(){
 
 uint32_t pmm_alloc_page(){
     //TODO assert()
+    printl("pmm_alloc_page: alloc page 0x%x, pmm_stack_top = %d\n", pmm_stack[pmm_stack_top - 1], pmm_stack_top - 1);
     return pmm_stack[--pmm_stack_top];
 }
 void pmm_free_page(uint32_t addr){
     //TODO assert()
+    printl("pmm_free_page: free page 0x%x, pmm_stack_top = %d\n", addr, pmm_stack_top + 1);
     pmm_stack[pmm_stack_top++] = addr;
 }

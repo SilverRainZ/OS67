@@ -8,7 +8,7 @@
  */
 
 #include <type.h>
-#include <vmm.h>
+#include <vmm.h> 
 #include <pmm.h>
 #include <pm.h>
 #include <isr.h>
@@ -60,11 +60,14 @@ void map(pgd_t *pgd, uint32_t va, uint32_t pa, uint32_t flags){
     uint32_t pgd_idx = PGD_INDEX(va);
     uint32_t pte_idx = PTE_INDEX(va);
 
+    printl("map: map 0x%x to 0x%x, flag = 0x%x\n",va ,pa, flags);
+
     pte_t *pte = (pte_t *)(pgd[pgd_idx] & PAGE_MASK);
     /* if pte == NULL */
     if (!pte){
     /* 只映射了0-512M的内存， 映射更高位的内存时，需要重新申请物理页
      * 我觉得这样增加了复杂度， 一开始就定义一个最大的1024*1024页表表不就好？*/
+        printl("map: pte of 0x%x is NULL, attempt to alloc one\n", va);
         pte = (pte_t *)pmm_alloc_page();
         pgd[pgd_idx] = (uint32_t)pte | PAGE_PRESENT | PAGE_WRITE;
         //assert(0,"pet = NULL");
@@ -81,10 +84,12 @@ void unmap(pgd_t *pgd, uint32_t va){
     uint32_t pgd_idx = PGD_INDEX(va);
     uint32_t pte_idx = PTE_INDEX(va);
 
+    printl("unmap: unmap virtual address 0x%x\n", va);
     pte_t *pte = (pte_t *)(pgd[pgd_idx] & PAGE_MASK);
 
     //assert(pte,"unmap fail.");
     if (!pte){
+        printl("unmap: unmap a unmapped page\n");
         return;
     }
     /* unmap this poge */
@@ -100,10 +105,12 @@ bool get_mapping(pgd_t *pgd, uint32_t va, uint32_t *pa){
 
     pte_t *pte = (pte_t *)(pgd[pgd_idx] & PAGE_MASK);
     if (!pte){
+        printl("get_mapping: virtual address 0x%x is unmapped\n", va);
         return FALSE;
     }
     if (pte[pte_idx] != 0 && pa){
         *pa = pte[pte_idx] & PAGE_MASK;
+        printl("get_mapping: virtual address 0x%x is mapped to 0x%x\n", va, pte[pte_idx] & PAGE_MASK);
         return TRUE;
     }
     return FALSE;
@@ -113,8 +120,10 @@ void vmm_test(){
     /* 注意映射的的粒度是一页，把 map(va = 0xc000, pa = 0x1234), 
      * 你得到的是（0x1000,0x1fff）- (0xc000,0xcfff) 的映射
      * 完成映射后，物理地址 0x1234 的虚拟地址是 0xc234 */
+    printl("=== vmm_test start ===\n");
     int *badfood = (int *)0xc000;
-    printk("valut at 0xc000: %x\n", *badfood);
+
+    printl("valut at 0xc000: %x\n", *badfood);
     map(pgd_kern, 0x1000, 0xc000, PAGE_PRESENT);
     badfood = (int *)0x1000;
 
@@ -123,16 +132,17 @@ void vmm_test(){
 
     vmm_switch_pgd((uint32_t)pgd_kern);
 
-    printk("%x is mapped to: %x\n", (int)badfood, (int)pa);
-    printk("value at 0x1000: %x\n", *badfood);
+    printl("%x is mapped to: %x\n", (int)badfood, (int)pa);
+    printl("value at 0x1000: %x\n", *badfood);
 
     //badfood = (int *)0xc0000000; 
     //printk("virtual addr 0xc000: %x\n", *badfood);    // page fault test
+    printl("=== vmm_test end ===\n");
 }
 
 void page_fault(struct regs_s *regs){
     uint32_t cr2;
     __asm__ volatile ("mov %%cr2, %0":"=r"(cr2));
-    printk("Page Fault Excetpion\nSystem Halted!\n");
+    panic("Page Fault Excetpion\nSystem Halted!\n");
     for (;;) hlt();
 }

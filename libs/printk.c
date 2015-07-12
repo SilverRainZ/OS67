@@ -6,6 +6,7 @@
 //#define __DEBUG
 
 #ifdef __DEBUG
+
 #include <stdio.h>
 #include <string.h>
 #undef NULL
@@ -20,16 +21,20 @@ int main(){
 }
 
 #else
+
 #include <type.h>
 #include <vga.h>
 #include <string.h>
 #include <printk.h>
+#include <dbg.h>
+
 #endif
 
 char* itoa(int value, char *str, int radix){
     char reverse[36];   
     char *p = reverse;
     bool sign = (value >= 0)?TRUE:FALSE;
+
     value = (value >= 0)?value:-value;
     *p++ = '\0';
     while (value >= 0){
@@ -37,17 +42,25 @@ char* itoa(int value, char *str, int radix){
         value /= radix;
         if (value == 0) break;
     }
-    if (!sign) *p = '-';
-    else p--;
+
+    if (!sign) {
+        *p = '-';
+    }
+    else {
+        p--;
+    }
+
     while (p >= reverse){
         *str++ = *p--;
     }
+
     return str;
 }
 
 char* uitoa(unsigned int value, char *str, int radix){
     char reverse[36];   
     char *p = reverse;
+
     *p++ = '\0';
     while (value >= 0){
         *p++ = "0123456789abcdef"[value%radix];
@@ -55,28 +68,39 @@ char* uitoa(unsigned int value, char *str, int radix){
         if (value == 0) break;
     }
     p--;
+
     while (p >= reverse){
         *str++ = *p--;
     }
+
     return str;
 }
+
+/* NOT WORK TODO */
 char* gcvt(double value, int ndigit, char *buf){
     char tmpbuf[72];
     int int_part = (int)value;
+
     printk("int: %d\n", int_part);
     double folat_part = value - int_part;
+
     if (folat_part < 0) folat_part = -folat_part;
     itoa(int_part, tmpbuf, 10);
+
     char *p = tmpbuf;
+
     printk("tmpbuf: %s\n", tmpbuf);
 
      while (*p != '\0') p++;
+
     *p++ = '.';
+
     while (ndigit > 0 && folat_part > 0.00000001){
         *p++ = (int)(folat_part*10) + '0';
         folat_part = (folat_part * 10) - (int)(folat_part * 10);
         ndigit--;
     }
+
     *p = '\0';
     printk("tmpbuf2: %s\n", tmpbuf);
     strcpy(buf, tmpbuf);
@@ -86,6 +110,7 @@ char* gcvt(double value, int ndigit, char *buf){
 void vsprintk(char *buf, const char *fmt, va_list args){
     char *p;
     va_list p_next_arg = args;
+
     for (p = buf; *fmt; fmt++){
         if (*fmt != '%'){
             *p++ = *fmt;
@@ -122,11 +147,34 @@ void vsprintk(char *buf, const char *fmt, va_list args){
 void printk(const char *fmt, ...){
     //使用static会给调试带来麻烦
     char buf[256];
-    memset(buf, 0, sizeof(buf));
     va_list args;
+
+    memset(buf, 0, sizeof(buf));
     va_start(args, fmt);
     vsprintk(buf, fmt, args);
     va_end(args);
     puts(buf);
 }
 
+/* this function will output string to host's console 
+ * but no display in screen, used for recording log
+ */ 
+void printl(const char *fmt, ...){
+    char buf[256];
+    char log[] = "[log]: ";
+    va_list args;
+    int i;
+
+    memset(buf, 0, sizeof(buf));
+    va_start(args, fmt);
+    vsprintk(buf, fmt, args);
+    va_end(args);
+
+    //puts(buf);
+    for (i = 0; i < strlen(log); i++){
+        bochs_putc(log[i]);
+    }
+    for (i = 0; i < strlen(buf); i++){
+        bochs_putc(buf[i]);
+    }
+}
