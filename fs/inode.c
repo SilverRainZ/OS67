@@ -1,6 +1,8 @@
 #include <type.h>
 #include <buf.h>
 #include <fs.h>
+#include <dbg.h>
+#include <asm.h>
 #include <string.h>
 #include <printk.h>
 
@@ -10,28 +12,27 @@ struct inode icache[NINODE];
 /* find the inode with specific dev and inum in memory, 
  * if not found, use first empty inode 
  * 注意: 这里只会申请一个可用的 inode 槽位, 增加一个内存引用, 不会锁住, 也不会从磁盘读出 */
-static struct *inode iget(char dev, uint32_t inum){
-    struct buf *bp;
+static struct inode* iget(char dev, uint32_t inum){
     struct inode *ip, *empty;
 
     empty = 0;
-    for (ip = &icache[0], ip < &icache[NINODE]; ip++){
-    /* this inode is cached */
+    for (ip = &icache[0]; ip < &icache[NINODE]; ip++){
+        /* this inode is cached */
         if (ip->ref > 0 && ip->dev == dev && ip->inum == inum){
             ip->ref--;
             return ip;
         }
-    /* remember the first free inode */
+        /* remember the first free inode */
         if (empty == 0 && ip->ref == 0){
             empty = ip;
         }
-
+    }
     assert(empty, "ige: no inode");
     ip = empty;
     ip->dev = dev;
     ip->inum = inum;
     ip->ref = 1;
-    ip->flag = 0;
+    ip->flags = 0;
     return ip;
 }
 
@@ -39,7 +40,7 @@ static struct *inode iget(char dev, uint32_t inum){
  * - 磁盘: 找到磁盘里的空闲 dinodes, 清空并写入 type, 表示已经占用
  * - 内存: 通过 iget() 在内存中申请一个对应的 inodes 槽位
  */
-static struct *inode ialloc(char dev, uint16_t type){
+struct inode* ialloc(char dev, uint16_t type){
     int inum;
     struct buf *bp;
     struct dinode *dip;
@@ -49,8 +50,8 @@ static struct *inode ialloc(char dev, uint16_t type){
 
     /* 这里会重复读取扇区 TODO */
     /* 从 1 开始吗? */
-    for (inum = 1; inum < sb.inodes; inum++){
-        bp = bread(ip->dev, IBLOCK(inum));
+    for (inum = 1; inum < sb.ninodes; inum++){
+        bp = bread(dev, IBLOCK(inum));
         dip = (struct dinode *)bp->data + inum%IPB;
         /* detect a free node */
         if (dip->type == 0){
@@ -63,10 +64,11 @@ static struct *inode ialloc(char dev, uint16_t type){
         brelse(bp);
     }
     assert(0, "ialloc: no dinode");
+    return NULL;
 }
 
 /* copy a in-memory inode to disk */
-void iupdate(struct *inode ip){
+void iupdate(struct inode *ip){
     struct buf *bp;
     struct dinode *dip;
 
@@ -74,12 +76,12 @@ void iupdate(struct *inode ip){
     dip = (struct dinode *)bp + (ip->inum)%IPB;
 
     /* ip -> dip */
-    dip->dev = ip->dev;
+    dip->type = ip->type;
     dip->major = ip->major;
     dip->minor = ip->minor;
     dip->nlink = ip->nlink;
     dip->size = ip->size;
-    memmove(dip->addrs, ip->addrs, sizeof(ip->addrs));
+    memcpy(dip->addrs, ip->addrs, sizeof(ip->addrs));
 
     bwrite(bp);
     brelse(bp);
@@ -91,14 +93,14 @@ void iupdate(struct *inode ip){
  * - 在磁盘上没有被任何目录引用 nlink = 0
  * - 在内存里没有引用(没有被打开) ref = 0
  */
-static void itrunc(struct inode *ip){
+void itrunc(struct inode *ip){
     int i, j;
     struct buf *bp;
     uint32_t *addrs2;
-    /* lenght of addrs is NDIRCET + 1 */
+    /* lenght of addrs is NDIRECT + 1 */
 
     /* free DIRECT block */
-    for (i = 0; i < NDIRCET; i++){
+    for (i = 0; i < NDIRECT; i++){
         if (ip->addrs[i]){
             bfree(ip->dev, ip->addrs[i]);
             ip->addrs[i] = 0;
@@ -106,8 +108,8 @@ static void itrunc(struct inode *ip){
     }
 
     /* free INDIRECT block */
-    if (ip->addrs[NDIRCET]){
-        bp = bread(ip->dev,ip->addrs[NDIRCET]);
+    if (ip->addrs[NDIRECT]){
+        bp = bread(ip->dev,ip->addrs[NDIRECT]);
         addrs2 = (uint32_t *)bp->data;
         for (j = 0; j < NINDIRECT; j++){
             if (addrs2[j]){
@@ -122,7 +124,7 @@ static void itrunc(struct inode *ip){
 }
 
 /* reference of ip + 1 */
-struct inode* idup(struct inodes *ip){
+struct inode* idup(struct inode *ip){
     ip->ref++;
     return ip;
 }
@@ -139,8 +141,8 @@ void iput(struct inode *ip){
         ip->flags |= I_BUSY;
         itrunc(ip); // TODO
         ip->type = 0;
-        iupdat(ip);
-        ip->flag = 0;
+        iupdate(ip);
+        ip->flags = 0;
     }
     ip->ref--;
 }
@@ -149,7 +151,7 @@ void iput(struct inode *ip){
  * read the inode form disk if necessary
  * non-ref inode can not be lock (ref = 0)
  */
-void ilock(struct indoe *ip){
+void ilock(struct inode *ip){
     struct buf *bp;
     struct dinode *dip;
 
@@ -171,12 +173,12 @@ void ilock(struct indoe *ip){
         dip = (struct dinode *)bp->data + (ip->inum)%IPB;
 
         /* ip -> dip */
-        ip->dev = dip->dev;
+        ip->type = dip->type;
         ip->major = dip->major;
         ip->minor = dip->minor;
         ip->nlink = dip->nlink;
         ip->size = dip->size;
-        memmove(ip->addrs, dip->addrs, sizeof(dip->addrs));
+        memcpy(ip->addrs, dip->addrs, sizeof(dip->addrs));
 
         brelse(bp);
         ip->flags |= I_VALID;
@@ -204,19 +206,19 @@ void iunlockput(struct inode *ip){
 /* return the disk block address of the nth block in given inode
  * if not such  block, alloc one
  */
-static uint32_t bmap(struct indoe *ip, uint32_t bn){
+uint32_t bmap(struct inode *ip, uint32_t bn){
     uint32_t addr, *addrs2;
     struct buf *bp;
 
-    assert(bn < NDIRCET + NINDIRECT,"bmap: out of range");
+    assert(bn < NDIRECT + NINDIRECT,"bmap: out of range");
 
-    if (bn < NDIRCET){
+    if (bn < NDIRECT){
         if ((addr = ip->addrs[bn]) == 0) {
             addr = ip->addrs[bn] = balloc(ip->dev);
             return addr;
         }
     }
-    bn -= NDIRCET; if ((addr = ip->addrs[NINDIRECT]) == 0){
+    bn -= NDIRECT; if ((addr = ip->addrs[NINDIRECT]) == 0){
         addr = ip->addrs[NINDIRECT] = balloc(ip->dev);
     }
     bp = bread(ip->dev, ip->addrs[NINDIRECT]);
