@@ -95,8 +95,30 @@ static void itrunc(struct inode *ip){
     int i, j;
     struct buf *bp;
     uint32_t *addrs2;
+    /* lenght of addrs is NDIRCET + 1 */
 
-    // TODO
+    /* free DIRECT block */
+    for (i = 0; i < NDIRCET; i++){
+        if (ip->addrs[i]){
+            bfree(ip->dev, ip->addrs[i]);
+            ip->addrs[i] = 0;
+        }
+    }
+
+    /* free INDIRECT block */
+    if (ip->addrs[NDIRCET]){
+        bp = bread(ip->dev,ip->addrs[NDIRCET]);
+        addrs2 = (uint32_t *)bp->data;
+        for (j = 0; j < NINDIRECT; j++){
+            if (addrs2[j]){
+                bfree(ip->dev, addrs2[j]);
+                addrs2[j] = 0;
+            }
+        }
+    }
+
+    ip->size = 0;
+    iupdate(ip);
 }
 
 /* reference of ip + 1 */
@@ -179,8 +201,32 @@ void iunlockput(struct inode *ip){
     iput(ip);
 }
 
-void bmap(){
-    // TODO
+/* return the disk block address of the nth block in given inode
+ * if not such  block, alloc one
+ */
+static uint32_t bmap(struct indoe *ip, uint32_t bn){
+    uint32_t addr, *addrs2;
+    struct buf *bp;
+
+    assert(bn < NDIRCET + NINDIRECT,"bmap: out of range");
+
+    if (bn < NDIRCET){
+        if ((addr = ip->addrs[bn]) == 0) {
+            addr = ip->addrs[bn] = balloc(ip->dev);
+            return addr;
+        }
+    }
+    bn -= NDIRCET; if ((addr = ip->addrs[NINDIRECT]) == 0){
+        addr = ip->addrs[NINDIRECT] = balloc(ip->dev);
+    }
+    bp = bread(ip->dev, ip->addrs[NINDIRECT]);
+    addrs2 = (uint32_t *)bp->data;
+    if ((addr = addrs2[bn]) == 0){
+        addrs2[bn] = balloc(ip->dev);
+        bwrite(bp);
+    }
+    brelse(bp);
+    return addr;
 }
 
 void stati(struct inode *ip, struct stat *st){

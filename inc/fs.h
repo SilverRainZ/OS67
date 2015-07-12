@@ -30,6 +30,7 @@ struct dinode{
     uint32_t nlink;     // number of links to this node
     uint32_t size;      // size of file (byte)
     uint32_t addrs[NDIRECT + 1];
+    // addrs 中多出来的一个 1 用来索引 NINDIRECT block
 };
 
 /* in-memory copy of an inode */
