@@ -57,7 +57,7 @@ int osmain(void)
     puts("heap init...\n\r");
     heap_test();
 
-    ide_init();
+/*    ide_init();
     puts("ide init...\n\r");
 
     bcache_init();
@@ -67,6 +67,7 @@ int osmain(void)
     ide_test();
     show_sb();
     
+    */
     for (;;);
     kern_stack_top = (uint32_t)kern_stack + STACK_SIZE;
 	__asm__ __volatile__ ("mov %0, %%esp\n\t"

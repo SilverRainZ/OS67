@@ -46,8 +46,8 @@ void panic(const char *msg){
     print_cur_status();
 
     //i can't get the name of funciton form call stack, so don't use it
-    //printk("Call stack:\n");
-    //print_stack_trace();
+    printk("Call stack:\n");
+    print_stack_trace();
     for (;;);
 }
 

@@ -10,12 +10,15 @@
 #include <printk.h>
 #include <pmm.h>
 
-/* these symbol's addr were remaped in ld script*/
-uint8_t kernstart = 1; 
-uint8_t code = 2;
-uint8_t data = 3;
-uint8_t bss = 4;
-uint8_t kernend = 5; 
+/* these symbol's addr were remapped in ld script: script/link.ld
+ * NB: only a symbol, not a variable
+ * ref: http://wiki.osdev.org/Using_Linker_Script_Values
+ */
+extern uint32_t kernstart;
+extern uint32_t code;
+extern uint32_t data;
+extern uint32_t bss;
+extern uint32_t kernend;
 
 
 static uint32_t pmm_stack[PAGE_MAX_SIZE + 1];
@@ -42,6 +45,9 @@ void pmm_mem_info(){
         }
     }
     printl("memory size: %dMB\n", memsize/(1024*1024) + 1);
+
+    printl("check: .code: %x, .data: %x, .bss: %x\n", code, data, bss);
+    /* bss's value should be 0x0a*/
 
     /*get kernel mem map*/
     printl("kernel start at: 0x%x  end at 0x%x\n", &kernstart, &kernend);

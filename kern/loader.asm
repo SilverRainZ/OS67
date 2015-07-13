@@ -42,6 +42,7 @@ go:
     mov esi,msg_pm  
     call temp_print32 
 
+    push 0
     jmp osmain          ; never return? 
 
     mov esi,msg_return  

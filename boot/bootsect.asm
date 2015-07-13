@@ -87,6 +87,12 @@ get_mem_map_ok:
 
 ;============================================================
 ; read kernel form disk
+; NB: 1.44 MB 软盘的最大连续扇区只有 18*2 = 36
+; 而 bochs 对连续读取扇区的长度限制是 72 2.88 M 软盘的最大连续扇区数 36*2
+; http://stackoverflow.com/questions/3645803/bios-int-13h-with-ah-2-can-only-read-72-sectors-each-time-why
+; http://f.osdev.org/viewtopic.php?f=13&t=22491
+
+; read 20 cylinder (360 KB) form floppy (暂定)
 loadloader:      
     mov bx,0    
     mov ax,0x0800 
@@ -95,23 +101,43 @@ loadloader:
     mov dh,1    ; head
     mov cl,17   ; sector
     mov dl,0x00 ; driver a:
-; kernel 在软gg盘的第34个扇区,0x4200,换算为c0-h1-s16
+; kernel 在软gg盘的第35个扇区,0x4400,换算为c0-h1-s17
 
 readloop:
     mov si,0    ; err counter 
 
 retry:
     mov ah,0x02 ; int 0x13  ah = 0x02 read sector form dirve
-    mov al,60 ; read 60 sector
+    mov al, 1; read 1 sector 
     int 0x13
-    jnc succ 
+    jnc next
     add si,1
     cmp si,5    
     jae error
     mov ah,0x00
     mov dl,0x00 ; driver a
     int 0x13    ; reset
-    jmp retry    
+    jmp next 
+
+next: 
+    mov ax, es
+    add ax, 0x20    ; 0x200 size of a sector
+    mov es, ax
+
+    add cl, 1   ; sector + 1
+    cmp cl, 18  ; 18 sector
+    jbe readloop
+
+    mov cl, 1
+    add dh, 1   ; head + 1
+    cmp dh, 1
+    jbe readloop
+
+    mov dh, 0
+    add ch, 1   ; cylinder + 1
+    cmp ch, 20
+    jbe readloop
+    jmp succ
 
 error:        
     mov  si,msg_err
