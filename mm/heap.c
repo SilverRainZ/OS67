@@ -35,8 +35,8 @@ static void alloc_chunk(uint32_t start, uint32_t len){
 static void free_chunk(struct header *chunk){
     if (chunk->prev == NULL){
         heap_first = NULL;
-    } else {
-        chunk->prev->next = NULL;
+    } else { 
+        chunk->prev->next = NULL; 
     }
     /* 当 chunk 的内存超过一页时， 持续释放 */
     while((heap_max - PAGE_SIZE) >= (uint32_t)chunk){

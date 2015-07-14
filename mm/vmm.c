@@ -32,6 +32,12 @@ void vmm_init(){
     for (i = 0, j = 0; i < PTE_COUNT; i++, j++){
         pgd_kern[i] = (uint32_t)pte_kern[j] | PAGE_PRESENT | PAGE_WRITE;
     }
+
+    /* 初始化剩下的页目录 */
+    for (; i < PGD_SIZE; i++){
+        pgd_kern[i] = 0;
+    } 
+
     /* 为所有的页表项填充映射到的页地址(高20位) 
      * hurlex 在这里没有映射第0页， 然而我并不知道为什么要这么做 */
     uint32_t *pte = (uint32_t *)pte_kern;
@@ -60,8 +66,8 @@ void map(pgd_t *pgd, uint32_t va, uint32_t pa, uint32_t flags){
     uint32_t pgd_idx = PGD_INDEX(va);
     uint32_t pte_idx = PTE_INDEX(va);
 
-    printl("map: map 0x%x to 0x%x, flag = 0x%x\n",va ,pa, flags);
-
+    printl("map: map 0x%x to 0x%x, flag = 0x%x\n", pa, va, flags);
+ 
     pte_t *pte = (pte_t *)(pgd[pgd_idx] & PAGE_MASK);
     /* if pte == NULL */
     if (!pte){
