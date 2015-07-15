@@ -45,6 +45,7 @@ int osmain(void)
     pmm_init();
     puts("pmm init...\n\r");
     pmm_mem_info();
+    //pmm_test();
     
     vmm_init();
     puts("vmm init...\n\r");

@@ -9,17 +9,21 @@
 #include <type.h> 
 #include <printk.h>
 #include <pmm.h>
+#include <dbg.h>
 
 /* these symbol's addr were remapped in ld script: script/link.ld
  * NB: only a symbol, not a variable
  * ref: http://wiki.osdev.org/Using_Linker_Script_Values
  */
-extern uint32_t kernstart;
-extern uint32_t code;
-extern uint32_t data;
-extern uint32_t bss;
-extern uint32_t kernend;
-
+/* (?) 为什么使用 uint32_t 会得到错误的内核大小呢? 
+ * 明明只是利用他的地址, 地址都是 32位不是吗?
+ * 而且可以得到正确的内存分布, 只是相减的时候出错了
+ */
+extern uint8_t kernstart;
+extern uint8_t code;
+extern uint8_t data;
+extern uint8_t bss;
+extern uint8_t kernend;
 
 static uint32_t pmm_stack[PAGE_MAX_SIZE + 1];
 static uint32_t pmm_stack_top = 0;     // top of stack
@@ -46,9 +50,6 @@ void pmm_mem_info(){
     }
     printl("memory size: %dMB\n", memsize/(1024*1024) + 1);
 
-    printl("check: .code: %x, .data: %x, .bss: %x\n", code, data, bss);
-    /* bss's value should be 0x0a*/
-
     /*get kernel mem map*/
     printl("kernel start at: 0x%x  end at 0x%x\n", &kernstart, &kernend);
     printl(".code: 0x%x\n", &code);
@@ -64,13 +65,20 @@ void pmm_init(){
     uint32_t MCR_count = *(uint32_t *)0x400;
     struct ARD_entry_s *ARD_entry = (struct ARD_entry_s *)0x500;
     int i = 0;
+
     for (i = 0; i < MCR_count; i++){
         /* reach available memory */
         /* 如果该内存段有效且基址是0x100000, 将其加入栈中 */
-        /* TODO 我觉得这里应该从 kernend 之后再开始分配 */
+        /* 从 kernend 之后再开始分配 */
        if (ARD_entry[i].type == ADDR_RANGE_MEMORY && ARD_entry[i].base_addr_low == 0x100000) {
-           uint32_t addr = ARD_entry[i].base_addr_low;
-           uint32_t limit = addr + ARD_entry[i].len_low;
+           
+           // uint32_t addr = ARD_entry[i].base_addr_low;
+           assert(ARD_entry[i].base_addr_low < (uint32_t)(&kernend), "pmm_init: wrong base address");
+           assert(ARD_entry[i].len_low > (uint32_t)(&kernend), "pmm_init: wrong limit");
+
+           uint32_t addr = ((uint32_t)&kernend + PMM_PAGE_SIZE) & 0xfffff000;
+           uint32_t limit = ARD_entry[i].base_addr_low + ARD_entry[i].len_low;
+
            while (addr < limit && addr <= PMM_MAX_SIZE){
                //pmm_free_page(addr);
                /* 使用 pmm_free_page 会引入大量的 log */
@@ -78,17 +86,28 @@ void pmm_init(){
                addr += PMM_PAGE_SIZE;
                pmm_page_count++;
            }
+           printl("pmm_init: allocatable memory: 0x%x to 0x%x\n"
+                 , ((uint32_t)&kernend + PMM_PAGE_SIZE) & 0xfffff000
+                 , limit
+                 );
        }
     }
 }
 
 uint32_t pmm_alloc_page(){
-    //TODO assert()
-    printl("pmm_alloc_page: alloc page 0x%x, pmm_stack_top = %d\n", pmm_stack[pmm_stack_top - 1], pmm_stack_top - 1);
-    return pmm_stack[--pmm_stack_top];
+    uint32_t addr = pmm_stack[--pmm_stack_top];
+    assert(pmm_stack_top >= 0,"pmm_alloc_page: no physical page");
+
+    printl("pmm_alloc_page: alloc page 0x%x, pmm_stack_top = %d\n", addr, pmm_stack_top);
+    return addr;
 }
 void pmm_free_page(uint32_t addr){
-    //TODO assert()
-    printl("pmm_free_page: free page 0x%x, pmm_stack_top = %d\n", addr, pmm_stack_top + 1);
+
     pmm_stack[pmm_stack_top++] = addr;
+    assert(pmm_stack_top <= pmm_page_count ,"pmm_free_page: pmm stack overflow");
+
+    printl("pmm_free_page: free page 0x%x, pmm_stack_top = %d\n", addr, pmm_stack_top);
+}
+
+void pmm_test(){
 }
