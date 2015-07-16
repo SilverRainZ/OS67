@@ -13,11 +13,9 @@
 
 /* these symbol's addr were remapped in ld script: script/link.ld
  * NB: only a symbol, not a variable
+ * NB: 求两个变量地址的偏移的时候, 得到的是偏移是以该变量的步长为单位的(sizeof)
+ * 因此这里只能用 uint8_t
  * ref: http://wiki.osdev.org/Using_Linker_Script_Values
- */
-/* (?) 为什么使用 uint32_t 会得到错误的内核大小呢? 
- * 明明只是利用他的地址, 地址都是 32位不是吗?
- * 而且可以得到正确的内存分布, 只是相减的时候出错了
  */
 extern uint8_t kernstart;
 extern uint8_t code;
