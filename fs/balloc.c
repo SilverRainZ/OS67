@@ -12,7 +12,7 @@
 void show_sb(){
     struct superblock sb;
     readsb(0, &sb);
-    printk("sb ->size: %d ni: %d nb: %d\n", sb.size, sb.nblocks, sb.ninodes);
+    printl("show_sb: sb ->size: %d ->ni: %d ->nb: %d\n", sb.size, sb.nblocks, sb.ninodes);
 }
 
 /* read the superblock */

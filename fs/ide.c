@@ -49,9 +49,11 @@ static void ide_start(struct buf *b){
     /* but 0xe0 = 1010000 (? TODO */
     outb(IDE_PORT_CURRENT, 0xe0 | ((b->dev&1)<<4) | ((b->lba>>24)&0x0f)); 
     if(b->flags & B_DIRTY){   // write
+        printl("ide_start: write blk-%d\n", b->lba);
         outb(IDE_PORT_CMD, IDE_CMD_WRITE);
         outsl(IDE_PORT_DATA, b->data, 512/4);
     } else {                  // read
+        printl("ide_start: read blk-%d\n", b->lba);
         outb(IDE_PORT_CMD, IDE_CMD_READ);
     }
 }
@@ -73,6 +75,7 @@ void ide_handler(struct regs_s *r){
     /* 数据是最新的 */
     b->flags &= ~B_DIRTY;
 
+    printl("ide_handler: blk-%d VALID \n", b->lba);
     if (idequeue){
         ide_start(idequeue);
     }
@@ -92,7 +95,11 @@ void ide_rw(struct buf *b){
     /* nb: 这里的双重指针要小心 */
     struct buf **pp;
     b->qnext = 0; 
-    for (pp = &idequeue; *pp; pp = &(*pp)->qnext);
+    printl("ide_rw: request queue: ");
+    for (pp = &idequeue; *pp; pp = &(*pp)->qnext){
+        printl("%d -> ",(*pp)->lba);
+    }
+    printl("%d\n", b->lba);
     *pp = b;
     
     /* if b is the head of queue, read/write it now */
@@ -106,23 +113,23 @@ void ide_rw(struct buf *b){
 }
 
 void ide_print_blk(struct buf *b){
-    printk("flag: ");
-    if (b->flags & B_BUSY) printk("B_BUSY ");
-    if (b->flags & B_DIRTY) printk("B_DIRTY");
-    if (b->flags & B_VALID) printk("B_VALID");
-    printk("\n");
-    printk("dev: %d, lba: %d\n",b->dev, b->lba);
+    printl("ide_print_blk: blk-%d, flags: ", b->lba);
+    if (b->flags & B_BUSY) printl("B_BUSY ");
+    if (b->flags & B_DIRTY) printl("B_DIRTY");
+    if (b->flags & B_VALID) printl("B_VALID");
+    printl("\n");
     int i,j;
-    for (i = 0; i < 512; i += 16){
-        printk("%x: ",b->lba*512 + i);
-        for (j = i; j < i + 16; j++){
-            printk("%x ",b->data[j]);
+    for (i = 0; i < 512; i += 32){
+        for (j = i; j < i + 32; j++){
+            printl("%x ",b->data[j]);
         }
-        printk("\n");
+        printl("\n");
     }
 }
+
 struct buf buffer;  // used for test
 void ide_test(){
+    printl("=== ide_test start ===\n");
     buffer.dev = 0;
     buffer.lba = 2;
     buffer.flags = B_BUSY;
@@ -130,7 +137,7 @@ void ide_test(){
     ide_print_blk(&buffer);
     int i = 0;
     for (i = 0; i < 512; i++){
-        buffer.data[i] = 1;
+        buffer.data[i] = 0;
     }
     buffer.flags = B_BUSY|B_DIRTY;
     ide_rw(&buffer);
@@ -138,4 +145,5 @@ void ide_test(){
     buffer.flags = B_BUSY;
     ide_rw(&buffer);
     ide_print_blk(&buffer);
+    printl("=== ide_test end ===\n");
 }

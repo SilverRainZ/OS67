@@ -161,7 +161,6 @@ void printk(const char *fmt, ...){
  */ 
 void printl(const char *fmt, ...){
     char buf[256];
-    char log[] = "[log]: ";
     va_list args;
     int i;
 
@@ -171,9 +170,6 @@ void printl(const char *fmt, ...){
     va_end(args);
 
     //puts(buf);
-    for (i = 0; i < strlen(log); i++){
-        bochs_putc(log[i]);
-    }
     for (i = 0; i < strlen(buf); i++){
         bochs_putc(buf[i]);
     }
