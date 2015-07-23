@@ -10,4 +10,7 @@ int strcmp(const char *str1, const char *str2);
 char *strcpy(char *dest,const char *src);
 char *strcat(char *dest,const char *src);
 char *strstr(const char *str, const char *search);
+
+int strncmp(const char *str1, const char *str2, uint32_t n);
+char *strncpy(char *dest, const char *src, uint32_t n);
 #endif

@@ -4,10 +4,10 @@
 #include <buf.h>
 
 /*  Struct of file system
- *      0           1           2           ...         ...
- *  ===========================================================
- *  bootsector | superblock | inodes ...| bit map ...| data ...
- *  ===========================================================
+ *          0           1           2           ...         ...
+ *  +--------------------------------------------------------------+
+ *  | bootsector | superblock | inodes ...| bit map ...| data ...  | 
+ *  +--------------------------------------------------------------+
  */
 
 /* superblock is located in the second sector of disk */
@@ -80,6 +80,13 @@ struct stat{
 /* 取得包含第b bit的block号, ninodes 只可能是 superblock.ninodes  */
 #define BBLOCK(b, ninodes) (b/BPB + (ninodes)/IPB + 3)
 
+#define DIRSIZE 14
+
+struct dirent{
+    uint16_t inum;
+    char name[DIRSIZE];
+};
+
 /******functions in file fs/bcache.c buffer cache *****/
 #define NBUF 128    // length of disk buffer cache
 void bcache_init();
@@ -95,5 +102,9 @@ void show_sb();
 
 /******functions in file fs/inode.c  inode alloc *****/
 #define NINODE 500 // length of inodes cache
+struct inode* iget(char dev, uint32_t inum);
+void iput(struct inode *ip);
+int iread (struct inode *ip, char *dest, uint32_t off, uint32_t n);
+int iwrite(struct inode *ip, char *src, uint32_t off, uint32_t n);
 
 #endif

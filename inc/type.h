@@ -15,4 +15,9 @@ typedef unsigned short uint16_t;
 typedef short int16_t;
 typedef unsigned char uint8_t;
 typedef char int8_t;
+
+/* useful macro */
+#define min(a, b) ((a)<(b)?(a):(b))
+#define max(a, b) ((a)>(b)?(a):(b))
+
 #endif

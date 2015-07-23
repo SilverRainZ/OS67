@@ -1,7 +1,7 @@
 /* str.c
  * this file includes some library functions to process string
  */
-#include <type.h>
+#include <type.h> 
 #include <string.h>
 
 void *memcpy(void *dest, const void *src, uint32_t count){
@@ -71,3 +71,24 @@ char *strstr(const char *str, const char *search){
     return NULL;
 }
 
+int strncmp(const char *str1, const char *str2, uint32_t n){
+    while ((*str1 || *str2) && n > 0){
+        if (*str1 == *str2){
+            str1++;
+            str2++;
+            n--;
+        }
+        else return *str1 - *str2;
+    } 
+    return 0;
+}
+
+char *strncpy(char *dest, const char *src, uint32_t n){
+    char *addr = dest;
+
+    while (*src && n > 0){
+        *dest++ = *src++;
+        n--;
+    }
+    return addr;
+}

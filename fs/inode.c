@@ -12,7 +12,7 @@ struct inode icache[NINODE];
 /* find the inode with specific dev and inum in memory, 
  * if not found, use first empty inode 
  * 注意: 这里只会申请一个可用的 inode 槽位, 增加一个内存引用, 不会锁住, 也不会从磁盘读出 */
-static struct inode* iget(char dev, uint32_t inum){
+struct inode* iget(char dev, uint32_t inum){
     struct inode *ip, *empty;
 
     empty = 0;
@@ -215,10 +215,13 @@ uint32_t bmap(struct inode *ip, uint32_t bn){
     if (bn < NDIRECT){
         if ((addr = ip->addrs[bn]) == 0) {
             addr = ip->addrs[bn] = balloc(ip->dev);
-            return addr;
         }
+        return addr;
     }
-    bn -= NDIRECT; if ((addr = ip->addrs[NINDIRECT]) == 0){
+
+    bn -= NDIRECT; 
+
+    if ((addr = ip->addrs[NINDIRECT]) == 0){
         addr = ip->addrs[NINDIRECT] = balloc(ip->dev);
     }
     bp = bread(ip->dev, ip->addrs[NINDIRECT]);
@@ -237,4 +240,80 @@ void stati(struct inode *ip, struct stat *st){
     st->type = ip->type;
     st->nlink = ip->nlink;
     st->size = ip->size;
+}
+
+/* read data from inode */
+int iread (struct inode *ip, char *dest, uint32_t off, uint32_t n){
+    uint32_t tot, m;
+    struct buf *bp;
+
+    if (ip->type == I_DEV){
+        // TODO
+    }
+
+    /* 偏移过大 || 溢出*/
+    if (off > ip->size || off + n < off){
+        return ERROR;
+    }
+
+    if (off + n > ip->size){
+        n = ip->size - off;
+    }
+
+    /*  tot: 已读取的字节数
+     *  n: 要读取的字节数
+     *  off: 当前文件指针偏移
+     *  m: 当次循环要读取的字节数
+     */
+    for (tot = 0; tot < n; tot += m, off += m, dest += m){
+        bp = bread(ip->dev, bmap(ip, off/BSIZE));
+        /* 每个循环读取的数据可分两种情况：
+         * - 从当前文件偏移读到该扇区结束
+         * - 从当前文件偏移读到 *满足要读取的字节数*
+         * 每次选择较小的那个
+         */
+        m = min(n - tot, BSIZE - off%BSIZE);
+        /* 从当前偏移相对于该扇区的偏移处起开始读取
+         * (在中间的循环这个值常常是0) 
+         */
+        memcpy(dest, bp->data + off/BSIZE, m);
+        brelse(bp);
+    }
+
+    return n;
+}
+
+/* write data to inode */
+int iwrite(struct inode *ip, char *src, uint32_t off, uint32_t n){
+    uint32_t tot, m;
+    struct buf *bp;
+
+    if (ip->type == I_DEV){
+        // TODO
+    }
+
+    if (off > ip->size || off + n < off ){
+        return ERROR;
+    }
+
+    if (off + n > MAXFILE*BSIZE){
+        return ERROR;
+    }
+
+    for (tot = 0; tot < n; tot += m, src += m, off += m){
+        bp = bread(ip->dev, bmap(ip, off/BSIZE));
+        m = min(n - tot, BSIZE - off%BSIZE);
+        memcpy(bp->data + off%BSIZE, src, m);
+        bwrite(bp);
+        brelse(bp);
+    }
+
+    /* if alloc new block to ip, update it's size */
+    // n > 0 ?
+    if (n > 0 && off > ip->size){
+        ip->size = off;
+        iupdate(ip);
+    }
+    
+    return n;
 }
