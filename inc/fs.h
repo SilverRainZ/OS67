@@ -22,6 +22,9 @@ struct superblock{
 #define NINDIRECT (BSIZE/sizeof(uint32_t))  // 512/4 = 128
 #define MAXFILE (NDIRECT + NINDIRECT)       // 
 
+#define ROOT_DEV 1
+#define ROOT_INO 1
+
 /* On-disk inodes structure */
 struct dinode{
     int16_t type;
@@ -104,7 +107,14 @@ void show_sb();
 #define NINODE 500 // length of inodes cache
 struct inode* iget(char dev, uint32_t inum);
 void iput(struct inode *ip);
+void ilock(struct inode *ip);
+void iunlock(struct inode *ip);
+void iunlockput(struct inode *ip);
 int iread (struct inode *ip, char *dest, uint32_t off, uint32_t n);
 int iwrite(struct inode *ip, char *src, uint32_t off, uint32_t n);
 
+/******functions in file fs/dir.c *****/
+
+struct inode* dir_lookup(struct inode *dirip, char *name, uint32_t *poff);
+int dir_link(struct inode *dirip, char *name, uint32_t inum);
 #endif

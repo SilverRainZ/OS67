@@ -21,7 +21,7 @@ struct inode* dir_lookup(struct inode *dirip, char *name, uint32_t *poff){
             continue;
         }
 
-        if (strncmp(name, de.name, 14) == 0){
+        if (strncmp(name, de.name, DIRSIZE) == 0){
             /* found */
             if (poff){
                 *poff = off;
