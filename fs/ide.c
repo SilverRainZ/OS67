@@ -36,24 +36,31 @@ static int ide_wait(int checkerr){
     return OK;
 }
 
-
 static void ide_start(struct buf *b){
     assert(b, "idestart: buffer is null");
     ide_wait(0);
+
+    /* get physical block number */
+    uint32_t phy_blkn = b->blkno*(BSIZE/PHY_BSIZE);
+
     outb(IDE_PORT_ALTSTATUS, 0);  // generate interrupt
-    outb(IDE_PORT_SECT_COUNT, 1);  // number of sectors 
-    outb(IDE_PORT_LBA0, b->lba & 0xff);
-    outb(IDE_PORT_LBA1, (b->lba >> 8) & 0xff);
-    outb(IDE_PORT_LBA2, (b->lba >> 16) & 0xff);
+
+    /* number of sectors, read 2 sector for once  */
+    outb(IDE_PORT_SECT_COUNT, BSIZE/PHY_BSIZE);  
+
+    outb(IDE_PORT_LBA0, phy_blkn & 0xff);
+    outb(IDE_PORT_LBA1, (phy_blkn  >> 8) & 0xff);
+    outb(IDE_PORT_LBA2, (phy_blkn >> 16) & 0xff);
     /* IDE_PORT_CURRENT = 0x101dhhhh d = driver hhhh = head*/
     /* but 0xe0 = 1010000 (? TODO */
-    outb(IDE_PORT_CURRENT, 0xe0 | ((b->dev&1)<<4) | ((b->lba>>24)&0x0f)); 
+    outb(IDE_PORT_CURRENT, 0xe0 | ((b->dev & 1) << 4) | ((phy_blkn >> 24) & 0x0f)); 
+
     if(b->flags & B_DIRTY){   // write
-        printl("ide_start: write blk-%d\n", b->lba);
+        printl("ide_start: write blk-%d\n", b->blkno);
         outb(IDE_PORT_CMD, IDE_CMD_WRITE);
-        outsl(IDE_PORT_DATA, b->data, 512/4);
+        outsl(IDE_PORT_DATA, b->data, BSIZE/4);
     } else {                  // read
-        printl("ide_start: read blk-%d\n", b->lba);
+        printl("ide_start: read blk-%d\n", b->blkno);
         outb(IDE_PORT_CMD, IDE_CMD_READ);
     }
 }
@@ -67,7 +74,7 @@ void ide_handler(struct regs_s *r){
     /* remove the head of queue */
     idequeue = b->qnext;
     if (!(b->flags & B_DIRTY) && (ide_wait(1) >= 0)){
-        insl(IDE_PORT_DATA, b->data, 512/4);
+        insl(IDE_PORT_DATA, b->data, BSIZE/4);
     }
 
     /* 缓冲区可用 */
@@ -75,11 +82,12 @@ void ide_handler(struct regs_s *r){
     /* 数据是最新的 */
     b->flags &= ~B_DIRTY;
 
-    printl("ide_handler: blk-%d VALID \n", b->lba);
+    printl("ide_handler: blk-%d VALID \n", b->blkno);
     if (idequeue){
         ide_start(idequeue);
     }
 }
+
 void ide_init(){
     /* NB: 一切从简, 不需要检测磁盘的存在 */
     /* IRQ14 = Primary ATA Hard Disk */
@@ -97,9 +105,9 @@ void ide_rw(struct buf *b){
     b->qnext = 0; 
     printl("ide_rw: request queue: ");
     for (pp = &idequeue; *pp; pp = &(*pp)->qnext){
-        printl("%d -> ",(*pp)->lba);
+        printl("%d -> ",(*pp)->blkno);
     }
-    printl("%d\n", b->lba);
+    printl("%d\n", b->blkno);
     *pp = b;
     
     /* if b is the head of queue, read/write it now */
@@ -113,13 +121,13 @@ void ide_rw(struct buf *b){
 }
 
 void ide_print_blk(struct buf *b){
-    printl("ide_print_blk: blk-%d, flags: ", b->lba);
+    printl("ide_print_blk: blk-%d, flags: ", b->blkno);
     if (b->flags & B_BUSY) printl("B_BUSY ");
     if (b->flags & B_DIRTY) printl("B_DIRTY");
     if (b->flags & B_VALID) printl("B_VALID");
     printl("\n");
     int i,j;
-    for (i = 0; i < 512; i += 32){
+    for (i = 0; i < BSIZE; i += 32){
         for (j = i; j < i + 32; j++){
             printl("%x ",b->data[j]);
         }
@@ -131,13 +139,13 @@ struct buf buffer;  // used for test
 void ide_test(){
     printl("=== ide_test start ===\n");
     buffer.dev = 0;
-    buffer.lba = 2;
+    buffer.blkno= 10;
     buffer.flags = B_BUSY;
     ide_rw(&buffer);
     ide_print_blk(&buffer);
     int i = 0;
-    for (i = 0; i < 512; i++){
-        buffer.data[i] = 0;
+    for (i = 0; i < BSIZE; i++){
+        buffer.data[i] = 1;
     }
     buffer.flags = B_BUSY|B_DIRTY;
     ide_rw(&buffer);
@@ -146,4 +154,5 @@ void ide_test(){
     ide_rw(&buffer);
     ide_print_blk(&buffer);
     printl("=== ide_test end ===\n");
+
 }

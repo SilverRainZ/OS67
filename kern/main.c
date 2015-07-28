@@ -66,7 +66,7 @@ int osmain(void)
     sti();
 
     ide_test();
-    show_sb();
+    print_sb();
     
     for (;;);
     kern_stack_top = (uint32_t)kern_stack + STACK_SIZE;

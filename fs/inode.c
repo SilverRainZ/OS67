@@ -1,8 +1,8 @@
 #include <type.h>
-#include <buf.h>
-#include <fs.h>
-#include <dbg.h>
 #include <asm.h>
+#include <dbg.h>
+#include <buf.h>
+#include <inode.h>
 #include <string.h>
 #include <printk.h>
 
@@ -46,7 +46,7 @@ struct inode* ialloc(char dev, uint16_t type){
     struct dinode *dip;
     struct superblock sb;
 
-    readsb(dev, &sb);
+    read_sb(dev, &sb);
 
     /* 这里会重复读取扇区 TODO */
     /* 从 1 开始吗? */

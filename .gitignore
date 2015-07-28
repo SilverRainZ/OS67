@@ -12,6 +12,8 @@ bin/
 *.swp
 *.log
 *.ini
+*.py
+*.pyc
 
 
 

@@ -60,16 +60,20 @@ install : bin/floppy.img bin/kernel
 	sleep 1
 	sudo umount /mnt/kernel
 
-# make a disk with minix file system
+# make a disk with minix v1 file system
 fs:
 	$(DEL) bin/rootfs.img
 	bximage bin/rootfs.img -hd=10M -imgmode=flat -mode=create -q
-	sudo mkfs.minix bin/rootfs.img
+	mkfs.minix bin/rootfs.img -1 -n14
 	sudo mount -o loop -t minix bin/rootfs.img /mnt/fs
 	sudo cp usr/README /mnt/fs/README
 	sleep 1
 	sudo umount /mnt/fs
-	
+
+# check root file system
+fsck:
+	fsck.minix -fsl ./bin/rootfs.img
+
 # default run with bochs
 run:
 	$(DBG) -q -f script/bochsrc.bxrc -rc script/bochsinit
@@ -91,6 +95,7 @@ clean:
 	$(DEL) bin/*.bin 
 	$(DEL) bin/*.tmp 
 	$(DEL) bin/kernel 
+	$(DEL) bin/rootfs.img
 	$(DEL) bin/floppy.img
 
 # clean list file under lst/
