@@ -2,64 +2,75 @@
 #include <dbg.h>
 #include <string.h>
 #include <printk.h>
-#include <fs.h>
+
+#include <minix.h>
+#include <inode.h>
+
 
 /* lookup a entry by name in specific dir inode */
-struct inode* dir_lookup(struct inode *dirip, char *name, uint32_t *poff){
+struct inode* dir_lookup(struct inode *dip, char *name, uint32_t *poff){
     uint32_t off;
-    struct dirent de;
+    struct dir_entry de;
 
-    assert(dirip->type == I_DIR, "dir_lookup: no dir");
-    // assert(poff, "dir_loopup: null pointer poff");
+    printl("dir_lookup: inode-%d, lookup: %s\n", dip->ino, name);
 
-    for (off = 0; off < dirip->size; off += sizeof(de)){
-        if (iread(dirip, (char*)&de, off,sizeof(de)) != sizeof(de)){
+    //assert(dip->mode == T_DIR, "dir_lookup: no dir");
+
+    for (off = 0; off < dip->size; off += sizeof(de)){
+        if (iread(dip, (char*)&de, off,sizeof(de)) != sizeof(de)){
             panic("dir_lookup: fault when read");
         }
 
-        if (de.inum == 0){
+        if (de.ino == 0){
             continue;
         }
 
-        if (strncmp(name, de.name, DIRSIZE) == 0){
+        printl("inode-%d named %s", de.ino, de.name);
+
+        if (strncmp(name, de.name, NAME_LEN) == 0){
+            printl("found\n");
+
             /* found */
             if (poff){
                 *poff = off;
             }
+            return iget(dip->dev, de.ino);
         }
-        return iget(dirip->dev, de.inum);
     }
 
+    printl("no found\n");
     /* no found */
     return 0;
 }
 
-/* write a new dir entry(name & inum) into the dir inode */
-int dir_link(struct inode *dirip, char *name, uint32_t inum){
+/* write a new dir entry(name &.ino) into the dir inode */
+int dir_link(struct inode *dip, char *name, uint32_t ino){
     uint32_t off;
-    struct dirent de;
+    struct dir_entry de;
     struct inode *ip;
 
+    printl("dir_link: link inode-%d named %s to dir inode-%d\n", ino, name, dip->ino);
+
     /* is this name existed? */
-    if ((ip = dir_lookup(dirip, name, 0)) != 0){
+    if ((ip = dir_lookup(dip, name, 0)) != 0){
         iput(ip); // (?) 
         return ERROR;
     }
 
-    for (off = 0; off < dirip->size; off += sizeof(de)){
-        if (iread(dirip, (char *)&de, off, sizeof(de)) != 0){
+    for (off = 0; off < dip->size; off += sizeof(de)){
+        if (iread(dip, (char *)&de, off, sizeof(de)) != 0){
             panic("dir_link: fault when read");
         }
         /* found a free entry */
-        if (de.inum == 0){
+        if (de.ino == 0){
             break;
         }
         
     }
-    strncpy(de.name, name, DIRSIZE);
-    de.inum = inum;
+    strncpy(de.name, name, NAME_LEN);
+    de.ino = ino;
 
-    if (iwrite(dirip, (char *)&de, off, sizeof(de)) != sizeof(de)){
+    if (iwrite(dip, (char *)&de, off, sizeof(de)) != sizeof(de)){
         panic("dir_link: fault when write");
     }
     return 0;

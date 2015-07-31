@@ -2,6 +2,10 @@
 #include <asm.h>
 #include <dbg.h>
 #include <buf.h>
+#include <minix.h>
+#include <bcache.h>
+#include <sb.h>
+#include <bitmap.h>
 #include <inode.h>
 #include <string.h>
 #include <printk.h>
@@ -12,14 +16,15 @@ struct inode icache[NINODE];
 /* find the inode with specific dev and inum in memory, 
  * if not found, use first empty inode 
  * 注意: 这里只会申请一个可用的 inode 槽位, 增加一个内存引用, 不会锁住, 也不会从磁盘读出 */
-struct inode* iget(char dev, uint32_t inum){
+struct inode* iget(uint16_t dev, uint16_t ino){
     struct inode *ip, *empty;
 
     empty = 0;
     for (ip = &icache[0]; ip < &icache[NINODE]; ip++){
         /* this inode is cached */
-        if (ip->ref > 0 && ip->dev == dev && ip->inum == inum){
-            ip->ref--;
+        if (ip->ref > 0 && ip->dev == dev && ip->ino == ino){
+            printl("iget: inode-%d cached\n", ino);
+            ip->ref++;
             return ip;
         }
         /* remember the first free inode */
@@ -28,60 +33,47 @@ struct inode* iget(char dev, uint32_t inum){
         }
     }
     assert(empty, "ige: no inode");
+
+    printl("iget: inode-%d no cached, found a empty one\n", ino);
+
     ip = empty;
     ip->dev = dev;
-    ip->inum = inum;
+    ip->ino = ino;
     ip->ref = 1;
     ip->flags = 0;
     return ip;
 }
 
 /* alloc a inode with specific type 
- * - 磁盘: 找到磁盘里的空闲 dinodes, 清空并写入 type, 表示已经占用
+ * - 磁盘: 在 inode bitmap 中寻找一个空闲的位, 清空该位对应的 d_inode
  * - 内存: 通过 iget() 在内存中申请一个对应的 inodes 槽位
  */
-struct inode* ialloc(char dev, uint16_t type){
-    int inum;
-    struct buf *bp;
-    struct dinode *dip;
-    struct superblock sb;
+struct inode* ialloc(uint16_t dev){
+    int ino;
 
-    read_sb(dev, &sb);
-
-    /* 这里会重复读取扇区 TODO */
-    /* 从 1 开始吗? */
-    for (inum = 1; inum < sb.ninodes; inum++){
-        bp = bread(dev, IBLOCK(inum));
-        dip = (struct dinode *)bp->data + inum%IPB;
-        /* detect a free node */
-        if (dip->type == 0){
-            memset(dip, 0, sizeof(dip));
-            dip->type = type;
-            bwrite(bp);
-            brelse(bp);
-            return iget(dev, inum);
-        }
-        brelse(bp);
-    }
-    assert(0, "ialloc: no dinode");
-    return NULL;
+    ino = _ialloc(dev);
+    return iget(dev, ino);
 }
 
 /* copy a in-memory inode to disk */
 void iupdate(struct inode *ip){
     struct buf *bp;
-    struct dinode *dip;
+    struct d_inode *d_ip;
+    struct super_block sb;
+    
+    printl("iupdate: updata inode-%d\n", ip->ino);
 
-    bp = bread(ip->dev, IBLOCK(ip->inum));
-    dip = (struct dinode *)bp + (ip->inum)%IPB;
+    read_sb(ip->dev , &sb);
 
-    /* ip -> dip */
-    dip->type = ip->type;
-    dip->major = ip->major;
-    dip->minor = ip->minor;
-    dip->nlink = ip->nlink;
-    dip->size = ip->size;
-    memcpy(dip->addrs, ip->addrs, sizeof(ip->addrs));
+    bp = bread(ip->dev, IBLK(sb, ip->ino));
+    d_ip = (struct d_inode *)bp->data + (ip->ino)%IPB;
+
+    /* ip -> d_ip */
+    d_ip->mode = ip->mode;
+    d_ip->size = ip->size;
+    d_ip->nlinks = ip->nlinks;
+    d_ip->size = ip->size;
+    memcpy(d_ip->zone, ip->zone, sizeof(ip->zone));
 
     bwrite(bp);
     brelse(bp);
@@ -90,34 +82,44 @@ void iupdate(struct inode *ip){
 /* truncate inode 
  * only called when the inode has no links to it 
  * and not any in-memory ref to it
- * - 在磁盘上没有被任何目录引用 nlink = 0
+ * - 在磁盘上没有被任何目录引用 nlinks = 0
  * - 在内存里没有引用(没有被打开) ref = 0
  */
-void itrunc(struct inode *ip){
-    int i, j;
+static void itrunc(struct inode *ip){
+    uint32_t i, j;
     struct buf *bp;
-    uint32_t *addrs2;
-    /* lenght of addrs is NDIRECT + 1 */
+    uint16_t *zone2;
+
+    printl("itrunc: truncate inode-%d\n", ip->ino);
+
+    printl("itrunc:  direct block\n");
 
     /* free DIRECT block */
     for (i = 0; i < NDIRECT; i++){
-        if (ip->addrs[i]){
-            bfree(ip->dev, ip->addrs[i]);
-            ip->addrs[i] = 0;
+        if (ip->zone[i]){
+            bfree(ip->dev, ip->zone[i]);
+            ip->zone[i] = 0;
         }
     }
 
     /* free INDIRECT block */
-    if (ip->addrs[NDIRECT]){
-        bp = bread(ip->dev,ip->addrs[NDIRECT]);
-        addrs2 = (uint32_t *)bp->data;
+    if (ip->zone[NDIRECT]){
+        printl("itrunc:  direct block\n");
+
+        bp = bread(ip->dev,ip->zone[NDIRECT]);
+        zone2 = (uint16_t *)bp->data;
         for (j = 0; j < NINDIRECT; j++){
-            if (addrs2[j]){
-                bfree(ip->dev, addrs2[j]);
-                addrs2[j] = 0;
+            if (zone2[j]){
+                bfree(ip->dev, zone2[j]);
+                zone2[j] = 0;
             }
         }
+        brelse(bp);
+        bfree(ip->dev, ip->zone[NDIRECT]);
+        ip->zone[NDIRECT] = 0;
     }
+
+    /* DAUL INDIRECT block is unused*/
 
     ip->size = 0;
     iupdate(ip);
@@ -126,23 +128,30 @@ void itrunc(struct inode *ip){
 /* reference of ip + 1 */
 struct inode* idup(struct inode *ip){
     ip->ref++;
+    printl("idup: inode-%d's ref: %d\n", ip->ino, ip->ref);
     return ip;
 }
 
 /* reference of ip - 1 
  * if it is the last ref, this node can be recycle (ref = 1) (?)
- * and if this inode have no link to it (nlink = 0)
+ * and if this inode have no link to it (nlinks = 0)
  * free this inode in the disk
  */
 void iput(struct inode *ip){ 
-    if (ip->ref == 1 && ip->flags & I_VALID && ip->nlink == 0){
+    printl("iput: inode-%d's ref: %d\n", ip->ino, ip->ref);
+
+    if (ip->ref == 1 && ip->flags & I_VALID && ip->nlinks == 0){
+        printl("iput: free inode-%d\n", ip->ino);
+
         /* can not free a locked inode */
         assert(!(ip->flags & I_BUSY), "iput: free a locked inode");
         ip->flags |= I_BUSY;
         itrunc(ip); // TODO
-        ip->type = 0;
-        iupdate(ip);
-        ip->flags = 0;
+
+        _ifree(ip->dev, ip->ino);
+
+        // ip-> ref == 0
+        // ip->flags = 0;
     }
     ip->ref--;
 }
@@ -153,10 +162,15 @@ void iput(struct inode *ip){
  */
 void ilock(struct inode *ip){
     struct buf *bp;
-    struct dinode *dip;
+    struct d_inode *d_ip;
+    struct super_block sb;
 
-    assert(ip,"ilock: null pointer");
-    assert(ip->ref,"ilock: lock a noo-ref inode");
+    printl("ilock: lock inode-%d\n", ip->ino);
+
+    assert(ip, "ilock: null pointer");
+    assert(ip->ref, "ilock: lock a noo-ref inode");
+
+    read_sb(ip->dev, &sb);
 
     // TODO
     int timeout = 20000;
@@ -169,25 +183,25 @@ void ilock(struct inode *ip){
 
     /* need to be read form disk */
     if (!(ip->flags & I_VALID)){
-        bp = bread(ip->dev, IBLOCK(ip->inum));
-        dip = (struct dinode *)bp->data + (ip->inum)%IPB;
+        bp = bread(ip->dev, IBLK(sb, ip->ino));
+        d_ip = (struct d_inode *)bp->data + (ip->ino)%IPB;
 
         /* ip -> dip */
-        ip->type = dip->type;
-        ip->major = dip->major;
-        ip->minor = dip->minor;
-        ip->nlink = dip->nlink;
-        ip->size = dip->size;
-        memcpy(ip->addrs, dip->addrs, sizeof(dip->addrs));
+        ip->mode = d_ip->mode;
+        ip->nlinks = d_ip->nlinks;
+        ip->size = d_ip->size;
+        memcpy(ip->zone, d_ip->zone, sizeof(d_ip->zone));
 
         brelse(bp);
         ip->flags |= I_VALID;
-        assert(ip->type, "ilock: inode no type");
+        //assert(ip->type, "ilock: inode no type");
     }
 }
 
 /* unlock a inode */
 void iunlock(struct inode *ip){
+    printl("iunlock: unlock inode-%d\n", ip->ino);
+
     assert(ip,"iunlock: null pointer");
     assert(ip->ref,"iunlock: unlock a noo-ref inode"); // (?)
     assert(ip->flags & I_BUSY ,"iunlock: unlock a unlocked inode");
@@ -206,53 +220,63 @@ void iunlockput(struct inode *ip){
 /* return the disk block address of the nth block in given inode
  * if not such  block, alloc one
  */
-uint32_t bmap(struct inode *ip, uint32_t bn){
-    uint32_t addr, *addrs2;
+static uint32_t bmap(struct inode *ip, uint32_t bn){
+    uint32_t zone1, *zones2;
     struct buf *bp;
+
+    printl("bmap: inode-%d zone number: %d\n", ip->ino, bn);
 
     assert(bn < NDIRECT + NINDIRECT,"bmap: out of range");
 
     if (bn < NDIRECT){
-        if ((addr = ip->addrs[bn]) == 0) {
-            addr = ip->addrs[bn] = balloc(ip->dev);
+        if ((zone1 = ip->zone[bn]) == 0) {
+           zone1 = ip->zone[bn] = balloc(ip->dev);
         }
-        return addr;
+        printl("bmap: return direct blk-%d\n", zone1);
+        return zone1;
     }
 
     bn -= NDIRECT; 
 
-    if ((addr = ip->addrs[NINDIRECT]) == 0){
-        addr = ip->addrs[NINDIRECT] = balloc(ip->dev);
+    if ((zone1 = ip->zone[NDIRECT]) == 0){
+        zone1 = ip->zone[NDIRECT] = balloc(ip->dev);
     }
-    bp = bread(ip->dev, ip->addrs[NINDIRECT]);
-    addrs2 = (uint32_t *)bp->data;
-    if ((addr = addrs2[bn]) == 0){
-        addrs2[bn] = balloc(ip->dev);
+
+    bp = bread(ip->dev, ip->zone[NDIRECT]);
+    zones2 = (uint32_t *)bp->data;
+
+    if ((zone1 = zones2[bn]) == 0){
+        zones2[bn] = balloc(ip->dev);
         bwrite(bp);
     }
+
     brelse(bp);
-    return addr;
+    printl("bmap: return indirect blk-%d\n", zone1);
+    return zone1;
 }
 
+/*
 void stati(struct inode *ip, struct stat *st){
     st->dev = ip->dev;
     st->ino = ip->inum;
     st->type = ip->type;
-    st->nlink = ip->nlink;
+    st->nlinks = ip->nlinks;
     st->size = ip->size;
 }
+*/
 
 /* read data from inode */
 int iread (struct inode *ip, char *dest, uint32_t off, uint32_t n){
     uint32_t tot, m;
     struct buf *bp;
 
-    if (ip->type == I_DEV){
+    if (ip->mode == T_DEV){
         // TODO
     }
 
     /* 偏移过大 || 溢出*/
     if (off > ip->size || off + n < off){
+        panic("iread: incorrect offet");
         return ERROR;
     }
 
@@ -260,6 +284,7 @@ int iread (struct inode *ip, char *dest, uint32_t off, uint32_t n){
         n = ip->size - off;
     }
 
+    printl("iread: inode-%d offset: %d read: %d\n", ip->ino, off, n);
     /*  tot: 已读取的字节数
      *  n: 要读取的字节数
      *  off: 当前文件指针偏移
@@ -288,7 +313,9 @@ int iwrite(struct inode *ip, char *src, uint32_t off, uint32_t n){
     uint32_t tot, m;
     struct buf *bp;
 
-    if (ip->type == I_DEV){
+    printl("iwrite: inode-%d offset: %d read: %d\n", ip->ino, off, n);
+
+    if (ip->mode == T_DEV){
         // TODO
     }
 
@@ -316,4 +343,14 @@ int iwrite(struct inode *ip, char *src, uint32_t off, uint32_t n){
     }
     
     return n;
+}
+
+void print_i(struct inode *ip){
+    printl("print_i 0x%x\n", ip);
+    printl("  ino: %d\n", ip->ino);
+    printl("  ref: %d\n", ip->ref);
+    printl("  flags: %d\n", ip->flags);
+    printl("  mode: %d\n", ip->mode);
+    printl("  size: %d\n", ip->size);
+    printl("  nlinks: %d\n", ip->nlinks);
 }

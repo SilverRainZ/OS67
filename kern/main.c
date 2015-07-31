@@ -15,7 +15,8 @@
 #include <sched.h>
 #include <ide.h>
 #include <buf.h>
-#include <fs.h>
+#include <bcache.h>
+#include <sb.h>
 
 uint32_t kern_stack_top;
 char kern_stack[STACK_SIZE] __attribute__((aligned(16)));
@@ -49,30 +50,25 @@ int osmain(void)
     
     vmm_init();
     puts("vmm init...\n\r");
-    vmm_test();
+    // vmm_test();
     
     kb_init();
     puts("kb init...\n\r");
 
     heap_init();
     puts("heap init...\n\r");
-    heap_test();
+    // heap_test();
 
     ide_init();
     puts("ide init...\n\r");
+    // ide_test();
 
     bcache_init();
     puts("buffer cache init...\n\r");
     sti();
 
-    ide_test();
-    print_sb();
+    fs_test();
     
-    for (;;);
-    kern_stack_top = (uint32_t)kern_stack + STACK_SIZE;
-	__asm__ __volatile__ ("mov %0, %%esp\n\t"
-			"xor %%ebp, %%ebp" : : "r" (kern_stack_top));
-    /* 切换新栈 */
     for (;;);
     return 0;
 }

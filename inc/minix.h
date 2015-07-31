@@ -18,7 +18,6 @@
 /* size of a block in disk (byte) */
 #define PHY_BSIZE 512 
 
-/* minix superblock, locate at block 2 (zone 1)*/
 struct super_block{
     uint16_t ninodes;       // number of inodes
     uint16_t nzones;        // number of zones
@@ -32,22 +31,12 @@ struct super_block{
     uint16_t state;         // (?) mount state
 };
 
-/* inode status flag */
-#define I_BUSY 0x1
-#define I_VALID 0x2
-
-/* inode type flag */
-#define T_FREE 0x0
-#define T_DIR 0x1
-#define T_FILE 0x2
-#define T_DEV 0x3
-
 /* in-disk minix inode */
-struct dinode{
+struct d_inode{
     uint16_t mode;  // file type and RWX(unused) bit
     uint16_t uid;   // identifies the user who owns the file (unused)
     uint32_t size;  // file size (byte)
-    uint16_t mtime; // time since Jan. 1st, 1970 (second) (unused)
+    uint32_t mtime; // time since Jan. 1st, 1970 (second) (unused)
     uint8_t gid;    // owner's group (unused)
     uint8_t nlinks; // number of dircetory link to it
 
@@ -59,29 +48,46 @@ struct dinode{
     uint16_t zone[9]; 
 };
 
+/* inode status flag */
+#define I_BUSY 0x1
+#define I_VALID 0x2
+
+/* inode type flag */
+#define T_DIR 0x1
+#define T_FILE 0x2
+#define T_DEV 0x3
+
 /* in-memorty inode */
 struct inode{
-    uint16_t dev;
-    uint32_t inum;
+    uint16_t dev;   // be 0 forever
+    uint32_t ino;
     uint16_t ref;
     uint16_t flags;
-    uint16_t atime; 
-    uint16_t ctime; 
+    uint16_t atime; // (unused)
+    uint16_t ctime; // (unused)
     
+// struct d_inode {
     uint16_t mode;
-    uint16_t uid;
+    uint16_t uid;   // (unused)
     uint32_t size;
-    uint16_t mtime;
-    uint8_t gid;
+    uint32_t mtime; // (unused)
+    uint8_t gid;    // (unused)
     uint8_t nlinks;
     uint16_t zone[9];
+//}
 };
 
-#define DIRSIZE 14
+#define NAME_LEN 14
+#define NDIRECT 7 // 一个 i 节点直接管辖的块数目
+#define NINDIRECT (BSIZE/sizeof(uint16_t))  // 1024/2 = 512
+#define NDUAL_INDIRECT (BSIZE*BSIZE/sizeof(uint16_t)) // (unused)
+
+#define MAXFILE (NDIRECT + NINDIRECT)       // 512 + 7 kb
+
 /* minix directroy entry */
 struct dir_entry{
-    uint16_t inum;
-    char name[DIRSIZE];
+    uint16_t ino;
+    char name[NAME_LEN];
 };
 
 /* inode per block */
@@ -91,14 +97,13 @@ struct dir_entry{
 
 /* block contain inode i 
  * NB: inode number starts at 1 */
-#define IBLOCK(sb, i) (2 + ((sp)->imap_blk) + ((sp)->zmap_blk) + ((i) - 1)/IPB)
-/* block contain bit b */
-/* 取得包含第b bit的block号, ninodes 只可能是 super_block.ninodes  */
-#define BBLOCK(sb, b) (b/BPB + (sb->ninodes)/IPB + (sp->imp_blk) + (sp->zmap_blk))
+#define IBLK(sb, i) (2 + ((sb).imap_blk) + ((sb).zmap_blk) + ((i) - 1)/IPB)
 
-#define NDIRECT 7 // 一个 i 节点直接管辖的块数目
-#define NINDIRECT (BSIZE/sizeof(uint32_t))  // 1024/4 = 256
-#define MAXFILE (NDIRECT + NINDIRECT)       // 
+/* bitmap contain inode i*/
+#define IMAP_BLK(sb, i) (2 + (i - 1)/BPB)
+/* bitmap contain block z */
+#define ZMAP_BLK(sb, b) (2 + sb.imap_blk + (b)/BPB)
 
+void fs_test();
 
 #endif

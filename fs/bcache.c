@@ -1,4 +1,4 @@
-/* buffer cache 
+/* block cache 
  * This file is modified form xv6
  */
 #include <type.h>
