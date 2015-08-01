@@ -1,5 +1,6 @@
 #ifndef __BUF_H
 #define __BUF_H
+
 #include <type.h>
 #include <minix.h>
 
