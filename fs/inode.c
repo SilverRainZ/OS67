@@ -184,7 +184,7 @@ void ilock(struct inode *ip){
     /* need to be read form disk */
     if (!(ip->flags & I_VALID)){
         bp = bread(ip->dev, IBLK(sb, ip->ino));
-        d_ip = (struct d_inode *)bp->data + (ip->ino)%IPB;
+        d_ip = (struct d_inode *)bp->data + (ip->ino - 1)%IPB;
 
         /* ip -> dip */
         ip->mode = d_ip->mode;
@@ -301,7 +301,7 @@ int iread (struct inode *ip, char *dest, uint32_t off, uint32_t n){
         /* 从当前偏移相对于该扇区的偏移处起开始读取
          * (在中间的循环这个值常常是0) 
          */
-        memcpy(dest, bp->data + off/BSIZE, m);
+        memcpy(dest, bp->data + off%BSIZE, m);
         brelse(bp);
     }
 

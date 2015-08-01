@@ -25,10 +25,10 @@ struct inode* dir_lookup(struct inode *dip, char *name, uint32_t *poff){
             continue;
         }
 
-        printl("inode-%d named %s", de.ino, de.name);
+        printl("inode-%d named: [%s]\n", de.ino, de.name);
 
         if (strncmp(name, de.name, NAME_LEN) == 0){
-            printl("found\n");
+            printl("dir_lookup: found\n");
 
             /* found */
             if (poff){
