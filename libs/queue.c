@@ -1,7 +1,9 @@
 /* queue.c
  * this file define a queue, used as a buffer.
  */
+// std
 #include <type.h>
+// libs
 #include <queue.h> 
 
 bool queue_init(pqueue Q){

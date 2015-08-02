@@ -1,7 +1,9 @@
 /* str.c
  * this file includes some library functions to process string
  */
+// std
 #include <type.h> 
+// libs
 #include <string.h>
 
 void *memcpy(void *dest, const void *src, uint32_t count){

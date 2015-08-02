@@ -2,8 +2,9 @@
  * This file is modified form Bram's Kernel Development Tutorial
  * set the new gdt, the new gdt table has 256 entrys
  */
-
+// std
 #include <type.h>
+// x86
 #include <pm.h>
 
 static struct gdt_entry gdt[256];  // we hava 256 gdt entry

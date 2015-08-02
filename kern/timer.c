@@ -3,13 +3,16 @@
  * enable programmable interval timer(PIT)
  *
  */
-
+// std
 #include <asm.h>
+// x86
 #include <isr.h>
-#include <vga.h>
 #include <timer.h>
-#include <sched.h>
+// drv
+#include <vga.h>
 #include <printk.h>
+// proc
+#include <sched.h>
 
 unsigned int timer_ticks = 0;
 

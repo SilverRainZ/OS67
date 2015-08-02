@@ -1,14 +1,17 @@
+// std
 #include <type.h>
 #include <asm.h>
 #include <dbg.h>
-#include <buf.h>
-#include <minix.h>
-#include <bcache.h>
-#include <sb.h>
-#include <bitmap.h>
-#include <inode.h>
+// libs
 #include <string.h>
 #include <printk.h>
+// fs
+#include <buf.h>
+#include <minix.h>
+#include <sb.h>
+#include <bcache.h>
+#include <bitmap.h>
+#include <inode.h>
 
 /* inodes cache */
 struct inode icache[NINODE];
@@ -349,7 +352,11 @@ void print_i(struct inode *ip){
     printl("print_i 0x%x\n", ip);
     printl("  ino: %d\n", ip->ino);
     printl("  ref: %d\n", ip->ref);
-    printl("  flags: %d\n", ip->flags);
+    printl("  flags: ");
+    if (ip->flags & I_BUSY) printl("I_BUSY ");
+    if (ip->flags & I_VALID) printl("I_VALID");
+    printl("\n");
+
     printl("  mode: %d\n", ip->mode);
     printl("  size: %d\n", ip->size);
     printl("  nlinks: %d\n", ip->nlinks);

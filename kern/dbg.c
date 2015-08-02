@@ -4,10 +4,13 @@
  * 由于kernel是纯二进制文件， print_stack_trace并没有太大的作用
  */
 
+// std
+#include <type.h>
 #include <dbg.h> 
 #include <asm.h>
-#include <type.h>
+// drv
 #include <vga.h>
+// libs
 #include <printk.h>
 
 /* print current runlevel and register */

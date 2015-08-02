@@ -2,9 +2,10 @@
  * This file is modified form Bram's Kernel Development Tutorial
  * Handle the Interrupt Requests(IRQs)h raised by hardware device 
  */
-
+// std
 #include <type.h>
 #include <asm.h>
+// x86
 #include <pm.h>
 #include <isr.h>
 

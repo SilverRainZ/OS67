@@ -67,7 +67,7 @@ fs:
 	bximage bin/rootfs.img -hd=10M -imgmode=flat -mode=create -q
 	mkfs.minix bin/rootfs.img -1 -n14
 	sudo mount -o loop -t minix bin/rootfs.img /mnt/fs
-	sudo cp usr/README /mnt/fs/README
+	sudo cp -r usr/* /mnt/fs/
 	sleep 1
 	sudo umount /mnt/fs
 

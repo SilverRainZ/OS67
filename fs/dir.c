@@ -1,8 +1,10 @@
+// std
 #include <type.h>
 #include <dbg.h>
+// libs
 #include <string.h>
 #include <printk.h>
-
+// fs
 #include <minix.h>
 #include <inode.h>
 
@@ -58,14 +60,13 @@ int dir_link(struct inode *dip, char *name, uint32_t ino){
     }
 
     for (off = 0; off < dip->size; off += sizeof(de)){
-        if (iread(dip, (char *)&de, off, sizeof(de)) != 0){
+        if (iread(dip, (char *)&de, off, sizeof(de)) != sizeof(de)){
             panic("dir_link: fault when read");
         }
         /* found a free entry */
         if (de.ino == 0){
             break;
         }
-        
     }
     strncpy(de.name, name, NAME_LEN);
     de.ino = ino;

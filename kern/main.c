@@ -1,22 +1,29 @@
+// std
 #include <type.h>
 #include <asm.h>
+#include <dbg.h>
+// x86
 #include <pm.h>
 #include <isr.h>
-#include <vga.h>
 #include <timer.h>
-#include <kb.h>
+// libs
 #include <string.h>
 #include <printk.h>
+// drv
+#include <vga.h>
+#include <kb.h>
+#include <ide.h>
+// mm
 #include <pmm.h>
 #include <vmm.h>
-#include <dbg.h>
 #include <heap.h>
+// proc
 #include <task.h>
 #include <sched.h>
-#include <ide.h>
+// fs
 #include <buf.h>
-#include <bcache.h>
 #include <sb.h>
+#include <bcache.h>
 
 uint32_t kern_stack_top;
 char kern_stack[STACK_SIZE] __attribute__((aligned(16)));
@@ -45,7 +52,7 @@ int osmain(void)
 
     pmm_init();
     puts("pmm init...\n\r");
-    pmm_mem_info();
+    // pmm_mem_info();
     //pmm_test();
     
     vmm_init();

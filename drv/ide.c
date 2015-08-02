@@ -6,16 +6,21 @@
  * 注意磁盘镜像是通过 make fs 生成的rootfs.img文件, 而内核单独存在于floppy.img中
  * 因此你无法通过这里的函数访问到内核.
  */
-
-#include <ide.h> 
-#include <buf.h>
-#include <asm.h>
+// std
 #include <type.h>
+#include <dbg.h>
+#include <asm.h>
+// x86
 #include <isr.h>
+//mm
 #include <heap.h>
+// libs
 #include <string.h>
 #include <printk.h>
-#include <dbg.h>
+// drv
+#include <ide.h> 
+// fs
+#include <buf.h>
 
 /* 缓冲区定义在 bcache.c */
 static struct buf *idequeue = NULL;    // buffer queue of disk request
@@ -56,11 +61,11 @@ static void ide_start(struct buf *b){
     outb(IDE_PORT_CURRENT, 0xe0 | ((b->dev & 1) << 4) | ((phy_blkn >> 24) & 0x0f)); 
 
     if(b->flags & B_DIRTY){   // write
-        printl("ide_start: write blk-%d\n", b->blkno);
+        // printl("ide_start: write blk-%d\n", b->blkno);
         outb(IDE_PORT_CMD, IDE_CMD_WRITE);
         outsl(IDE_PORT_DATA, b->data, BSIZE/4);
     } else {                  // read
-        printl("ide_start: read blk-%d\n", b->blkno);
+        // printl("ide_start: read blk-%d\n", b->blkno);
         outb(IDE_PORT_CMD, IDE_CMD_READ);
     }
 }
@@ -82,7 +87,7 @@ void ide_handler(struct regs_s *r){
     /* 数据是最新的 */
     b->flags &= ~B_DIRTY;
 
-    printl("ide_handler: blk-%d VALID \n", b->blkno);
+    //printl("ide_handler: blk-%d VALID \n", b->blkno);
     if (idequeue){
         ide_start(idequeue);
     }
@@ -103,11 +108,11 @@ void ide_rw(struct buf *b){
     /* nb: 这里的双重指针要小心 */
     struct buf **pp;
     b->qnext = 0; 
-    printl("ide_rw: request queue: ");
+    //printl("ide_rw: request queue: ");
     for (pp = &idequeue; *pp; pp = &(*pp)->qnext){
-        printl("%d -> ",(*pp)->blkno);
+        //printl("%d -> ",(*pp)->blkno);
     }
-    printl("%d\n", b->blkno);
+    //printl("%d\n", b->blkno);
     *pp = b;
     
     /* if b is the head of queue, read/write it now */
@@ -122,9 +127,9 @@ void ide_rw(struct buf *b){
 
 void ide_print_blk(struct buf *b){
     printl("ide_print_blk: blk-%d, flags: ", b->blkno);
-    if (b->flags & B_BUSY) printl("B_BUSY ");
-    if (b->flags & B_DIRTY) printl("B_DIRTY");
-    if (b->flags & B_VALID) printl("B_VALID");
+    if (b->flags & B_BUSY) //printl("B_BUSY ");
+    if (b->flags & B_DIRTY) //printl("B_DIRTY");
+    if (b->flags & B_VALID) //printl("B_VALID");
     printl("\n");
     int i,j;
     for (i = 0; i < BSIZE; i += 32){
@@ -137,7 +142,7 @@ void ide_print_blk(struct buf *b){
 
 struct buf buffer;  // used for test
 void ide_test(){
-    printl("=== ide_test start ===\n");
+    //printl("=== ide_test start ===\n");
     buffer.dev = 0;
     buffer.blkno= 10;
     buffer.flags = B_BUSY;
@@ -153,6 +158,6 @@ void ide_test(){
     buffer.flags = B_BUSY;
     ide_rw(&buffer);
     ide_print_blk(&buffer);
-    printl("=== ide_test end ===\n");
+    //printl("=== ide_test end ===\n");
 
 }

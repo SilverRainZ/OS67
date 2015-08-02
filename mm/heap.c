@@ -3,13 +3,15 @@
  * 内存堆分配， 实现kmalloc()和kfree()
  * 链表实现的侵入式内存管理
  */
-
+// std
 #include <type.h> 
-#include <heap.h>
+#include <dbg.h>
+// libs
+#include <printk.h>
+// mm
 #include <pmm.h>
 #include <vmm.h>
-#include <dbg.h>
-#include <printk.h>
+#include <heap.h>
 
 /* head node of chunk list */
 static struct header *heap_first;

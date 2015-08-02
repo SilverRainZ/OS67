@@ -2,12 +2,14 @@
  * This file is modified form Bram's Kernel Development Tutorial
  * enable keyboard and retive message by IRQ
  */
-
+// std
 #include <type.h>
-#include <vga.h>
 #include <asm.h>
+// x86
 #include <isr.h>
+// drv
 #include <kb.h>
+#include <vga.h>
 
 static unsigned char kb_map[128] =
 {

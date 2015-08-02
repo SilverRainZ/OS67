@@ -1,16 +1,20 @@
 /* alloc.c
  * alloc/free data_block/inode
  */
+// std
 #include <type.h> 
-#include <buf.h> 
+#include <dbg.h> 
+// libs
+#include <string.h> 
+#include <printk.h> 
+// drv
 #include <ide.h> 
+// fs
+#include <buf.h> 
 #include <minix.h>
 #include <sb.h>
 #include <bcache.h>
 #include <bitmap.h> 
-#include <string.h> 
-#include <printk.h> 
-#include <dbg.h> 
 
 
 /* clear a block */
@@ -106,9 +110,7 @@ int _ialloc(uint16_t dev){
                /* fill inode with zero */
                bp = bread(dev, IBLK(sb,ino));
                d_ip = (struct d_inode *)bp->data + (ino - 1)%IPB;
-               memset(d_ip, 0, sizeof(*d_ip));
-               bwrite(bp);
-               brelse(bp);
+               memset(d_ip, 0, sizeof(*d_ip)); bwrite(bp); brelse(bp);
 
                return ino;
            }

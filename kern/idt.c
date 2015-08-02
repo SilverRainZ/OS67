@@ -3,8 +3,11 @@
   * install idt, 256 entrys table
   */
 
+// std
 #include <type.h>
+// x86
 #include <pm.h>
+// libs
 #include <string.h>
 
 static struct idt_entry idt[256];

@@ -6,16 +6,19 @@
  * 同时实现了对页异常 int 14 的处理 page_fault()
  * 实现了map和unmap，供kmalloc使用
  */
-
+// std
 #include <type.h>
-#include <vmm.h> 
-#include <pmm.h>
-#include <pm.h>
-#include <isr.h>
-#include <string.h>
-#include <printk.h>
 #include <asm.h>
 #include <dbg.h>
+// x86
+#include <pm.h>
+#include <isr.h>
+// libs
+#include <string.h>
+#include <printk.h>
+// mm
+#include <vmm.h> 
+#include <pmm.h>
 
 /* page directory table of kernel */
 pgd_t pgd_kern[PGD_SIZE] __attribute__((aligned(PAGE_SIZE)));

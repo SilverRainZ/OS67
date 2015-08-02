@@ -21,12 +21,14 @@ int main(){
 }
 
 #else
-
+// std
 #include <type.h>
+#include <dbg.h>
+// drv
 #include <vga.h>
+// libs
 #include <string.h>
 #include <printk.h>
-#include <dbg.h>
 
 #endif
 

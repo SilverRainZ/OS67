@@ -1,7 +1,10 @@
+// std
 #include <type.h>
 #include <dbg.h>
+// libs
 #include <printk.h>
 #include <string.h>
+// fs
 #include <inode.h>
 #include <dir.h>
 #include <minix.h> 

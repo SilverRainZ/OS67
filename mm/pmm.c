@@ -5,11 +5,13 @@
  * （该中断的执行在 boot/bootsector.asm:get_mem_map 中）
  * 内核的布局通过在ldscript中定位的变量获取
  */
-
+// std
 #include <type.h> 
-#include <printk.h>
-#include <pmm.h>
 #include <dbg.h>
+// libs
+#include <printk.h>
+// mm
+#include <pmm.h>
 
 /* these symbol's addr were remapped in ld script: script/link.ld
  * NB: only a symbol, not a variable
