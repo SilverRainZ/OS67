@@ -42,7 +42,7 @@ struct inode* dir_lookup(struct inode *dip, char *name, uint32_t *poff){
 
     printl("no found\n");
     /* no found */
-    return 0;
+    return NULL;
 }
 
 /* write a new dir entry(name &.ino) into the dir inode */
@@ -55,7 +55,7 @@ int dir_link(struct inode *dip, char *name, uint32_t ino){
 
     /* is this name existed? */
     if ((ip = dir_lookup(dip, name, 0)) != 0){
-        iput(ip); // (?) 
+        iput(ip); // dir_lookup return a inode by call iget() 
         return ERROR;
     }
 
@@ -63,6 +63,7 @@ int dir_link(struct inode *dip, char *name, uint32_t ino){
         if (iread(dip, (char *)&de, off, sizeof(de)) != sizeof(de)){
             panic("dir_link: fault when read");
         }
+
         /* found a free entry */
         if (de.ino == 0){
             break;
@@ -74,7 +75,7 @@ int dir_link(struct inode *dip, char *name, uint32_t ino){
     if (iwrite(dip, (char *)&de, off, sizeof(de)) != sizeof(de)){
         panic("dir_link: fault when write");
     }
-    return 0;
+    return OK;
 }
 
 

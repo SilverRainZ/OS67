@@ -69,13 +69,16 @@ void iupdate(struct inode *ip){
     read_sb(ip->dev , &sb);
 
     bp = bread(ip->dev, IBLK(sb, ip->ino));
-    d_ip = (struct d_inode *)bp->data + (ip->ino)%IPB;
+    d_ip = (struct d_inode *)bp->data + (ip->ino - 1)%IPB;
 
     /* ip -> d_ip */
     d_ip->mode = ip->mode;
+    d_ip->uid = ip->uid;
     d_ip->size = ip->size;
+    d_ip->mtime= ip->mtime;
+    d_ip->gid = ip->gid;
     d_ip->nlinks = ip->nlinks;
-    d_ip->size = ip->size;
+    printl("::::nlnks = %d", d_ip->nlinks);
     memcpy(d_ip->zone, ip->zone, sizeof(ip->zone));
 
     bwrite(bp);
@@ -191,8 +194,12 @@ void ilock(struct inode *ip){
 
         /* ip -> dip */
         ip->mode = d_ip->mode;
-        ip->nlinks = d_ip->nlinks;
+        ip->uid = d_ip->uid;
         ip->size = d_ip->size;
+        ip->mtime = d_ip->mtime;
+        ip->gid = d_ip->gid;
+        ip->nlinks = d_ip->nlinks;
+
         memcpy(ip->zone, d_ip->zone, sizeof(d_ip->zone));
 
         brelse(bp);
@@ -227,15 +234,13 @@ static uint32_t bmap(struct inode *ip, uint32_t bn){
     uint32_t zone1, *zones2;
     struct buf *bp;
 
-    printl("bmap: inode-%d zone number: %d\n", ip->ino, bn);
-
     assert(bn < NDIRECT + NINDIRECT,"bmap: out of range");
 
     if (bn < NDIRECT){
         if ((zone1 = ip->zone[bn]) == 0) {
            zone1 = ip->zone[bn] = balloc(ip->dev);
         }
-        printl("bmap: return direct blk-%d\n", zone1);
+        printl("bmap: inode-%d zone num: %d, return direct blk-%d\n", ip->ino, bn, zone1);
         return zone1;
     }
 
@@ -323,10 +328,12 @@ int iwrite(struct inode *ip, char *src, uint32_t off, uint32_t n){
     }
 
     if (off > ip->size || off + n < off ){
+        panic("iwrite: incorrect offset or read length\n");
         return ERROR;
     }
 
     if (off + n > MAXFILE*BSIZE){
+        panic("iwrite: size out of range\n");
         return ERROR;
     }
 

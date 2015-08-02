@@ -41,7 +41,7 @@ char *skipelem(char *path, char *name){
     while (*path == '/'){
         path++;
     }
-    printl("skipelem: name: %s, path: %s\n", name, path);
+    // printl("skipelem: name: %s, path: %s\n", name, path);
     return path;
 }
 
@@ -60,7 +60,7 @@ struct inode *namx(char *path, int parent, char *name){
     while ((path = skipelem(path, name)) != 0){
         /* read from disk */
         ilock(ip);
-        print_i(ip);
+        //print_i(ip);
         /*if (ip->mode != T_DIR){
             iunlockput(ip);
             return 0;
@@ -85,6 +85,7 @@ struct inode *namx(char *path, int parent, char *name){
         iput(ip);
         return 0;
     }
+
     return ip;
 }
 
