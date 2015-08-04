@@ -5,6 +5,6 @@
 #include <minix.h>
 
 struct inode* dir_lookup(struct inode *dirip, char *name, uint32_t *poff);
-int dir_link(struct inode *dirip, char *name, uint32_t inum);
+int dir_link(struct inode *dirip, char *name, struct inode *fip);
 
 #endif

@@ -46,15 +46,22 @@ struct inode* dir_lookup(struct inode *dip, char *name, uint32_t *poff){
     return NULL;
 }
 
-/* write a new dir entry(name &.ino) into the dir inode */
-int dir_link(struct inode *dip, char *name, uint32_t ino){
+/* add a new dir entry into a directroy(dip)
+ * increase nlinks of file(fip) 
+ * NB: fip must be lock and valid.
+ */
+int dir_link(struct inode *dip, char *name, struct inode *fip){
     uint32_t off;
     struct dir_entry de;
     struct inode *ip;
 
-    printl("dir_link: link inode-%d named %s to dir inode-%d\n", ino, name, dip->ino);
+    printl("dir_link: link inode-%d named %s to dir inode-%d\n", fip->ino, name, dip->ino);
 
     assert(S_ISDIR(dip->mode), "dir_link: no dir");
+    assert(fip->flags & I_BUSY, "dir_link: file inode no locked")
+    assert(fip->flags & I_VALID, "dir_link: file inode no valid")
+
+    /* add new dir entry*/
 
     /* is this name existed? */
     if ((ip = dir_lookup(dip, name, 0)) != 0){
@@ -73,12 +80,17 @@ int dir_link(struct inode *dip, char *name, uint32_t ino){
         }
     }
     strncpy(de.name, name, NAME_LEN);
-    de.ino = ino;
+    de.ino = fip->ino;
 
     if (iwrite(dip, (char *)&de, off, sizeof(de)) != sizeof(de)){
         panic("dir_link: fault when write");
     }
+
+
+    /* increase nlinks*/
+    fip->nlinks++;
+    iupdate(fip);
+
     return OK;
 }
-
 

@@ -54,9 +54,16 @@ struct inode* iget(uint16_t dev, uint16_t ino){
  */
 struct inode* ialloc(uint16_t dev){
     int ino;
+    struct inode *ip;
 
     ino = _ialloc(dev);
-    return iget(dev, ino);
+    ip = iget(dev, ino);
+
+    ip->nlinks = 0;
+    ip->size = 0;
+    ip->mode = S_RWX; 
+    memset(ip->zone, 0, sizeof(ip->zone));
+    return ip;
 }
 
 /* copy a in-memory inode to disk */
