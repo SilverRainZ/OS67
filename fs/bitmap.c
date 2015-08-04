@@ -34,6 +34,7 @@ int balloc(uint16_t dev){
     uint32_t b, bi, m;
     struct buf *bp;
     struct super_block sb;
+    uint32_t v_blkno;
     
     //bp = 0;
     read_sb(dev,&sb);
@@ -42,14 +43,14 @@ int balloc(uint16_t dev){
         for(bi = 0; bi < BPB && b + bi < sb.nzones; bi++){
             m = 1 << (bi%8);
             if ((bp->data[bi/8] & m) == 0){ // This block is free
-
-                printl("balloc: alloc blk-%d\n", b + bi);
+                v_blkno = sb.fst_data_zone + b + bi - 1;
+                printl("balloc: alloc blk-%d\n", v_blkno);
 
                 bp->data[bi/8] |= m;
                 bwrite(bp);                 // mark this block as uesed in bitmap
                 brelse(bp);
-                bzero(dev, b + bi);         // clear block with zero
-                return sb.fst_data_zone + b + bi;
+                bzero(dev, v_blkno);         // clear block with zero
+                return v_blkno;
             }
         }
         brelse(bp);
@@ -99,13 +100,13 @@ int _ialloc(uint16_t dev){
            m = 1 << (bi%8);
            if ((bp->data[bi/8] & m) == 0){
 
-               printl("_ialloc: alloc inode-%d\n", b + bi);
+               ino = b + bi - 1;
+               printl("_ialloc: alloc inode-%d\n", ino);
 
                bp->data[bi/8] |= m;
                bwrite(bp);
                brelse(bp);
 
-               ino = b + bi;
 
                /* fill inode with zero */
                bp = bread(dev, IBLK(sb,ino));
