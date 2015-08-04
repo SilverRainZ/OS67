@@ -8,6 +8,7 @@
 #include <inode.h>
 #include <dir.h>
 #include <minix.h> 
+#include <stat.h>
 
 /* 抽取路径中的第一个名字, 返回余下部分 
  * skip the first elem of path, return this elem
@@ -61,11 +62,10 @@ struct inode *namx(char *path, int parent, char *name){
         /* read from disk */
         ilock(ip);
         //print_i(ip);
-        /*if (ip->mode != T_DIR){
+        if (!S_ISDIR(ip->mode)){
             iunlockput(ip);
             return 0;
         }
-        */
 
         if (parent && *path != '\0'){
             iunlock(ip);

@@ -52,11 +52,6 @@ struct d_inode{
 #define I_BUSY 0x1
 #define I_VALID 0x2
 
-/* inode type flag */
-#define T_DIR 0x1
-#define T_FILE 0x2
-#define T_DEV 0x3
-
 /* in-memorty inode */
 struct inode{
     uint16_t dev;   // be 0 forever

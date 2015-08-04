@@ -6,6 +6,7 @@
 
 #define NINODE 500 // length of inodes cache
 
+struct inode* ialloc(uint16_t dev);
 struct inode* iget(uint16_t dev, uint16_t ino);
 struct inode* idup(struct inode *ip);
 void iput(struct inode *ip);

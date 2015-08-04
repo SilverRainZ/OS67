@@ -12,6 +12,7 @@
 #include <bcache.h>
 #include <bitmap.h>
 #include <inode.h>
+#include <stat.h>
 
 /* inodes cache */
 struct inode icache[NINODE];
@@ -78,7 +79,6 @@ void iupdate(struct inode *ip){
     d_ip->mtime= ip->mtime;
     d_ip->gid = ip->gid;
     d_ip->nlinks = ip->nlinks;
-    printl("::::nlnks = %d", d_ip->nlinks);
     memcpy(d_ip->zone, ip->zone, sizeof(ip->zone));
 
     bwrite(bp);
@@ -278,9 +278,9 @@ int iread (struct inode *ip, char *dest, uint32_t off, uint32_t n){
     uint32_t tot, m;
     struct buf *bp;
 
-    if (ip->mode == T_DEV){
+    /* if (ip->mode == ){
         // TODO
-    }
+    } */
 
     /* 偏移过大 || 溢出*/
     if (off > ip->size || off + n < off){
@@ -321,11 +321,11 @@ int iwrite(struct inode *ip, char *src, uint32_t off, uint32_t n){
     uint32_t tot, m;
     struct buf *bp;
 
-    printl("iwrite: inode-%d offset: %d read: %d\n", ip->ino, off, n);
+    printl("iwrite: inode-%d offset: %d len: %d\n", ip->ino, off, n);
 
-    if (ip->mode == T_DEV){
+    /* if (ip->mode == T_DEV){
         // TODO
-    }
+    } */
 
     if (off > ip->size || off + n < off ){
         panic("iwrite: incorrect offset or read length\n");
@@ -361,10 +361,14 @@ void print_i(struct inode *ip){
     printl("  ref: %d\n", ip->ref);
     printl("  flags: ");
     if (ip->flags & I_BUSY) printl("I_BUSY ");
-    if (ip->flags & I_VALID) printl("I_VALID");
+    if (ip->flags & I_VALID) printl("I_VALID ");
     printl("\n");
 
-    printl("  mode: %d\n", ip->mode);
+    printl("  mode: %d ", ip->mode);
+    if (S_ISDIR(ip->mode)) printl("S_DIR ");
+    if (S_ISREG(ip->mode)) printl("S_REG ");
+    printl("\n");
+
     printl("  size: %d\n", ip->size);
     printl("  nlinks: %d\n", ip->nlinks);
 }
