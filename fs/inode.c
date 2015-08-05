@@ -379,3 +379,10 @@ void print_i(struct inode *ip){
     printl("  size: %d\n", ip->size);
     printl("  nlinks: %d\n", ip->nlinks);
 }
+
+void istat(struct inode *ip, struct stat *st){
+    st->dev = ip->dev;
+    st->mode = ip->mode;
+    st->ino = st->ino;
+    st->size = st->size;
+}

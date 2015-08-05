@@ -3,6 +3,7 @@
 
 #include <type.h>
 #include <minix.h>
+#include <stat.h>
 
 #define NINODE 500 // length of inodes cache
 
@@ -16,6 +17,7 @@ void iunlockput(struct inode *ip);
 void iupdate(struct inode *ip);
 int iread (struct inode *ip, char *dest, uint32_t off, uint32_t n);
 int iwrite(struct inode *ip, char *src, uint32_t off, uint32_t n);
+void istat(struct inode *ip, struct stat *st);
 void print_i(struct inode *ip);
 
 #endif
