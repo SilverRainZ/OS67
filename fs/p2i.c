@@ -5,9 +5,10 @@
 #include <printk.h>
 #include <string.h>
 // fs
+#include <minix.h> 
 #include <inode.h>
 #include <dir.h>
-#include <minix.h> 
+#include <p2i.h>
 #include <stat.h>
 
 /* 抽取路径中的第一个名字, 返回余下部分 
@@ -46,7 +47,7 @@ char *skipelem(char *path, char *name){
     return path;
 }
 
-struct inode *namx(char *path, int parent, char *name){
+static struct inode *_path2inode(char *path, int parent, char *name){
     struct inode *ip, *next;
 
     ip = 0;
@@ -90,11 +91,11 @@ struct inode *namx(char *path, int parent, char *name){
 }
 
 
-struct inode *nami(char *path){
+struct inode *path2inode(char *path){
     char name[NAME_LEN];
-    return namx(path, 0, name);
+    return _path2inode(path, 0, name);
 }
 
-struct inode *namiparent(char *path, char *name){
-    return namx(path, 1, name);
+struct inode *path2inode_parent(char *path, char *name){
+    return _path2inode(path, 1, name);
 }
