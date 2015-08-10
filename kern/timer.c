@@ -11,8 +11,6 @@
 // drv
 #include <vga.h>
 #include <printk.h>
-// proc
-#include <sched.h>
 
 unsigned int timer_ticks = 0;
 
@@ -28,7 +26,6 @@ void timer_phase(int hz){
 } 
 
 void timer_handler(struct regs_s *r){
-    //schedule();
     /* trigger when every 18 clocks (approximately 1 second)  */
 
     timer_ticks++;

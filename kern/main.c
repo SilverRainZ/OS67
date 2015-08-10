@@ -18,8 +18,7 @@
 #include <vmm.h>
 #include <heap.h>
 // proc
-#include <task.h>
-#include <sched.h>
+#include <proc.h>
 // fs
 #include <buf.h>
 #include <sb.h>
