@@ -49,7 +49,7 @@ void vmm_init(){
     }
 
     /* register isr */
-    idt_set_gate(14, (unsigned)page_fault, 0x08, 0x8E);
+    idt_set_gate(14, (unsigned)page_fault, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
 
     /* switch page global directory */
     vmm_switch_pgd((uint32_t)pgd_kern);
