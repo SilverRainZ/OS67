@@ -13,7 +13,7 @@
 #include <bitmap.h>
 #include <inode.h>
 #include <dir.h>
-#include <nami.h>
+#include <p2i.h>
 #include <stat.h>
 
 void fs_test(){
@@ -25,7 +25,7 @@ void fs_test(){
     char content[100];
     int len;
 
-    ip = nami("/README");
+    ip = p2i("/README");
     ilock(ip);
     len = iread(ip, content, 0, ip->size);
     iunlockput(ip);
@@ -33,7 +33,7 @@ void fs_test(){
     printl("fs_test: content: [%s]\n", content);
 
     char write_test[] = "iwrite test :|\n";
-    ip = nami("/bin/README");
+    ip = p2i("/bin/README");
     ilock(ip);
     len = iwrite(ip, write_test, 0, sizeof(write_test));
     printl("fs_test: write %d byte\n", len);
@@ -44,11 +44,11 @@ void fs_test(){
     */
 
     /* dir_link() dir_lookup() 
-    ip = nami("/bin/README");
+    ip = p2i("/bin/README");
     ilock(ip);
     ip->nlinks++;
 
-    dip = nami("/");
+    dip = p2i("/");
     ilock(dip);
     dir_link(dip, "README2",ip->ino);
     iunlockput(dip);
@@ -57,15 +57,15 @@ void fs_test(){
     iunlockput(ip);
     */
 
-    /** nami()
-    ip = nami("/bin/README1");
+    /** p2i()
+    ip = p2i("/bin/README1");
     if (!ip){
         printk("NO FOUND\n");
     } **/
 
     /* stat 
     struct inode *ip;
-    ip = nami("/bin/README");
+    ip = p2i("/bin/README");
     ilock(ip);
     if (S_ISDIR(ip->mode)) {
         printk("/bin/README is no dir\n");
@@ -73,7 +73,7 @@ void fs_test(){
     iunlockput(ip);
 
     struct inode *dip;
-    dip = nami("/bin");
+    dip = p2i("/bin");
     ilock(dip);
     if (S_ISDIR(dip->mode)) {
         printk("bin DIR\n");
@@ -92,7 +92,7 @@ void fs_test(){
 
     iwrite(ip, content, ip->size, sizeof(content));
 
-    struct inode *dip = nami("/");
+    struct inode *dip = p2i("/");
     ilock(dip);
     dir_link(dip, "TEST", ip);
 
@@ -110,7 +110,7 @@ void fs_test(){
     ip->mode |= S_IFDIR;
     iupdate(ip);
 
-    dip = nami("/");
+    dip = p2i("/");
     ilock(dip);
 
     dir_link(ip, ".", ip);

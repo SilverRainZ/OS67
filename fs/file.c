@@ -6,7 +6,7 @@
 // fs
 #include <minix.h>
 #include <dir.h>
-#include <nami.h>
+#include <p2i.h>
 #include <stat.h>
 #include <file.h>
 
