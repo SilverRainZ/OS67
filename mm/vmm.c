@@ -21,8 +21,8 @@
 #include <pmm.h>
 
 /* page directory table of kernel */
-pgd_t pgd_kern[PGD_SIZE] __attribute__((aligned(PAGE_SIZE)));
-/* page table entry of kernel */
+pde_t pde_kern[PDE_SIZE] __attribute__((aligned(PAGE_SIZE)));
+/* page table of kernel */
 static pte_t pte_kern[PTE_COUNT][PTE_SIZE] __attribute__((aligned(PAGE_SIZE)));
 /* 由于页目录和页表都aligned(PAGE_SIZE), 
  * 因此低地址的12位始终为0 */
@@ -30,15 +30,15 @@ static pte_t pte_kern[PTE_COUNT][PTE_SIZE] __attribute__((aligned(PAGE_SIZE)));
 void vmm_init(){
     uint32_t i, j;
     /*phyical addr = virtual addr */
-    /* 为页目录填充128个页表的地址(高20位), 地址是物理地址，
+    /* 为页目录填充 PTE_COUNT 个页表的地址(高20位), 地址是物理地址，
      * 当然这里物理地址和虚拟地址相同 */
     for (i = 0, j = 0; i < PTE_COUNT; i++, j++){
-        pgd_kern[i] = (uint32_t)pte_kern[j] | PAGE_PRESENT | PAGE_WRITE;
+        pde_kern[i] = (uint32_t)pte_kern[j] | PAGE_PRESENT | PAGE_WRITE;
     }
 
-    /* 初始化剩下的页目录 */
-    for (; i < PGD_SIZE; i++){
-        pgd_kern[i] = 0;
+    /* 初始化剩下的页目录: 并没有剩下 [摊手] */
+    for (; i < PDE_SIZE; i++){
+        pde_kern[i] = 0;
     } 
 
     /* 为所有的页表项填充映射到的页地址(高20位) 
@@ -52,7 +52,7 @@ void vmm_init(){
     idt_set_gate(14, (unsigned)page_fault, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
 
     /* switch page global directory */
-    vmm_switch_pgd((uint32_t)pgd_kern);
+    vmm_switch_pde((uint32_t)pde_kern);
 
     /* enable paging */
     uint32_t cr0;
@@ -61,24 +61,24 @@ void vmm_init(){
 	__asm__ volatile ("mov %0, %%cr0" : : "r" (cr0));
 }
 
-void vmm_switch_pgd(uint32_t pgd){
-    __asm__ volatile ("mov %0, %%cr3": :"r"(pgd));
+void vmm_switch_pde(uint32_t pde){
+    __asm__ volatile ("mov %0, %%cr3": :"r"(pde));
 }
 
-void map(pgd_t *pgd, uint32_t va, uint32_t pa, uint32_t flags){
-    uint32_t pgd_idx = PGD_INDEX(va);
+void map(pde_t *pde, uint32_t va, uint32_t pa, uint32_t flags){
+    uint32_t pde_idx = PDE_INDEX(va);
     uint32_t pte_idx = PTE_INDEX(va);
 
     printl("map: map 0x%x to 0x%x, flag = 0x%x\n", pa, va, flags);
  
-    pte_t *pte = (pte_t *)(pgd[pgd_idx] & PAGE_MASK);
+    pte_t *pte = (pte_t *)(pde[pde_idx] & PAGE_MASK);
     /* if pte == NULL */
     if (!pte){
     /* 只映射了0-512M的内存， 映射更高位的内存时，需要重新申请物理页
      * 我觉得这样增加了复杂度， 一开始就定义一个最大的1024*1024页表表不就好？*/
         printl("map: pte of 0x%x is NULL, attempt to alloc one\n", va);
         pte = (pte_t *)pmm_alloc_page();
-        pgd[pgd_idx] = (uint32_t)pte | PAGE_PRESENT | PAGE_WRITE;
+        pde[pde_idx] = (uint32_t)pte | PAGE_PRESENT | PAGE_WRITE;
         //assert(0,"pet = NULL");
         memset(pte, 0, PAGE_SIZE);
     } 
@@ -89,12 +89,12 @@ void map(pgd_t *pgd, uint32_t va, uint32_t pa, uint32_t flags){
     __asm__ volatile ("invlpg (%0)" : : "a" (va));
 }
 
-void unmap(pgd_t *pgd, uint32_t va){
-    uint32_t pgd_idx = PGD_INDEX(va);
+void unmap(pde_t *pde, uint32_t va){
+    uint32_t pde_idx = PDE_INDEX(va);
     uint32_t pte_idx = PTE_INDEX(va);
 
     printl("unmap: unmap virtual address 0x%x\n", va);
-    pte_t *pte = (pte_t *)(pgd[pgd_idx] & PAGE_MASK);
+    pte_t *pte = (pte_t *)(pde[pde_idx] & PAGE_MASK);
 
     //assert(pte,"unmap fail.");
     if (!pte){
@@ -108,11 +108,11 @@ void unmap(pgd_t *pgd, uint32_t va){
     __asm__ volatile ("invlpg (%0)"::"a"(va));
 }
 
-bool get_mapping(pgd_t *pgd, uint32_t va, uint32_t *pa){
-    uint32_t pgd_idx = PGD_INDEX(va);
+bool get_mapping(pde_t *pde, uint32_t va, uint32_t *pa){
+    uint32_t pde_idx = PDE_INDEX(va);
     uint32_t pte_idx = PTE_INDEX(va);
 
-    pte_t *pte = (pte_t *)(pgd[pgd_idx] & PAGE_MASK);
+    pte_t *pte = (pte_t *)(pde[pde_idx] & PAGE_MASK);
     if (!pte){
         printl("get_mapping: virtual address 0x%x is unmapped\n", va);
         return FALSE;
@@ -133,13 +133,13 @@ void vmm_test(){
     int *badfood = (int *)0xc000;
 
     printl("valut at 0xc000: %x\n", *badfood);
-    map(pgd_kern, 0x1000, 0xc000, PAGE_PRESENT);
+    map(pde_kern, 0x1000, 0xc000, PAGE_PRESENT);
     badfood = (int *)0x1000;
 
     uint32_t pa = 0;
-    get_mapping(pgd_kern, 0x1000, &pa);
+    get_mapping(pde_kern, 0x1000, &pa);
 
-    vmm_switch_pgd((uint32_t)pgd_kern);
+    vmm_switch_pde((uint32_t)pde_kern);
 
     printl("%x is mapped to: %x\n", (int)badfood, (int)pa);
     printl("value at 0x1000: %x\n", *badfood);

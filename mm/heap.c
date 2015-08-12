@@ -26,7 +26,7 @@ static void alloc_chunk(uint32_t start, uint32_t len){
      * 存在这种情况, 这次申请所需的内存完全可以从上次申请余下的内存中取得 */
     while (start + len > heap_max){
         uint32_t page = pmm_alloc_page();
-        map(pgd_kern, heap_max, page, PAGE_PRESENT|PAGE_WRITE);
+        map(pde_kern, heap_max, page, PAGE_PRESENT|PAGE_WRITE);
         heap_max += PAGE_SIZE;
     }
 }
@@ -44,8 +44,8 @@ static void free_chunk(struct header *chunk){
     while((heap_max - PAGE_SIZE) >= (uint32_t)chunk){
         heap_max -= PAGE_SIZE;
         uint32_t page;
-        get_mapping(pgd_kern, heap_max, &page);
-        unmap(pgd_kern, heap_max);
+        get_mapping(pde_kern, heap_max, &page);
+        unmap(pde_kern, heap_max);
         pmm_free_page(page);
     }
 }
