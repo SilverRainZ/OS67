@@ -9,9 +9,11 @@
 #include <type.h> 
 #include <dbg.h>
 // libs
+#include <string.h>
 #include <printk.h>
 // mm
 #include <pmm.h>
+#include <vmm.h>
 
 /* these symbol's addr were remapped in ld script: script/link.ld
  * NB: only a symbol, not a variable
@@ -27,7 +29,7 @@ extern uint8_t kernend;
 
 static uint32_t pmm_stack[PAGE_MAX_SIZE + 1];
 static uint32_t pmm_stack_top = 0;     // top of stack
-uint32_t pmm_page_count = 0;
+uint32_t pmm_count = 0;
 
 void pmm_mem_info(){
     printl("=== display memory info start ===\n");
@@ -37,7 +39,7 @@ void pmm_mem_info(){
     uint32_t MCR_count = *(uint32_t *)0x400;
     struct ARD_entry_s *ARD_entry = (struct ARD_entry_s *)0x500;
     uint32_t memsize = 0;
-    int i = 0;
+    uint32_t i = 0;
 
     /* do not care about high bit, we assume that the size of
      * memory always less than 512M */
@@ -64,7 +66,7 @@ void pmm_mem_info(){
 void pmm_init(){
     uint32_t MCR_count = *(uint32_t *)0x400;
     struct ARD_entry_s *ARD_entry = (struct ARD_entry_s *)0x500;
-    int i = 0;
+    uint32_t i = 0;
 
     for (i = 0; i < MCR_count; i++){
         /* reach available memory */
@@ -80,11 +82,11 @@ void pmm_init(){
            uint32_t limit = ARD_entry[i].base_addr_low + ARD_entry[i].len_low;
 
            while (addr < limit && addr <= PMM_MAX_SIZE){
-               //pmm_free_page(addr);
-               /* 使用 pmm_free_page 会引入大量的 log */
+               //pmm_free(addr);
+               /* 使用 pmm_free 会引入大量的 log */
                pmm_stack[pmm_stack_top++] = addr;   
                addr += PMM_PAGE_SIZE;
-               pmm_page_count++;
+               pmm_count++;
            }
            printl("pmm_init: allocatable memory: 0x%x to 0x%x\n"
                  , ((uint32_t)&kernend + PMM_PAGE_SIZE) & 0xfffff000
@@ -94,19 +96,22 @@ void pmm_init(){
     }
 }
 
-uint32_t pmm_alloc_page(){
+uint32_t pmm_alloc(){
     uint32_t addr = pmm_stack[--pmm_stack_top];
-    assert(pmm_stack_top >= 0,"pmm_alloc_page: no physical page");
+    assert(pmm_stack_top >= 0,"pmm_alloc: no physical page");
 
-    printl("pmm_alloc_page: alloc page 0x%x, pmm_stack_top = %d\n", addr, pmm_stack_top);
+    memset((void *)addr, 0, PAGE_SIZE);
+    printl("pmm_alloc: alloc page 0x%x, pmm_stack_top = %d\n", addr, pmm_stack_top);
     return addr;
 }
-void pmm_free_page(uint32_t addr){
+
+void pmm_free(uint32_t addr){
 
     pmm_stack[pmm_stack_top++] = addr;
-    assert(pmm_stack_top <= pmm_page_count ,"pmm_free_page: pmm stack overflow");
+    memset((void *)addr, 1, PAGE_SIZE);
+    assert(pmm_stack_top <= pmm_count ,"pmm_free: pmm stack overflow");
 
-    printl("pmm_free_page: free page 0x%x, pmm_stack_top = %d\n", addr, pmm_stack_top);
+    printl("pmm_free: free page 0x%x, pmm_stack_top = %d\n", addr, pmm_stack_top);
 }
 
 void pmm_test(){

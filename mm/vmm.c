@@ -19,77 +19,71 @@
 // mm
 #include <vmm.h> 
 #include <pmm.h>
+#include <_vm.h>
 
 /* page directory table of kernel */
-pde_t pde_kern[PDE_SIZE] __attribute__((aligned(PAGE_SIZE)));
+// pde_t pde_kern[PDE_SIZE] __attribute__((aligned(PAGE_SIZE)));
 /* page table of kernel */
-static pte_t pte_kern[PTE_COUNT][PTE_SIZE] __attribute__((aligned(PAGE_SIZE)));
+// static pte_t pte_kern[PTE_COUNT][PTE_SIZE] __attribute__((aligned(PAGE_SIZE)));
 /* 由于页目录和页表都aligned(PAGE_SIZE), 
  * 因此低地址的12位始终为0 */
 
-void vmm_init(){
-    uint32_t i, j;
-    /*phyical addr = virtual addr */
-    /* 为页目录填充 PTE_COUNT 个页表的地址(高20位), 地址是物理地址，
-     * 当然这里物理地址和虚拟地址相同 */
-    for (i = 0, j = 0; i < PTE_COUNT; i++, j++){
-        pde_kern[i] = (uint32_t)pte_kern[j] | PAGE_PRESENT | PAGE_WRITE;
-    }
-
-    /* 初始化剩下的页目录: 并没有剩下 [摊手] */
-    for (; i < PDE_SIZE; i++){
-        pde_kern[i] = 0;
-    } 
-
-    /* 为所有的页表项填充映射到的页地址(高20位) 
-     * hurlex 在这里没有映射第0页， 然而我并不知道为什么要这么做 */
-    uint32_t *pte = (uint32_t *)pte_kern;
-    for (i = 1; i < PTE_COUNT*PTE_SIZE; i++){
-        pte[i] = (i << 12) | PAGE_PRESENT | PAGE_WRITE;
-    }
-
-    /* register isr */
-    idt_set_gate(14, (unsigned)page_fault, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
-
-    /* switch page global directory */
-    vmm_switch_pde((uint32_t)pde_kern);
-
-    /* enable paging */
-    uint32_t cr0;
-    __asm__ volatile ("mov %%cr0, %0" : "=r" (cr0));
-	cr0 |= 0x80000000;
-	__asm__ volatile ("mov %0, %%cr0" : : "r" (cr0));
-}
-
-void vmm_switch_pde(uint32_t pde){
+/* switch page table */
+inline void vmm_switch_pde(uint32_t pde){
     __asm__ volatile ("mov %0, %%cr3": :"r"(pde));
 }
 
-void map(pde_t *pde, uint32_t va, uint32_t pa, uint32_t flags){
+/* reflush page table cache */
+static inline void vmm_reflush(uint32_t va){
+    __asm__ volatile ("invlpg (%0)"::"a"(va));
+}
+
+static inline void vmm_enable(){
+    uint32_t cr0;
+
+    __asm__ volatile ("mov %%cr0, %0" : "=r" (cr0));
+	cr0 |= CRO_PG;
+	__asm__ volatile ("mov %0, %%cr0" : : "r" (cr0));
+}
+
+void vmm_init(){
+    /* register isr */
+    idt_set_gate(14, (unsigned)page_fault, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
+
+    pde_t *pgdir = (pte_t *)pmm_alloc();
+
+    kvm_init(pgdir);
+
+    /* switch page global directory */
+    vmm_switch_pde((uint32_t)pgdir);
+
+    /* enable paging */
+    vmm_enable();
+}
+
+void vmm_map(pde_t *pgdir, uint32_t va, uint32_t pa, uint32_t flags){
     uint32_t pde_idx = PDE_INDEX(va);
     uint32_t pte_idx = PTE_INDEX(va);
 
-    printl("map: map 0x%x to 0x%x, flag = 0x%x\n", pa, va, flags);
+   // printl("map: map 0x%x to 0x%x, flag = 0x%x\n", pa, va, flags);
  
-    pte_t *pte = (pte_t *)(pde[pde_idx] & PAGE_MASK);
+    pte_t *pte = (pte_t *)(pgdir[pde_idx] & PAGE_MASK);
     /* if pte == NULL */
     if (!pte){
-    /* 只映射了0-512M的内存， 映射更高位的内存时，需要重新申请物理页
-     * 我觉得这样增加了复杂度， 一开始就定义一个最大的1024*1024页表表不就好？*/
         printl("map: pte of 0x%x is NULL, attempt to alloc one\n", va);
-        pte = (pte_t *)pmm_alloc_page();
-        pde[pde_idx] = (uint32_t)pte | PAGE_PRESENT | PAGE_WRITE;
+        pte = (pte_t *)pmm_alloc();
+        pgdir[pde_idx] = (uint32_t)pte | PTE_P | PTE_R;
         //assert(0,"pet = NULL");
         memset(pte, 0, PAGE_SIZE);
     } 
 
     pte[pte_idx] = (pa & PAGE_MASK) | flags;
 
-    /* reflush page talbe cache  */
-    __asm__ volatile ("invlpg (%0)" : : "a" (va));
+    vmm_reflush(va);
+    // printl("map: ret\n");
 }
 
-void unmap(pde_t *pde, uint32_t va){
+void vmm_unmap(pde_t *pde, uint32_t va){
     uint32_t pde_idx = PDE_INDEX(va);
     uint32_t pte_idx = PTE_INDEX(va);
 
@@ -104,25 +98,24 @@ void unmap(pde_t *pde, uint32_t va){
     /* unmap this poge */
     pte[pte_idx] = 0;
 
-    /* reflush page table cache */
-    __asm__ volatile ("invlpg (%0)"::"a"(va));
+    vmm_reflush(va);
 }
 
-bool get_mapping(pde_t *pde, uint32_t va, uint32_t *pa){
+int vmm_get_mapping(pde_t *pgdir, uint32_t va, uint32_t *pa){
     uint32_t pde_idx = PDE_INDEX(va);
     uint32_t pte_idx = PTE_INDEX(va);
 
-    pte_t *pte = (pte_t *)(pde[pde_idx] & PAGE_MASK);
+    pte_t *pte = (pte_t *)(pgdir[pde_idx] & PAGE_MASK);
     if (!pte){
         printl("get_mapping: virtual address 0x%x is unmapped\n", va);
-        return FALSE;
+        return 0;
     }
     if (pte[pte_idx] != 0 && pa){
         *pa = pte[pte_idx] & PAGE_MASK;
         printl("get_mapping: virtual address 0x%x is mapped to 0x%x\n", va, pte[pte_idx] & PAGE_MASK);
-        return TRUE;
+        return 1;
     }
-    return FALSE;
+    return 0;
 }
 
 void vmm_test(){
@@ -130,22 +123,6 @@ void vmm_test(){
      * 你得到的是（0x1000,0x1fff）- (0xc000,0xcfff) 的映射
      * 完成映射后，物理地址 0x1234 的虚拟地址是 0xc234 */
     printl("=== vmm_test start ===\n");
-    int *badfood = (int *)0xc000;
-
-    printl("valut at 0xc000: %x\n", *badfood);
-    map(pde_kern, 0x1000, 0xc000, PAGE_PRESENT);
-    badfood = (int *)0x1000;
-
-    uint32_t pa = 0;
-    get_mapping(pde_kern, 0x1000, &pa);
-
-    vmm_switch_pde((uint32_t)pde_kern);
-
-    printl("%x is mapped to: %x\n", (int)badfood, (int)pa);
-    printl("value at 0x1000: %x\n", *badfood);
-
-    //badfood = (int *)0xc0000000; 
-    //printk("virtual addr 0xc000: %x\n", *badfood);    // page fault test
     printl("=== vmm_test end ===\n");
 }
 

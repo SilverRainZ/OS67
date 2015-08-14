@@ -19,14 +19,14 @@ static struct header *heap_first;
 static uint32_t heap_max = HEAP_START;
 
 /* 分配一个内存块, 虚拟地址从start开始, 长度为len
- * 如果需要的话, 从pmm_alloc_page 取得物理页，
+ * 如果需要的话, 从pmm_alloc 取得物理页，
  * 连续地映到start上  并不涉及对header的操作 */
 static void alloc_chunk(uint32_t start, uint32_t len){
-    /* 如果需要内存大于已经申请了的内存从pmm_alloc_page索取内存
+    /* 如果需要内存大于已经申请了的内存从pmm_alloc索取内存
      * 存在这种情况, 这次申请所需的内存完全可以从上次申请余下的内存中取得 */
     while (start + len > heap_max){
-        uint32_t page = pmm_alloc_page();
-        map(pde_kern, heap_max, page, PAGE_PRESENT|PAGE_WRITE);
+        uint32_t page = pmm_alloc();
+        vmm_map(pde_kern, heap_max, page, PTE_P | PTE_R);
         heap_max += PAGE_SIZE;
     }
 }
@@ -44,9 +44,9 @@ static void free_chunk(struct header *chunk){
     while((heap_max - PAGE_SIZE) >= (uint32_t)chunk){
         heap_max -= PAGE_SIZE;
         uint32_t page;
-        get_mapping(pde_kern, heap_max, &page);
-        unmap(pde_kern, heap_max);
-        pmm_free_page(page);
+        vmm_get_mapping(pde_kern, heap_max, &page);
+        vmm_unmap(pde_kern, heap_max);
+        pmm_free(page);
     }
 }
 
