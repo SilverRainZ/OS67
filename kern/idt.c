@@ -14,7 +14,7 @@ static struct idt_entry idt[NIDT];
 struct idt_ptr idtp;
 extern void idt_load();
 
-void idt_set_gate(uint8_t num, uint32_t base, uint16_t selctor, uint8_t gate, uint8_t flags){
+void idt_install(uint8_t num, uint32_t base, uint16_t selctor, uint8_t gate, uint8_t flags){
     /* The interrupt routine's base address */
     idt[num].base_low = (base & 0xffff);
     idt[num].base_high = (base >> 16) & 0xffff;
@@ -34,6 +34,6 @@ void idt_init(){
     /* Clear out the entire IDT, initializing it to zeros */
     memset(&idt, 0, sizeof(struct idt_entry) * NIDT);
 
-    /* Add any new ISRs to the IDT here using idt_set_gate */
+    /* Add any new ISRs to the IDT here using idt_install */
     idt_load();
 }

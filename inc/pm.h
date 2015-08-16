@@ -70,10 +70,10 @@ struct idt_ptr{
     uint32_t base;
 } __attribute__((packed));
 
-void gdt_set_gate(uint8_t num, uint32_t base, uint32_t limit, uint8_t access, uint8_t gran);
+void gdt_install(uint8_t num, uint32_t base, uint32_t limit, uint8_t access, uint8_t gran);
 void gdt_init();
 
 void idt_init();
-void idt_set_gate(uint8_t num, uint32_t base, uint16_t selector, uint8_t gate, uint8_t flags);
+void idt_install(uint8_t num, uint32_t base, uint16_t selector, uint8_t gate, uint8_t flags);
 
 #endif

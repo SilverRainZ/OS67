@@ -12,7 +12,7 @@ struct gdt_ptr gp;
 
 extern void gdt_flush();    // extern func in loader.asm
 
-void gdt_set_gate(uint8_t num, uint32_t base, uint32_t limit, uint8_t access, uint8_t flags){
+void gdt_install(uint8_t num, uint32_t base, uint32_t limit, uint8_t access, uint8_t flags){
 
     /* Setup the descriptor base address */
     gdt[num].base_low = (base & 0xffff);
@@ -36,15 +36,15 @@ void gdt_init(){
     gp.base = (uint32_t)&gdt;
 
     /* null descriptor */
-    gdt_set_gate(0, 0, 0, 0, 0);  
+    gdt_install(0, 0, 0, 0, 0);  
     /* kernel code segment type: code addr: 0 limit: 4G gran: 4KB sz: 32bit */
-    gdt_set_gate(1, 0, 0xfffff, AC_RW|AC_EX|AC_PL_KERN|AC_PR, GDT_GR|GDT_SZ);
+    gdt_install(1, 0, 0xfffff, AC_RW|AC_EX|AC_PL_KERN|AC_PR, GDT_GR|GDT_SZ);
     /* kernel data segment type: data addr: 0 limit: 4G gran: 4KB sz: bit 32bit */
-    gdt_set_gate(2, 0, 0xfffff, AC_RW|AC_PL_KERN|AC_PR, GDT_GR|GDT_SZ); 
+    gdt_install(2, 0, 0xfffff, AC_RW|AC_PL_KERN|AC_PR, GDT_GR|GDT_SZ); 
     /* user code segment type: data addr: 0 limit: 4G gran: 4KB sz: 32bit */
-    gdt_set_gate(3, 0, 0xfffff, AC_RW|AC_EX|AC_PL_USER|AC_PR, GDT_GR|GDT_SZ); 
+    gdt_install(3, 0, 0xfffff, AC_RW|AC_EX|AC_PL_USER|AC_PR, GDT_GR|GDT_SZ); 
     /* user code segment type: data addr: 0 limit: 4G gran: 4KB sz: 32bit */
-    gdt_set_gate(4, 0, 0xfffff, AC_RW|AC_PL_USER|AC_PR, GDT_GR|GDT_SZ); 
+    gdt_install(4, 0, 0xfffff, AC_RW|AC_PL_USER|AC_PR, GDT_GR|GDT_SZ); 
     
     gdt_flush();
 }
