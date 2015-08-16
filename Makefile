@@ -13,24 +13,30 @@ OBJCPY = objcopy
 CFLAGS = -c -O0 -Wall -Werror -nostdinc -fno-builtin -fno-stack-protector -funsigned-char \
 		 -finline-functions -finline-small-functions -findirect-inlining \
 		 -finline-functions-called-once -Iinc -m32 -ggdb -gstabs+
-#OBJS = $(wildcard bin/*.o)
-OBJS = bin/loader.o bin/main.o bin/vga.o bin/gdt.o bin/idt.o \
-	   bin/isrs.o bin/irq.o bin/timer.o bin/asm.o bin/kb.o \
-	   bin/string.o	bin/queue.o bin/printk.o bin/pmm.o bin/vmm.o \
-	   bin/dbg.o bin/ide.o \
-	   bin/bcache.o bin/sb.o bin/bitmap.o bin/inode.o bin/dir.o \
-	   bin/p2i.o bin/fstest.o bin/file.o bin/_vm.o
+OBJS = bin/loader.o \
+	   bin/main.o bin/dbg.o bin/timer.o bin/asm.o \
+	   bin/gdt.o bin/idt.o \
+	   bin/isr.o bin/irq.o bin/fault.o bin/syscall.o \
+	   bin/vga.o bin/kb.o bin/ide.o \
+	   bin/string.o	bin/queue.o bin/printk.o \
+	   bin/pmm.o bin/vmm.o bin/_vm.o \
+	   bin/bcache.o bin/sb.o bin/bitmap.o bin/inode.o \
+	   bin/dir.o bin/p2i.o bin/fstest.o bin/file.o \
+	   bin/init.o
 
 # create a 1.44MB floppy include kernel and bootsector
 bin/floppy.img: boot/floppy.asm bin/bootsect.bin bin/kernel 
-	$(AS) -I ./bin/ -f bin -l lst/floppy.asm $< -o $@ 
+	$(AS) -I ./bin/ -f bin -l lst/floppy.s $< -o $@ 
 
 # bootsector
 bin/bootsect.bin: boot/bootsect.asm 
-	$(AS) -I ./boot/ -f bin -l lst/bootsect.asm $< -o $@ 
+	$(AS) -I ./boot/ -f bin -l lst/bootsect.s $< -o $@ 
 
 bin/loader.o : kern/loader.asm
 	$(AS) -I ./boot/ -f elf32 -g -F stabs -l lst/loader.asm $< -o $@ 
+
+bin/init.o: proc/init.asm 
+	$(AS) -I ./boot/ -f elf32 -g -F stabs -l lst/init.asm $< -o $@ 
 
 # link loader.o and c objfile 
 # generate a symbol file(kernel.elf) and a flat binary kernel file(kernel)
@@ -41,7 +47,7 @@ bin/kernel: script/link.ld $(OBJS)
 # compile c file in all directory
 bin/%.o: */%.c
 	$(CC) $(CFLAGS) -c $^ -o $@  
-	$(CC) $(CFLAGS) -S $^ -o lst/$*.asm  
+	$(CC) $(CFLAGS) -S $^ -o lst/$*.s
 
 #----------------------------------------
 

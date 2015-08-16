@@ -6,6 +6,7 @@
 #include <pm.h>
 #include <isr.h>
 #include <timer.h>
+#include <syscall.h>
 // libs
 #include <string.h>
 #include <printk.h>
@@ -37,11 +38,8 @@ int osmain(void)
     idt_init();
     puts("IDT installed...\n\r");
 
-    isrs_init();
+    isr_init();
     puts("ISRs installed...\n\r");
-
-    irq_init();
-    puts("IRQs installed...\n\r");
 
     //timer_init(); 
 
@@ -51,8 +49,8 @@ int osmain(void)
 
     pmm_init();
     puts("pmm init...\n\r");
-    // pmm_mem_info();
-    //pmm_test();
+    pmm_mem_info();
+    pmm_test();
     
     vmm_init();
     puts("vmm init...\n\r");
@@ -61,7 +59,7 @@ int osmain(void)
     kb_init();
     puts("kb init...\n\r");
 
-    heap_init();
+    //heap_init();
     puts("heap init...\n\r");
     // heap_test();
 
