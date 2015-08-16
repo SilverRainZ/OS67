@@ -123,5 +123,5 @@ void kb_handler(struct regs_s *r){
 }
 
 void kb_init(){
-    irq_install_handler(1, kb_handler);
+    irq_install(IRQ_KB, kb_handler);
 }

@@ -48,7 +48,7 @@ static inline void vmm_enable(){
 
 void vmm_init(){
     /* register isr */
-    idt_set_gate(14, (unsigned)page_fault, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
+    idt_install(FAULT_PAGE, (unsigned)page_fault, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
 
     pde_t *pgdir = (pte_t *)pmm_alloc();
 

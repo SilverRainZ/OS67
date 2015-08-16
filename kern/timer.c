@@ -44,6 +44,6 @@ void timer_wait(int ticks){
 /* Sets up the system clock by installing the timer handler
  *  into IRQ0 */
 void timer_init(){
-    irq_install_handler(0, timer_handler);
+    irq_install(IRQ_TIMER, timer_handler);
 }
  

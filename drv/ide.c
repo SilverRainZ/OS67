@@ -96,7 +96,7 @@ void ide_handler(struct regs_s *r){
 void ide_init(){
     /* NB: 一切从简, 不需要检测磁盘的存在 */
     /* IRQ14 = Primary ATA Hard Disk */
-    irq_install_handler(14,ide_handler);
+    irq_install(IRQ_IDE, ide_handler);
     ide_wait(0);
 }
 
