@@ -30,18 +30,18 @@ extern void irq15();
 
 /* This array is actually an array of function pointers. We use
 *  this to handle custom IRQ handlers for a given IRQ */
-void *irq_routines[16] ={
+void *irq_routines[ISR_NIRQ] ={
     0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0
 };
 
 /* This installs a custom IRQ handler for the given IRQ */
-void irq_install_handler(unsigned char irq, void (*handler)(struct regs_s *r)){
+void irq_install(unsigned char irq, void (*handler)(struct regs_s *r)){
     irq_routines[irq] = handler;
 }
 
 /* This clears the handler for a given IRQ */
-void irq_uninstall_handler(unsigned char irq){
+void irq_uninstall(unsigned char irq){
     irq_routines[irq] = 0;
 }
 
@@ -73,23 +73,22 @@ void irq_remap(){
 void irq_init(){
     irq_remap();
 
-    idt_set_gate(32, (uint32_t)irq0, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
-    idt_set_gate(33, (uint32_t)irq1, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
-    idt_set_gate(34, (uint32_t)irq2, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
-    idt_set_gate(35, (uint32_t)irq3, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
-    idt_set_gate(36, (uint32_t)irq4, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
-    idt_set_gate(37, (uint32_t)irq5, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
-    idt_set_gate(38, (uint32_t)irq6, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
-    idt_set_gate(39, (uint32_t)irq7, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
-
-    idt_set_gate(40, (uint32_t)irq8, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
-    idt_set_gate(41, (uint32_t)irq9, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
-    idt_set_gate(42, (uint32_t)irq10, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
-    idt_set_gate(43, (uint32_t)irq11, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
-    idt_set_gate(44, (uint32_t)irq12, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
-    idt_set_gate(45, (uint32_t)irq13, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
-    idt_set_gate(46, (uint32_t)irq14, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
-    idt_set_gate(47, (uint32_t)irq15, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
+    idt_install(ISR_IRQ0 + 0, (uint32_t)irq0, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
+    idt_install(ISR_IRQ0 + 1, (uint32_t)irq1, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
+    idt_install(ISR_IRQ0 + 2, (uint32_t)irq2, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
+    idt_install(ISR_IRQ0 + 3, (uint32_t)irq3, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
+    idt_install(ISR_IRQ0 + 4, (uint32_t)irq4, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
+    idt_install(ISR_IRQ0 + 5, (uint32_t)irq5, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
+    idt_install(ISR_IRQ0 + 6, (uint32_t)irq6, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
+    idt_install(ISR_IRQ0 + 7, (uint32_t)irq7, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
+    idt_install(ISR_IRQ0 + 8, (uint32_t)irq8, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
+    idt_install(ISR_IRQ0 + 9, (uint32_t)irq9, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
+    idt_install(ISR_IRQ0 + 10, (uint32_t)irq10, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
+    idt_install(ISR_IRQ0 + 11, (uint32_t)irq11, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
+    idt_install(ISR_IRQ0 + 12, (uint32_t)irq12, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
+    idt_install(ISR_IRQ0 + 13, (uint32_t)irq13, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
+    idt_install(ISR_IRQ0 + 14, (uint32_t)irq14, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
+    idt_install(ISR_IRQ0 + 15, (uint32_t)irq15, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
 }
 
 /* Each of the IRQ ISRs point to this function, rather than
@@ -119,7 +118,6 @@ void irq_handler(struct regs_s *r){
     if (r->int_no >= 40){
         outb(0xA0, 0x20);
     }
-
     /* In either case, we need to send an EOI to the master
     *  interrupt controller too */
     outb(0x20, 0x20);
