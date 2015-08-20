@@ -87,7 +87,7 @@ void proc_userinit(){
     pp->fm->fs = pp->fm->ds;
     pp->fm->gs = pp->fm->ds;
     pp->fm->ss = pp->fm->ds;
-    pp->fm->eflags = FLAG_IF;
+    pp->fm->eflags = 0;
     pp->fm->user_esp = USER_BASE + PAGE_SIZE - 1;
     pp->fm->eip = USER_BASE;
     printl("proc_userinit: init stack build\n");

@@ -6,6 +6,8 @@
 #include <type.h>
 // x86
 #include <pm.h>
+// libs
+#include <string.h>
 
 struct tss_entry tss;
 
@@ -15,9 +17,8 @@ struct gdt_ptr gp;
 extern void gdt_flush();    // extern func in loader.asm
 
 void tss_install(){
-    __asm__ volatile("ltr %%ax" : : "a"((uint16_t)SEL_CPU_TSS));
+    __asm__ volatile("ltr %%ax" : : "a"((uint16_t)SEL_CPU_TSS|0x3));
 }
-
 
 void gdt_install(uint8_t num, uint32_t base, uint32_t limit, uint8_t access, uint8_t flags){
 
@@ -38,7 +39,7 @@ void gdt_install(uint8_t num, uint32_t base, uint32_t limit, uint8_t access, uin
 }
 
 void tss_init(){
-    gdt_install(5, (uint32_t)&tss, sizeof(tss) - 1,0x89, 0x40); 
+    gdt_install(5, (uint32_t)&tss, sizeof(tss),AC_PR|AC_AC|AC_EX|AC_PL_USER, GDT_GR); 
     gdt[5].access &= ~AC_REVERSE;
 }
 
@@ -65,7 +66,9 @@ void gdt_init(){
 }
 
 void tss_set(uint16_t ss0, uint32_t esp0){
+
+    memset((void *)&tss, 0, sizeof(tss));
     tss.ss0 = ss0;
-    tss.esp = esp0;
+    tss.esp0 = esp0;
     tss.iopb_off = sizeof(tss);
 }

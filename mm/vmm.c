@@ -174,7 +174,6 @@ void uvm_switch(struct proc *pp){
     cli();
 
     tss_set(SEL_KERN_DATA, (uint32_t)pp->kern_stack + PAGE_SIZE);
-
     vmm_switch_pgd((uint32_t)pp->pgdir);
 
     sti();
