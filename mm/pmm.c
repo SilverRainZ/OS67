@@ -100,8 +100,8 @@ uint32_t pmm_alloc(){
     uint32_t addr = pmm_stack[--pmm_stack_top];
     assert(pmm_stack_top >= 0,"pmm_alloc: no physical page");
 
-    memset((void *)addr, 0, PAGE_SIZE);
-    printl("pmm_alloc: alloc page 0x%x, pmm_stack_top = %d\n", addr, pmm_stack_top);
+     // memset((void *)addr, 0, PAGE_SIZE);
+    // printl("pmm_alloc: alloc page 0x%x, pmm_stack_top = %d\n", addr, pmm_stack_top);
     return addr;
 }
 
@@ -111,7 +111,7 @@ void pmm_free(uint32_t addr){
     memset((void *)addr, 1, PAGE_SIZE);
     assert(pmm_stack_top <= pmm_count ,"pmm_free: pmm stack overflow");
 
-    printl("pmm_free: free page 0x%x, pmm_stack_top = %d\n", addr, pmm_stack_top);
+   //  printl("pmm_free: free page 0x%x, pmm_stack_top = %d\n", addr, pmm_stack_top);
 }
 
 void pmm_test(){

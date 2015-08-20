@@ -19,10 +19,10 @@ OBJS = bin/loader.o \
 	   bin/isr.o bin/irq.o bin/fault.o bin/syscall.o \
 	   bin/vga.o bin/kb.o bin/ide.o \
 	   bin/string.o	bin/queue.o bin/printk.o \
-	   bin/pmm.o bin/vmm.o bin/_vm.o \
+	   bin/pmm.o bin/vmm.o \
 	   bin/bcache.o bin/sb.o bin/bitmap.o bin/inode.o \
 	   bin/dir.o bin/p2i.o bin/fstest.o bin/file.o \
-	   bin/init.o
+	   bin/init.o bin/sched.o bin/proc.o
 
 # create a 1.44MB floppy include kernel and bootsector
 bin/floppy.img: boot/floppy.asm bin/bootsect.bin bin/kernel 
@@ -33,10 +33,10 @@ bin/bootsect.bin: boot/bootsect.asm
 	$(AS) -I ./boot/ -f bin -l lst/bootsect.s $< -o $@ 
 
 bin/loader.o : kern/loader.asm
-	$(AS) -I ./boot/ -f elf32 -g -F stabs -l lst/loader.asm $< -o $@ 
+	$(AS) -I ./boot/ -f elf32 -g -F stabs -l lst/loader.s $< -o $@ 
 
 bin/init.o: proc/init.asm 
-	$(AS) -I ./boot/ -f elf32 -g -F stabs -l lst/init.asm $< -o $@ 
+	$(AS) -I ./boot/ -f elf32 -g -F stabs -l lst/init.s $< -o $@ 
 
 # link loader.o and c objfile 
 # generate a symbol file(kernel.elf) and a flat binary kernel file(kernel)

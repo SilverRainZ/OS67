@@ -3,6 +3,7 @@
 
 #include <type.h>
 #include <isr.h>
+#include <proc.h>
 
 /* CPU */
 #define CRO_PG  0x80000000 
@@ -11,7 +12,8 @@
 #define PTE_P   0x1     // Present
 #define PTE_R   0x2     // Read/Write, can be read&write when set
 #define PTE_U   0x4     // User / Kern
-#define PTE_K   0x0     // User / Kern #define PTE_W   0x8     // Write through
+#define PTE_K   0x0     // User / Kern 
+#define PTE_W   0x8     // Write through
 #define PTE_D   0x10    // Cache disable
 #define PTE_A   0x20    // Accessed
 #define PTE_S   0x40    // Page size, 0 for 4kb pre page
@@ -38,10 +40,6 @@
 #define PTE_INDEX(x) (((x) >> 12) & 0x3ff)  // 获得页表号
 #define OFFSET_INDEX(x) ((x) & 0xfff)       // 获得页内偏移
 
-/* page global directory */
-typedef uint32_t pde_t;
-/* page talbe entry */
-typedef uint32_t pte_t;
 
 /* size of page global dirctory */
 #define PDE_SIZE (PAGE_SIZE/sizeof(pte_t))
@@ -56,12 +54,18 @@ typedef uint32_t pte_t;
 extern pde_t pde_kern[PDE_SIZE];
 
 void vmm_init();
-void vmm_switch_pde(uint32_t pgdir);
+void vmm_switch_pgd(uint32_t pgd);
 void vmm_map(pde_t *pgdir, uint32_t va, uint32_t pa, uint32_t flags);
 void vmm_unmap(pde_t *pgdir, uint32_t va);
 int vmm_get_mapping(pde_t *pgdir, uint32_t va, uint32_t *pa);
 void vmm_test();
 
+/* process address mapping */
+void kvm_init(pde_t *pgdir);
+void uvm_init_fst(pde_t *pgdir, char *init, uint32_t size); 
+void uvm_init();
+void uvm_switch(struct proc *pp);
+
 /* isr 14 */
-void page_fault(struct regs_s *regs);
+void page_fault(struct int_frame *r);
 #endif

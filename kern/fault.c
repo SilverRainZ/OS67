@@ -5,8 +5,12 @@
 // std
 #include <type.h>
 #include <vga.h>
+#include <dbg.h>
+// x86
 #include <pm.h>
 #include <isr.h>
+// libs
+#include <printk.h>
 
 /* int 0-31 is used to service exceptions! */
 extern void fault0();
@@ -120,14 +124,15 @@ void fault_init()
 
 }
 
-void fault_handler(struct regs_s *r){
+void fault_handler(struct int_frame *r){
     setcolor(COL_RED, COL_BLACK);
     if (r->int_no < 32){
+        printl("error code: %d\n", r->err_code);
         puts(fault_msg[r->int_no]);
-        puts("Exception.\nSystem Halted!\n");
+        panic("Exception.\nSystem Halted!\n");
     }
     else {
-        puts("Unkonwn Interrupt, System Halted!\n");
+        panic("Unkonwn Interrupt, System Halted!\n");
     }
     for (;;);
 }

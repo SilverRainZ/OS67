@@ -5,9 +5,10 @@ align 4
 
 [global __init_start]
 __init_start:
-    int 3
+    nop
+    nop
+    nop
+    jmp $
 
 [global __init_end]
 __init_end:
-
-

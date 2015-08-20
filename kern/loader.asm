@@ -8,6 +8,7 @@ SEL_KERN_CODE   EQU 0x8
 SEL_KERN_DATA   EQU 0x10
 ; vedio memory
 SEL_KERN_VEDIO  EQU 0x18
+USER_BASE       EQU 0xc0000000
 
 align 4
 
@@ -167,6 +168,7 @@ isr_unknown:
 
 ; ********** Common Interrupt Process Routine
 ; exists in kern/isr.c 
+[global _isr_stub_ret]
 [extern isr_stub]
 ; a common ISR func, sava the context of CPU 
 ; call C func to process fault
@@ -184,13 +186,15 @@ _isr_stub:
     mov fs, ax
     mov gs, ax
     mov ss, ax
+
     mov eax, esp
     push eax
 
     mov eax,isr_stub
     call eax
-
     pop eax
+
+_isr_stub_ret:
     pop gs
     pop fs
     pop es
@@ -198,4 +202,26 @@ _isr_stub:
     popa
     add esp, 8
     iret
+
+; ********** context switch: use in proc/proc.c
+; void context_switch(struct context **old, struct *new);
+[global context_switch]
+context_switch:
+    mov eax, [esp + 4]  ; old
+    mov edx, [esp + 8]  ; new
+
+    push ebp
+    push ebx
+    push esi
+    push edi
+
+    ; switch stack
+    mov [eax], esp
+    mov esp, edx
+
+    pop edi
+    pop esi
+    pop ebx
+    pop ebp
+    ret
 

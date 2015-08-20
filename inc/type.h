@@ -16,6 +16,11 @@ typedef short int16_t;
 typedef unsigned char uint8_t;
 typedef char int8_t;
 
+/* page global directory */
+typedef uint32_t pde_t;
+/* page talbe entry */
+typedef uint32_t pte_t;
+
 /* useful macro */
 #define min(a, b) ((a)<(b)?(a):(b))
 #define max(a, b) ((a)>(b)?(a):(b))

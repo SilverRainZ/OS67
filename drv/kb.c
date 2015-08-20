@@ -93,7 +93,7 @@ static unsigned char kb_map_shift[128] =
     0,    /* All other keys are undefined */
 };
 
-void kb_handler(struct regs_s *r){
+void kb_handler(struct int_frame *r){
     unsigned char scancode;
     kb_map_shift[0] = 0;
     /* Read from the keyboard's data buffer */

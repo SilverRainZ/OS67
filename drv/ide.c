@@ -70,7 +70,7 @@ static void ide_start(struct buf *b){
     }
 }
 
-void ide_handler(struct regs_s *r){
+void ide_handler(struct int_frame *r){
     struct buf *b;
     /* if queue is empty */
     if ((b = idequeue) == 0){

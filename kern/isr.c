@@ -28,7 +28,7 @@ void isr_init(){
     sys_init();
 }
 
-void isr_stub(struct regs_s *r){
+void isr_stub(struct int_frame *r){
     assert(r->int_no >= 0, "isr_stub: wrong intrrupt number < 0");
 
     if (r->int_no < ISR_IRQ0 || r->int_no == ISR_UNKNOWN){

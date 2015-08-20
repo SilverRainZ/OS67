@@ -19,17 +19,22 @@
 // mm
 #include <vmm.h> 
 #include <pmm.h>
-#include <_vm.h>
+// proc
+#include <proc.h>
 
-/* page directory table of kernel */
-// pde_t pde_kern[PDE_SIZE] __attribute__((aligned(PAGE_SIZE)));
-/* page table of kernel */
-// static pte_t pte_kern[PTE_COUNT][PTE_SIZE] __attribute__((aligned(PAGE_SIZE)));
-/* 由于页目录和页表都aligned(PAGE_SIZE), 
- * 因此低地址的12位始终为0 */
+
+extern uint8_t kernstart;
+extern uint8_t kernend;
+
+extern uint8_t __init_start;
+extern uint8_t __init_end;
+
+pde_t pgd_kern[PDE_SIZE] __attribute__((aligned(PAGE_SIZE)));
+/* page table entry of kernel */
+static pte_t pte_kern[PTE_COUNT][PTE_SIZE] __attribute__((aligned(PAGE_SIZE)));
 
 /* switch page table */
-inline void vmm_switch_pde(uint32_t pde){
+inline void vmm_switch_pgd(uint32_t pde){
     __asm__ volatile ("mov %0, %%cr3": :"r"(pde));
 }
 
@@ -47,17 +52,21 @@ static inline void vmm_enable(){
 }
 
 void vmm_init(){
+    uint32_t i, j;
     /* register isr */
     idt_install(FAULT_PAGE, (unsigned)page_fault, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
 
-    pde_t *pgdir = (pte_t *)pmm_alloc();
+    for (i = 0, j = 0; i < PTE_COUNT; i++, j++){
+        pgd_kern[i] = (uint32_t)pte_kern[j] | PTE_P | PTE_R | PTE_K;
+    }
+    
+    uint32_t *pte = (uint32_t *)pte_kern;
+    for (i = 1; i < PTE_COUNT*PTE_SIZE; i++){
+        pte[i] = (i << 12) | PTE_P | PTE_P | PTE_K;
+    }
 
-    kvm_init(pgdir);
+    vmm_switch_pgd((uint32_t)pgd_kern);
 
-    /* switch page global directory */
-    vmm_switch_pde((uint32_t)pgdir);
-
-    /* enable paging */
     vmm_enable();
 }
 
@@ -65,14 +74,14 @@ void vmm_map(pde_t *pgdir, uint32_t va, uint32_t pa, uint32_t flags){
     uint32_t pde_idx = PDE_INDEX(va);
     uint32_t pte_idx = PTE_INDEX(va);
 
-   // printl("map: map 0x%x to 0x%x, flag = 0x%x\n", pa, va, flags);
+    // printl("map: map 0x%x to 0x%x, flag = 0x%x\n", pa, va, flags);
  
     pte_t *pte = (pte_t *)(pgdir[pde_idx] & PAGE_MASK);
     /* if pte == NULL */
     if (!pte){
-        printl("map: pte of 0x%x is NULL, attempt to alloc one\n", va);
+        // printl("map: pte of 0x%x is NULL, attempt to alloc one\n", va);
         pte = (pte_t *)pmm_alloc();
-        pgdir[pde_idx] = (uint32_t)pte | PTE_P | PTE_R;
+        pgdir[pde_idx] = (uint32_t)pte | PTE_P | PTE_R | flags;
         //assert(0,"pet = NULL");
         memset(pte, 0, PAGE_SIZE);
     } 
@@ -87,12 +96,12 @@ void vmm_unmap(pde_t *pde, uint32_t va){
     uint32_t pde_idx = PDE_INDEX(va);
     uint32_t pte_idx = PTE_INDEX(va);
 
-    printl("unmap: unmap virtual address 0x%x\n", va);
+    // printl("unmap: unmap virtual address 0x%x\n", va);
     pte_t *pte = (pte_t *)(pde[pde_idx] & PAGE_MASK);
 
     //assert(pte,"unmap fail.");
     if (!pte){
-        printl("unmap: unmap a unmapped page\n");
+        // printl("unmap: unmap a unmapped page\n");
         return;
     }
     /* unmap this poge */
@@ -126,9 +135,47 @@ void vmm_test(){
     printl("=== vmm_test end ===\n");
 }
 
-void page_fault(struct regs_s *regs){
+void page_fault(struct int_frame *r){
     uint32_t cr2;
     __asm__ volatile ("mov %%cr2, %0":"=r"(cr2));
     panic("Page Fault Excetpion\nSystem Halted!\n");
     for (;;) hlt();
+}
+
+void kvm_init(pde_t *pgdir){
+    uint32_t addr;
+    uint32_t limit = PAGE_ALIGN_UP((uint32_t)&kernend);
+
+    assert(pgdir != 0, "kvm_init: null pgdir");
+
+    for (addr = 0; addr < limit; addr += PAGE_SIZE){
+        vmm_map(pgdir, addr, addr, PTE_P | PTE_R | PTE_K);
+    }
+}
+
+void uvm_init_fst(pde_t *pgdir, char *init, uint32_t size){
+    char *room;
+
+    assert(size < PAGE_SIZE, "uvm_init_fst: size");
+
+    printl("uvm_init_fst: alloc memory fot init\n");
+    room = (char *)pmm_alloc();
+
+    memset(room, 0, PAGE_SIZE);
+    printl("init = 0x%x size = %d\n", init, size);
+    memcpy(room, init, size);
+    printl("uvm_init_fst: clear and copy\n");
+
+    vmm_map(pgdir, USER_BASE, (uint32_t)room, PTE_U | PTE_P | PTE_R);
+    printl("uvm_init_fst: map\n");
+}
+
+void uvm_switch(struct proc *pp){
+    cli();
+
+    tss_set(SEL_KERN_DATA, (uint32_t)pp->kern_stack + PAGE_SIZE);
+
+    vmm_switch_pgd((uint32_t)pp->pgdir);
+
+    sti();
 }

@@ -36,12 +36,12 @@ void *irq_routines[ISR_NIRQ] ={
 };
 
 /* This installs a custom IRQ handler for the given IRQ */
-void irq_install(unsigned char irq, void (*handler)(struct regs_s *r)){
+void irq_install(uint8_t irq, void (*handler)(struct int_frame *r)){
     irq_routines[irq] = handler;
 }
 
 /* This clears the handler for a given IRQ */
-void irq_uninstall(unsigned char irq){
+void irq_uninstall(uint8_t irq){
     irq_routines[irq] = 0;
 }
 
@@ -73,8 +73,7 @@ void irq_remap(){
 void irq_init(){
     irq_remap();
 
-    idt_install(ISR_IRQ0 + 0, (uint32_t)irq0, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
-    idt_install(ISR_IRQ0 + 1, (uint32_t)irq1, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
+    idt_install(ISR_IRQ0 + 0, (uint32_t)irq0, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN); idt_install(ISR_IRQ0 + 1, (uint32_t)irq1, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
     idt_install(ISR_IRQ0 + 2, (uint32_t)irq2, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
     idt_install(ISR_IRQ0 + 3, (uint32_t)irq3, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
     idt_install(ISR_IRQ0 + 4, (uint32_t)irq4, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
@@ -101,9 +100,9 @@ void irq_init(){
 *  interrupt at BOTH controllers, otherwise, you only send
 *  an EOI command to the first controller. If you don't send
 *  an EOI, you won't raise any more IRQs */
-void irq_handler(struct regs_s *r){
+void irq_handler(struct int_frame *r){
     /* This is a blank function pointer */
-    void (*handler)(struct regs_s *r);
+    void (*handler)(struct int_frame *r);
 
     /* Find out if we have a custom handler to run for this
     *  IRQ, and then finally, run it */

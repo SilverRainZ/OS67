@@ -7,6 +7,8 @@
 /* ref: http://wiki.osdev.org/GDT */
 /* ref: http://wiki.osdev.org/IDT */
 
+#define FLAG_IF 0x200
+
 #define NGDT 256
 
 #define AC_AC 0x1       // access
@@ -28,6 +30,10 @@
 #define SEL_KERN_DATA 0x10
 #define SEL_USER_CODE 0x18
 #define SEL_USER_DATA 0x20
+#define SEL_CPU_TSS   0x28
+
+#define RPL_KERN    0x0
+#define RPL_USER   0x3
 
 struct gdt_entry{
     uint16_t limit_low;
@@ -70,10 +76,45 @@ struct idt_ptr{
     uint32_t base;
 } __attribute__((packed));
 
-void gdt_install(uint8_t num, uint32_t base, uint32_t limit, uint8_t access, uint8_t gran);
-void gdt_init();
 
+struct tss_entry{
+    uint32_t link;
+    uint32_t esp0;
+    uint32_t ss0;
+    uint32_t esp1;
+    uint32_t ss1;
+    uint32_t esp2;
+    uint32_t ss2;
+    uint32_t cr3;
+    uint32_t eip;
+    uint32_t eflags;
+    uint32_t eax;
+    uint32_t ecx;
+    uint32_t edx;
+    uint32_t ebx;
+    uint32_t esp;
+    uint32_t ebp;
+    uint32_t esi;
+    uint32_t edi;
+    uint32_t es;
+    uint32_t cs;
+    uint32_t ss;
+    uint32_t ds;
+    uint32_t fs;
+    uint32_t gs;
+    uint32_t ldtr;
+    uint16_t padding1;
+    uint16_t iopb_off;
+} __attribute__ ((packed));
+
+/* kern/gdt.c */
+void gdt_init();
+void tss_set(uint16_t ss0, uint32_t esp0);
+
+/* kern/idt.c */
 void idt_init();
 void idt_install(uint8_t num, uint32_t base, uint16_t selector, uint8_t gate, uint8_t flags);
+
+
 
 #endif

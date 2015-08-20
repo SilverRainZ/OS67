@@ -25,7 +25,7 @@ void timer_phase(int hz){
     /*设置除数的高字节  */
 } 
 
-void timer_handler(struct regs_s *r){
+void timer_handler(struct int_frame *r){
     /* trigger when every 18 clocks (approximately 1 second)  */
 
     timer_ticks++;

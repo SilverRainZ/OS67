@@ -20,6 +20,7 @@
 #include <heap.h>
 // proc
 #include <proc.h>
+#include <sched.h>
 // fs
 #include <buf.h>
 #include <sb.h>
@@ -50,7 +51,7 @@ int osmain(void)
     pmm_init();
     puts("pmm init...\n\r");
     pmm_mem_info();
-    pmm_test();
+    // pmm_test();
     
     vmm_init();
     puts("vmm init...\n\r");
@@ -69,9 +70,9 @@ int osmain(void)
 
     bcache_init();
     puts("buffer cache init...\n\r");
-    sti();
 
-    fs_test();
+    proc_userinit();
+    sched();
     
     for (;;);
     return 0;

@@ -2,7 +2,6 @@
 #define __PROC_H
 
 #include <type.h>
-#include <vmm.h>
 #include <file.h>
 #include <minix.h>
 
@@ -23,14 +22,15 @@ struct context{
     uint32_t eip;
 };
 
+
 struct proc{ 
     volatile uint8_t pid;
     char name[NAME_LEN];
     uint32_t size;
     uint8_t state;
 
-    // struct trapframe *tf;
-    // struct context *context;
+    struct int_frame *fm;
+    struct context *context;
     
     char *kern_stack;
     pde_t *pgdir;
@@ -39,5 +39,9 @@ struct proc{
     struct inode *cwd;
     struct proc *parent;
 };
+
+struct proc ptable[NPROC];
+
+void proc_userinit();
 
 #endif
