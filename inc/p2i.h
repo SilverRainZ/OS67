@@ -3,7 +3,7 @@
 
 #include <inode.h>
 
-struct inode *path2inode(char *path);
-struct inode *path2inode_parent(char *path, char *name);
+struct inode *p2i(char *path);
+struct inode *p2ip(char *path, char *name);
 
 #endif

@@ -91,11 +91,11 @@ static struct inode *_path2inode(char *path, int parent, char *name){
 }
 
 
-struct inode *path2inode(char *path){
+struct inode *p2i(char *path){
     char name[NAME_LEN];
     return _path2inode(path, 0, name);
 }
 
-struct inode *path2inode_parent(char *path, char *name){
+struct inode *p2ip(char *path, char *name){
     return _path2inode(path, 1, name);
 }

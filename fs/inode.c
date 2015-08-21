@@ -15,7 +15,7 @@
 #include <stat.h>
 
 /* inodes cache */
-struct inode icache[NINODE];
+static struct inode icache[NINODE];
 
 /* find the inode with specific dev and inum in memory, 
  * if not found, use first empty inode 
@@ -36,7 +36,7 @@ struct inode* iget(uint16_t dev, uint16_t ino){
             empty = ip;
         }
     }
-    assert(empty, "ige: no inode");
+    assert(empty, "iget: no inode");
 
     printl("iget: inode-%d no cached, found a empty one\n", ino);
 
