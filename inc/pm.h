@@ -15,25 +15,26 @@
 #define AC_RW 0x2       // readable for code selector & writeable for data selector
 #define AC_DC 0x4       // direcion
 #define AC_EX 0x8       // executable, code segment
-#define AC_REVERSE 0x10 
-#define AC_PL_KERN 0x0  // RING 0 kernel level
-#define AC_PL_USER 0x60 // RING 3 user level
+#define AC_RE 0x10 
 #define AC_PR 0x80      // persent in memory
 
-#define GDT_GR 0x8     // limit in 4k blocks
-#define GDT_SZ 0x4     // 32 bit protect mode
+#define AC_DPL_KERN 0x0  // RING 0 kernel level
+#define AC_DPL_USER 0x60 // RING 3 user level
+
+#define GDT_GR  0x8     // limit in 4k blocks
+#define GDT_SZ  0x4     // 32 bit protect mode
 
 #define NGDT 256
 
 // gdt selector 
-#define SEL_KERN_CODE 0x8
-#define SEL_KERN_DATA 0x10
-#define SEL_USER_CODE 0x18
-#define SEL_USER_DATA 0x20
-#define SEL_CPU_TSS   0x28
+#define SEL_KCODE   0x1
+#define SEL_KDATA   0x2
+#define SEL_UCODE   0x3
+#define SEL_UDATA   0x4
+#define SEL_TSS     0x5
 
 #define RPL_KERN    0x0
-#define RPL_USER   0x3
+#define RPL_USER    0x3
 
 struct gdt_entry{
     uint16_t limit_low;
@@ -76,7 +77,6 @@ struct idt_ptr{
     uint32_t base;
 } __attribute__((packed));
 
-
 struct tss_entry{
     uint32_t link;
     uint32_t esp0;
@@ -114,7 +114,5 @@ void tss_set(uint16_t ss0, uint32_t esp0);
 /* kern/idt.c */
 void idt_init();
 void idt_install(uint8_t num, uint32_t base, uint16_t selector, uint8_t gate, uint8_t flags);
-
-
 
 #endif

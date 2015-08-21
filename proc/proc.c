@@ -15,8 +15,12 @@
 #include <proc.h>
 
 extern void _isr_stub_ret();
+extern void context_switch(struct context **old, struct context *new);
 
-uint32_t cur_pid = 0;
+static uint32_t cur_pid = 0;
+static struct proc *initproc = NULL;
+static struct proc ptable[NPROC];
+static struct context cpu_context;
 
 void fork_ret(){
     return;
@@ -56,10 +60,9 @@ static struct proc *proc_alloc(){
     return NULL;
 }
 
-
-void proc_userinit(){
-    printl("proc_userinit: prepare for init\n");
+void proc_init(){
     struct proc *pp;
+    printl("proc_userinit: prepare for init\n");
 
     extern char __init_start;
     extern char __init_end;
@@ -78,24 +81,46 @@ void proc_userinit(){
     pp->size = size;
 
     uvm_init_fst(pp->pgdir, &__init_start, size);
-    printl("proc_userinit: user space maped\n");
+    printl("proc_serinit: user space maped\n");
 
     memset(pp->fm, 0, sizeof(*pp->fm));
-    pp->fm->cs = SEL_USER_CODE | 0x3;
-    pp->fm->ds = SEL_USER_DATA | 0x3;
+    pp->fm->cs = (SEL_UCODE << 3) | 0x3;
+    pp->fm->ds = (SEL_UDATA << 3) | 0x3;
     pp->fm->es = pp->fm->ds;
     pp->fm->fs = pp->fm->ds;
     pp->fm->gs = pp->fm->ds;
     pp->fm->ss = pp->fm->ds;
-    pp->fm->eflags = 0;
+    pp->fm->eflags = 0; // TODO FLAG_IF
     pp->fm->user_esp = USER_BASE + PAGE_SIZE - 1;
     pp->fm->eip = USER_BASE;
-    printl("proc_userinit: init stack build\n");
+    printl("proc_init: init stack build\n");
 
     strcpy(pp->name, "init");
-    pp->cwd = path2inode("/");
+    pp->cwd = p2i("/");
     pp->state = P_RUNABLE;
-    printl("proc_userinit: done, perpare for running\n");
+
+    initproc = pp;
+
+    printl("proc_init: done, perpare for running\n");
 }
 
 
+void sched(){
+    struct proc *pp;
+    struct context *old = &cpu_context;
+
+    printl("sched: start\n");
+    for (;;){
+        for (pp = &ptable[0]; pp < &ptable[NPROC]; pp++){
+            if (pp->state != P_RUNABLE){
+                continue;
+            }
+            printk("proc_init: proc `%s` will run\n", pp->name);
+            uvm_switch(pp);
+            pp->state = P_RUNNING;
+
+            printl("sched: context_switch\n");
+            context_switch(&old, pp->context);
+        }
+    }
+}

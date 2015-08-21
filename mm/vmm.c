@@ -54,7 +54,7 @@ static inline void vmm_enable(){
 void vmm_init(){
     uint32_t i, j;
     /* register isr */
-    idt_install(FAULT_PAGE, (unsigned)page_fault, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
+    idt_install(FAULT_PAGE, (unsigned)page_fault, SEL_KCODE << 3, GATE_INT, IDT_PR|IDT_DPL_KERN);
 
     for (i = 0, j = 0; i < PTE_COUNT; i++, j++){
         pgd_kern[i] = (uint32_t)pte_kern[j] | PTE_P | PTE_R | PTE_K;
@@ -173,7 +173,7 @@ void uvm_init_fst(pde_t *pgdir, char *init, uint32_t size){
 void uvm_switch(struct proc *pp){
     cli();
 
-    tss_set(SEL_KERN_DATA, (uint32_t)pp->kern_stack + PAGE_SIZE);
+    tss_set(SEL_KDATA, (uint32_t)pp->kern_stack + PAGE_SIZE);
     vmm_switch_pgd((uint32_t)pp->pgdir);
 
     sti();

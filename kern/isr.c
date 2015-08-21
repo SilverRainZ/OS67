@@ -21,7 +21,7 @@ void isr_init(){
     /* treat unkown interrupt as fault */
     int i;
     for (i = ISR_IRQ0; i < NIDT; i++){
-        idt_install(i,(uint32_t)isr_unknown, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
+        idt_install(i,(uint32_t)isr_unknown, SEL_KCODE << 3, GATE_INT, IDT_PR|IDT_DPL_KERN);
     }
 
     irq_init();

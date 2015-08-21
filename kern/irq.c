@@ -45,14 +45,6 @@ void irq_uninstall(uint8_t irq){
     irq_routines[irq] = 0;
 }
 
-/* Normally, IRQs 0 to 7 are mapped to entries 8 to 15. This
-*  is a problem in protected mode, because IDT entry 8 is a
-*  Double Fault! Without remapping, every time IRQ0 fires,
-*  you get a Double Fault Exception, which is NOT actually
-*  what's happening. We send commands to the Programmable
-*  Interrupt Controller (PICs - also called the 8259's) in
-*  order to make IRQ0 to 15 be remapped to IDT entries 32 to
-*  47 */
 /* in short: map irq 0-15 to int 32-47 */
 void irq_remap(){
     outb(0x20, 0x11);
@@ -73,40 +65,31 @@ void irq_remap(){
 void irq_init(){
     irq_remap();
 
-    idt_install(ISR_IRQ0 + 0, (uint32_t)irq0, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN); idt_install(ISR_IRQ0 + 1, (uint32_t)irq1, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
-    idt_install(ISR_IRQ0 + 2, (uint32_t)irq2, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
-    idt_install(ISR_IRQ0 + 3, (uint32_t)irq3, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
-    idt_install(ISR_IRQ0 + 4, (uint32_t)irq4, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
-    idt_install(ISR_IRQ0 + 5, (uint32_t)irq5, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
-    idt_install(ISR_IRQ0 + 6, (uint32_t)irq6, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
-    idt_install(ISR_IRQ0 + 7, (uint32_t)irq7, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
-    idt_install(ISR_IRQ0 + 8, (uint32_t)irq8, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
-    idt_install(ISR_IRQ0 + 9, (uint32_t)irq9, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
-    idt_install(ISR_IRQ0 + 10, (uint32_t)irq10, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
-    idt_install(ISR_IRQ0 + 11, (uint32_t)irq11, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
-    idt_install(ISR_IRQ0 + 12, (uint32_t)irq12, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
-    idt_install(ISR_IRQ0 + 13, (uint32_t)irq13, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
-    idt_install(ISR_IRQ0 + 14, (uint32_t)irq14, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
-    idt_install(ISR_IRQ0 + 15, (uint32_t)irq15, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
+    idt_install(ISR_IRQ0 + 0, (uint32_t)irq0, SEL_KCODE << 3, GATE_INT, IDT_PR|IDT_DPL_KERN); 
+    idt_install(ISR_IRQ0 + 1, (uint32_t)irq1, SEL_KCODE << 3, GATE_INT, IDT_PR|IDT_DPL_KERN);
+    idt_install(ISR_IRQ0 + 2, (uint32_t)irq2, SEL_KCODE << 3, GATE_INT, IDT_PR|IDT_DPL_KERN);
+    idt_install(ISR_IRQ0 + 3, (uint32_t)irq3, SEL_KCODE << 3, GATE_INT, IDT_PR|IDT_DPL_KERN);
+    idt_install(ISR_IRQ0 + 4, (uint32_t)irq4, SEL_KCODE << 3, GATE_INT, IDT_PR|IDT_DPL_KERN);
+    idt_install(ISR_IRQ0 + 5, (uint32_t)irq5, SEL_KCODE << 3, GATE_INT, IDT_PR|IDT_DPL_KERN);
+    idt_install(ISR_IRQ0 + 6, (uint32_t)irq6, SEL_KCODE << 3, GATE_INT, IDT_PR|IDT_DPL_KERN);
+    idt_install(ISR_IRQ0 + 7, (uint32_t)irq7, SEL_KCODE << 3, GATE_INT, IDT_PR|IDT_DPL_KERN);
+    idt_install(ISR_IRQ0 + 8, (uint32_t)irq8, SEL_KCODE << 3, GATE_INT, IDT_PR|IDT_DPL_KERN);
+    idt_install(ISR_IRQ0 + 9, (uint32_t)irq9, SEL_KCODE << 3, GATE_INT, IDT_PR|IDT_DPL_KERN);
+    idt_install(ISR_IRQ0 + 10, (uint32_t)irq10, SEL_KCODE << 3, GATE_INT, IDT_PR|IDT_DPL_KERN);
+    idt_install(ISR_IRQ0 + 11, (uint32_t)irq11, SEL_KCODE << 3, GATE_INT, IDT_PR|IDT_DPL_KERN);
+    idt_install(ISR_IRQ0 + 12, (uint32_t)irq12, SEL_KCODE << 3, GATE_INT, IDT_PR|IDT_DPL_KERN);
+    idt_install(ISR_IRQ0 + 13, (uint32_t)irq13, SEL_KCODE << 3, GATE_INT, IDT_PR|IDT_DPL_KERN);
+    idt_install(ISR_IRQ0 + 14, (uint32_t)irq14, SEL_KCODE << 3, GATE_INT, IDT_PR|IDT_DPL_KERN);
+    idt_install(ISR_IRQ0 + 15, (uint32_t)irq15, SEL_KCODE << 3, GATE_INT, IDT_PR|IDT_DPL_KERN);
 }
 
-/* Each of the IRQ ISRs point to this function, rather than
-*  the 'fault_handler' in 'isrs.c'. The IRQ Controllers need
-*  to be told when you are done servicing them, so you need
-*  to send them an "End of Interrupt" command (0x20). There
-*  are two 8259 chips: The first exists at 0x20,:vs  the second
-*  exists at 0xA0. If the second controller (an IRQ from 8 to
-*  15) gets an interrupt, you need to acknowledge the
-*  interrupt at BOTH controllers, otherwise, you only send
-*  an EOI command to the first controller. If you don't send
-*  an EOI, you won't raise any more IRQs */
 void irq_handler(struct int_frame *r){
     /* This is a blank function pointer */
     void (*handler)(struct int_frame *r);
 
     /* Find out if we have a custom handler to run for this
     *  IRQ, and then finally, run it */
-    handler = irq_routines[r->int_no - 32];
+    handler = irq_routines[r->int_no - ISR_IRQ0];
     if (handler){
         handler(r);
     }

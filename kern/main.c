@@ -20,7 +20,6 @@
 #include <heap.h>
 // proc
 #include <proc.h>
-#include <sched.h>
 // fs
 #include <buf.h>
 #include <sb.h>
@@ -71,7 +70,7 @@ int osmain(void)
     bcache_init();
     puts("buffer cache init...\n\r");
 
-    proc_userinit();
+    proc_init();
     sched();
     
     for (;;);

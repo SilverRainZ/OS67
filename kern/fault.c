@@ -86,41 +86,41 @@ static char *fault_msg[] = {
 
 void fault_init()
 {
-    idt_install(0, (uint32_t)fault0, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
-    idt_install(1, (uint32_t)fault1, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
-    idt_install(2, (uint32_t)fault2, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
-    idt_install(3, (uint32_t)fault3, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
-    idt_install(4, (uint32_t)fault4, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
-    idt_install(5, (uint32_t)fault5, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
-    idt_install(6, (uint32_t)fault6, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
-    idt_install(7, (uint32_t)fault7, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
+    idt_install(0, (uint32_t)fault0, SEL_KCODE << 3, GATE_INT, IDT_PR|IDT_DPL_KERN);
+    idt_install(1, (uint32_t)fault1, SEL_KCODE << 3, GATE_INT, IDT_PR|IDT_DPL_KERN);
+    idt_install(2, (uint32_t)fault2, SEL_KCODE << 3, GATE_INT, IDT_PR|IDT_DPL_KERN);
+    idt_install(3, (uint32_t)fault3, SEL_KCODE << 3, GATE_INT, IDT_PR|IDT_DPL_KERN);
+    idt_install(4, (uint32_t)fault4, SEL_KCODE << 3, GATE_INT, IDT_PR|IDT_DPL_KERN);
+    idt_install(5, (uint32_t)fault5, SEL_KCODE << 3, GATE_INT, IDT_PR|IDT_DPL_KERN);
+    idt_install(6, (uint32_t)fault6, SEL_KCODE << 3, GATE_INT, IDT_PR|IDT_DPL_KERN);
+    idt_install(7, (uint32_t)fault7, SEL_KCODE << 3, GATE_INT, IDT_PR|IDT_DPL_KERN);
 
-    idt_install(8, (uint32_t)fault8, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
-    idt_install(9, (uint32_t)fault9, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
-    idt_install(10, (uint32_t)fault10, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
-    idt_install(11, (uint32_t)fault11, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
-    idt_install(12, (uint32_t)fault12, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
-    idt_install(13, (uint32_t)fault13, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
-    idt_install(14, (uint32_t)fault14, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
-    idt_install(15, (uint32_t)fault15, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
+    idt_install(8, (uint32_t)fault8, SEL_KCODE << 3, GATE_INT, IDT_PR|IDT_DPL_KERN);
+    idt_install(9, (uint32_t)fault9, SEL_KCODE << 3, GATE_INT, IDT_PR|IDT_DPL_KERN);
+    idt_install(10, (uint32_t)fault10, SEL_KCODE << 3, GATE_INT, IDT_PR|IDT_DPL_KERN);
+    idt_install(11, (uint32_t)fault11, SEL_KCODE << 3, GATE_INT, IDT_PR|IDT_DPL_KERN);
+    idt_install(12, (uint32_t)fault12, SEL_KCODE << 3, GATE_INT, IDT_PR|IDT_DPL_KERN);
+    idt_install(13, (uint32_t)fault13, SEL_KCODE << 3, GATE_INT, IDT_PR|IDT_DPL_KERN);
+    idt_install(14, (uint32_t)fault14, SEL_KCODE << 3, GATE_INT, IDT_PR|IDT_DPL_KERN);
+    idt_install(15, (uint32_t)fault15, SEL_KCODE << 3, GATE_INT, IDT_PR|IDT_DPL_KERN);
 
-    idt_install(16, (uint32_t)fault16, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
-    idt_install(17, (uint32_t)fault17, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
-    idt_install(18, (uint32_t)fault18, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
-    idt_install(19, (uint32_t)fault19, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
-    idt_install(20, (uint32_t)fault20, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
-    idt_install(21, (uint32_t)fault21, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
-    idt_install(22, (uint32_t)fault22, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
-    idt_install(23, (uint32_t)fault23, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
+    idt_install(16, (uint32_t)fault16, SEL_KCODE << 3, GATE_INT, IDT_PR|IDT_DPL_KERN);
+    idt_install(17, (uint32_t)fault17, SEL_KCODE << 3, GATE_INT, IDT_PR|IDT_DPL_KERN);
+    idt_install(18, (uint32_t)fault18, SEL_KCODE << 3, GATE_INT, IDT_PR|IDT_DPL_KERN);
+    idt_install(19, (uint32_t)fault19, SEL_KCODE << 3, GATE_INT, IDT_PR|IDT_DPL_KERN);
+    idt_install(20, (uint32_t)fault20, SEL_KCODE << 3, GATE_INT, IDT_PR|IDT_DPL_KERN);
+    idt_install(21, (uint32_t)fault21, SEL_KCODE << 3, GATE_INT, IDT_PR|IDT_DPL_KERN);
+    idt_install(22, (uint32_t)fault22, SEL_KCODE << 3, GATE_INT, IDT_PR|IDT_DPL_KERN);
+    idt_install(23, (uint32_t)fault23, SEL_KCODE << 3, GATE_INT, IDT_PR|IDT_DPL_KERN);
 
-    idt_install(24, (uint32_t)fault24, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
-    idt_install(25, (uint32_t)fault25, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
-    idt_install(26, (uint32_t)fault26, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
-    idt_install(27, (uint32_t)fault27, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
-    idt_install(28, (uint32_t)fault28, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
-    idt_install(29, (uint32_t)fault29, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
-    idt_install(30, (uint32_t)fault30, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
-    idt_install(31, (uint32_t)fault31, SEL_KERN_CODE, GATE_INT, IDT_PR|IDT_DPL_KERN);
+    idt_install(24, (uint32_t)fault24, SEL_KCODE << 3, GATE_INT, IDT_PR|IDT_DPL_KERN);
+    idt_install(25, (uint32_t)fault25, SEL_KCODE << 3, GATE_INT, IDT_PR|IDT_DPL_KERN);
+    idt_install(26, (uint32_t)fault26, SEL_KCODE << 3, GATE_INT, IDT_PR|IDT_DPL_KERN);
+    idt_install(27, (uint32_t)fault27, SEL_KCODE << 3, GATE_INT, IDT_PR|IDT_DPL_KERN);
+    idt_install(28, (uint32_t)fault28, SEL_KCODE << 3, GATE_INT, IDT_PR|IDT_DPL_KERN);
+    idt_install(29, (uint32_t)fault29, SEL_KCODE << 3, GATE_INT, IDT_PR|IDT_DPL_KERN);
+    idt_install(30, (uint32_t)fault30, SEL_KCODE << 3, GATE_INT, IDT_PR|IDT_DPL_KERN);
+    idt_install(31, (uint32_t)fault31, SEL_KCODE << 3, GATE_INT, IDT_PR|IDT_DPL_KERN);
 
 }
 

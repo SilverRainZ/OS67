@@ -10,7 +10,7 @@
 extern void _syscall();
 
 void sys_init(){
-    idt_install(ISR_SYSCALL, (uint32_t)_syscall, SEL_KERN_CODE, GATE_TRAP, IDT_PR | IDT_DPL_USER);
+    idt_install(ISR_SYSCALL, (uint32_t)_syscall, SEL_KCODE << 3, GATE_TRAP, IDT_PR | IDT_DPL_USER);
 }
 
 void syscall(struct int_frame *r){

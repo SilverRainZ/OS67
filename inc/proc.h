@@ -40,8 +40,7 @@ struct proc{
     struct proc *parent;
 };
 
-struct proc ptable[NPROC];
-
-void proc_userinit();
+void proc_init();
+void sched();
 
 #endif
