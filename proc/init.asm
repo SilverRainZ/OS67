@@ -5,7 +5,7 @@ align 4
 
 [global __init_start]
 __init_start:
-    nop
+    int 0x80
     nop
     nop
     jmp $

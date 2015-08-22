@@ -137,7 +137,9 @@ void vmm_test(){
 
 void page_fault(struct int_frame *r){
     uint32_t cr2;
+
     __asm__ volatile ("mov %%cr2, %0":"=r"(cr2));
+    printk("errro code: 0x%x\n", cr2);
     panic("Page Fault Excetpion\nSystem Halted!\n");
     for (;;) hlt();
 }
@@ -173,7 +175,7 @@ void uvm_init_fst(pde_t *pgdir, char *init, uint32_t size){
 void uvm_switch(struct proc *pp){
     cli();
 
-    tss_set(SEL_KDATA, (uint32_t)pp->kern_stack + PAGE_SIZE);
+    tss_set(SEL_KDATA << 3, (uint32_t)pp->kern_stack + PAGE_SIZE - 1);
     vmm_switch_pgd((uint32_t)pp->pgdir);
 
     sti();
