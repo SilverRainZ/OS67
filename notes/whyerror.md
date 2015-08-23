@@ -53,3 +53,12 @@
 无法理解.
 
 #2015-8-14 关于 bitmap 的操作还是不太清楚, 尽管结果是正确的
+
+#2015-8-20 执行 userland 的第一条指令时, 莫名奇妙地 PageFault, 而用 bochs 单步错误则不发生
+stupid! 错误并不是发生在执行 userland 的时候, 而是因为刚进入 userland 时, IF 位是置位的... 因此有时钟中断发生... 错误发生在执行中断的代码上.
+因此暂且把中断关掉, 问题解决. 感谢 #archlinux-cn@fixme
+
+#2015-8-21 userland 中执行 int 时, CPU 没有从 tss 取得内核的 ss 和 esp
+当要执行的 ISR 的段的 `DPL` < `CPL` 时, CPU 会从 tss 取出对应特权级的 ss 和 esp(这里是 ss0 和 esp0), 然而...
+
+如果段描述符的 Access bit `DC` 置位时, 意味着该段可以被与之相等或更低特权级的段访问(所以就没有取出 tss 的内容了甚至 cs 寄存器的 CPL 也不改变)...但是 kerenl 的页表可是 `PTE_K`的, 所以发生 Page Fault.
