@@ -17,62 +17,55 @@
 // mm
 #include <pmm.h>
 #include <vmm.h>
-#include <heap.h>
 // proc
 #include <proc.h>
 // fs
-#include <buf.h>
-#include <sb.h>
 #include <bcache.h>
-
-uint32_t kern_stack_top;
-char kern_stack[STACK_SIZE] __attribute__((aligned(16)));
 
 int osmain(void)
 {
     vga_init();
 
     gdt_init();
-    puts("GDT installed...\n\r");
+    puts("GDT installed...\n");
 
     idt_init();
-    puts("IDT installed...\n\r");
+    puts("IDT installed...\n");
 
     isr_init();
-    puts("ISRs installed...\n\r");
-
-    //timer_init(); 
+    puts("ISRs installed...\n");
 
     setcolor(COL_D_GREY, COL_CYAN);
-    puts("Welcome to OS67...\n\r");
+    puts("Welcome to OS67...\n");
     setcolor(COL_L_GREY, COL_BLACK);
 
+    timer_init(); 
+    puts("timer init...\n");
+
     pmm_init();
-    puts("pmm init...\n\r");
+    puts("pmm init...\n");
     pmm_mem_info();
     // pmm_test();
     
     vmm_init();
-    puts("vmm init...\n\r");
+    puts("vmm init...\n");
     // vmm_test();
     
     kb_init();
-    puts("kb init...\n\r");
-
-    //heap_init();
-    puts("heap init...\n\r");
-    // heap_test();
+    puts("kb init...\n");
 
     ide_init();
-    puts("ide init...\n\r");
+    puts("ide init...\n");
     // ide_test();
 
     bcache_init();
-    puts("buffer cache init...\n\r");
+    puts("block cache init...\n");
 
     proc_init();
+    puts("porcess init...\n");
+
     sched();
     
-    for (;;);
-    return 0;
+    panic("you shouldn't see this :( \n");
+    return 67;
 }
