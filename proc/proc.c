@@ -22,6 +22,8 @@ static struct proc *initproc = NULL;
 static struct proc ptable[NPROC];
 static struct context cpu_context;
 
+struct proc *proc = NULL;
+
 void fork_ret(){
     return;
 }
@@ -78,7 +80,7 @@ void proc_init(){
     printl("proc_userinit: kernel space maped\n");
 
     uint32_t size = &__init_end - &__init_start;
-    pp->size = size;
+    pp->size = PAGE_SIZE;
 
     uvm_init_fst(pp->pgdir, &__init_start, size);
     printl("proc_serinit: user space maped\n");
@@ -90,8 +92,8 @@ void proc_init(){
     pp->fm->fs = pp->fm->ds;
     pp->fm->gs = pp->fm->ds;
     pp->fm->ss = pp->fm->ds;
-    pp->fm->eflags = FLAG_IF; // TODO FLAG_IF
-    pp->fm->user_esp = USER_BASE + PAGE_SIZE - 1;
+    pp->fm->eflags = FLAG_IF;
+    pp->fm->user_esp = USER_BASE + PAGE_SIZE;
     pp->fm->eip = USER_BASE;
     printl("proc_init: init stack build\n");
 
@@ -115,9 +117,11 @@ void sched(){
             if (pp->state != P_RUNABLE){
                 continue;
             }
-            printk("proc_init: proc `%s` will run\n", pp->name);
+            printl("sched: proc `%s` will run\n", pp->name);
             uvm_switch(pp);
             pp->state = P_RUNNING;
+
+            proc = pp;
 
             printl("sched: context_switch\n");
             context_switch(&old, pp->context);
