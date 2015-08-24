@@ -40,6 +40,8 @@ struct proc{
     struct proc *parent;
 };
 
+extern struct proc *proc;
+
 void proc_init();
 void sched();
 

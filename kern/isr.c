@@ -38,7 +38,7 @@ void isr_stub(struct int_frame *r){
         irq_handler(r);
     }
     else if (r->int_no == ISR_SYSCALL){
-        syscall(r);
+        syscall();  // syscall get param form proc->fm
     } 
     else {
         panic("isr_stub: wrong intrrupt number");

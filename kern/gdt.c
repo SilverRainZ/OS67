@@ -41,7 +41,7 @@ void gdt_install(uint8_t num, uint32_t base, uint32_t limit, uint8_t access, uin
 }
 
 void tss_init(){
-    gdt_install(SEL_TSS, (uint32_t)&tss, sizeof(tss),AC_PR|AC_AC|AC_EX, 0); 
+    gdt_install(SEL_TSS, (uint32_t)&tss, sizeof(tss),AC_PR|AC_AC|AC_EX, GDT_GR); 
     /* for tss, access_reverse bit is 1 */
     gdt[5].access &= ~AC_RE;
 }

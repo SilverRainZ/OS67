@@ -21,8 +21,8 @@ OBJS = bin/loader.o \
 	   bin/string.o	bin/queue.o bin/printk.o \
 	   bin/pmm.o bin/vmm.o \
 	   bin/bcache.o bin/sb.o bin/bitmap.o bin/inode.o \
-	   bin/dir.o bin/p2i.o bin/fstest.o bin/file.o \
-	   bin/init.o bin/proc.o
+	   bin/dir.o bin/p2i.o bin/fstest.o bin/file.o bin/sysfile.o \
+	   bin/init.o bin/proc.o bin/sysproc.o
 
 # create a 1.44MB floppy include kernel and bootsector
 bin/floppy.img: boot/floppy.asm bin/bootsect.bin bin/kernel 
