@@ -61,8 +61,3 @@ void bochs_putc(char c){
     outb(0xe9, (uint8_t)c);
 }
 
-/* stops simulation and breaks into the debug console */
-void bochs_break(){
-    outw(0x8A00,0x8A00);
-    outw(0x8A00,0x08AE0);
-}

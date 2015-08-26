@@ -1,5 +1,6 @@
 #ifndef __DBG_C
 #define __DBG_C
+
 #define assert(x, info)                         \
     if (!(x)){                                  \
         printk("In file: %s\n", __FILE__);      \
@@ -14,6 +15,10 @@ void print_stack_trace();
 
 /********* Debug functions which depend on bochs ****************/
 void bochs_putc(char c);
-void bochs_break();
+
+/* stops simulation and breaks into the debug console */
+#define bochs_break()       \
+    outw(0x8A00,0x8A00);    \
+    outw(0x8A00,0x08AE0);   
 
 #endif
