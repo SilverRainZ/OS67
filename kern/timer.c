@@ -5,12 +5,18 @@
  */
 // std
 #include <asm.h>
+#include <dbg.h>
 // x86
 #include <isr.h>
 #include <timer.h>
 // drv
 #include <vga.h>
 #include <printk.h>
+// proc 
+#include <proc.h>
+
+extern struct context* cpu_context;
+extern void context_switch(struct context **old, struct context *new);
 
 unsigned int timer_ticks = 0;
 
@@ -28,8 +34,11 @@ void timer_phase(int hz){
 void timer_handler(struct int_frame *r){
     /* trigger when every 18 clocks (approximately 1 second)  */
 
+    if (!proc) return;
+
     timer_ticks++;
     if (timer_ticks % 18 == 0){
+        context_switch(&proc->context, cpu_context);
     }
 }
 

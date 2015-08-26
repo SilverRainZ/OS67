@@ -20,7 +20,7 @@ extern void context_switch(struct context **old, struct context *new);
 static uint32_t cur_pid = 0;
 static struct proc *initproc = NULL;
 static struct proc ptable[NPROC];
-static struct context cpu_context;
+struct context *cpu_context;
 
 struct proc *proc = NULL;
 
@@ -64,6 +64,10 @@ static struct proc *proc_alloc(){
 
 void proc_init(){
     struct proc *pp;
+    printl("proc_userinit: clear ptable\n");
+
+    memset(ptable, 0, sizeof(struct proc) * NPROC);
+
     printl("proc_userinit: prepare for init\n");
 
     extern char __init_start;
@@ -109,7 +113,6 @@ void proc_init(){
 
 void sched(){
     struct proc *pp;
-    struct context *old = &cpu_context;
 
     printl("sched: start\n");
     for (;;){
@@ -123,8 +126,11 @@ void sched(){
 
             proc = pp;
 
-            printl("sched: context_switch\n");
-            context_switch(&old, pp->context);
+            for (;;){
+                printl("sched: cpu scheduler -> proc\n");
+                context_switch(&cpu_context, pp->context);
+                printl("sched: proc -> cpu scheduler\n");
+            }
         }
     }
 }
