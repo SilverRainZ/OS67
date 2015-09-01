@@ -1,5 +1,6 @@
 // std
 #include <type.h>
+#include <dbg.h>
 // x86
 #include <pm.h>
 #include <isr.h>
@@ -10,6 +11,7 @@
 #include <pmm.h>
 #include <vmm.h>
 // fs
+#include <inode.h>
 #include <p2i.h>
 // proc
 #include <proc.h>
@@ -111,26 +113,145 @@ void proc_init(){
 }
 
 
-void sched(){
+void scheduler(){
     struct proc *pp;
 
-    printl("sched: start\n");
+    printl("scheduler: start\n");
     for (;;){
         for (pp = &ptable[0]; pp < &ptable[NPROC]; pp++){
             if (pp->state != P_RUNABLE){
                 continue;
             }
-            printl("sched: proc `%s` will run\n", pp->name);
+            printl("scheduler: proc `%s` will run\n", pp->name);
             uvm_switch(pp);
             pp->state = P_RUNNING;
 
             proc = pp;
 
-            for (;;){
-                printl("sched: cpu scheduler -> proc\n");
-                context_switch(&cpu_context, pp->context);
-                printl("sched: proc -> cpu scheduler\n");
+            context_switch(&cpu_context, pp->context);
             }
         }
     }
 }
+
+void sched(){
+    assert(proc->state != P_RUNABLE, "sched: ")
+
+    proc->state = P_RUNABLE;
+    context_switch(&proc->context, cpu_context);
+}
+
+void sleep(void *chan){
+    assert(proc, "sleep: no proc");
+
+    // go to sleep
+    proc->chan = chan;
+    proc->state = P_SLEEPING;
+
+    sched();
+
+    // wake up
+    proc->chan = 0;
+}
+
+void wakeup(void *chan){
+    struct proc *pp;
+
+    for (pp = ptable; pp < &ptable[NPROC]; pp++){
+        if (pp->state == P_SLEEPING && pp->chan == chan){
+            pp->state = P_RUNABLE;
+        }
+    }
+}
+
+int wait(){
+    uint8_t havekids, pid;
+    struct proc* pp;
+
+    for (;;){
+        havekids = 0;
+        for (pp = ptable; pp <= &ptable[NPROC]; pp++){
+            if (pp->parent != proc){
+                continue;
+            }
+
+            havekids = 1;
+            
+            if (pp->state == P_ZOMBIE){
+                // can be clear
+                pid = pp->pid;
+                pmm_free((uint32_t)pp->kern_stack);
+                pp->kern_stack = 0;
+                // vm_free
+                pp->state = P_UNUSED;
+                pp->pid = 0;
+                pp->parent = 0;
+                pp->name[0] = 0;
+                pp->killed = 0;
+                return pid;
+            }
+        }
+
+        if (!havekids || proc->killed){
+            return -1;
+        }
+
+        // wait for chidren to exit
+        sleep(proc);
+    }
+}
+
+void exit(){
+    struct proc *pp;
+    // int fd;
+
+    assert(proc != initproc, "exit: initproc can no exit");
+
+    // for (fd = 0; fd < NOFILE; fd++){
+    // 
+    // }
+
+    // iput(proc->pwd);
+    proc->cwd = 0;
+
+    wakeup(proc->parent);
+
+    for (pp = ptable; pp < &proc[NPROC]; pp++){
+        pp->parent = initproc;
+        if (pp->state == P_ZOMBIE){
+            wakeup(initproc);
+        }
+    }
+
+    proc->state = P_ZOMBIE;
+    sched();
+    panic("exit: return form sched");
+}
+
+int kill(uint8_t pid){
+    struct proc *pp;
+
+    for (pp = ptable; pp < &ptable[NPROC]; pp++){
+        if (pp->pid == pid){
+            pp->killed = 1;
+
+            if (pp->state == P_SLEEPING){
+                pp->state = P_RUNABLE;
+            }
+            return 0;
+        }
+    }
+    return -1;
+}
+
+int fork(){
+    int i, pid;
+    struct proc *np;
+
+    if ((np = proc_alloc()) == 0){
+        return -1;
+    }
+
+    return 0;
+}
+

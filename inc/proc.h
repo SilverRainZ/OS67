@@ -13,6 +13,8 @@
 #define P_USED      0x1
 #define P_RUNABLE   0x2
 #define P_RUNNING   0x3
+#define P_SLEEPING  0x4
+#define P_ZOMBIE    0x5
 
 struct context{
     uint32_t edi;
@@ -25,15 +27,19 @@ struct context{
 
 struct proc{ 
     volatile uint8_t pid;
-    char name[NAME_LEN];
     uint32_t size;
     uint8_t state;
+    uint8_t killed;
+    char name[NAME_LEN];
 
+    // context
     struct int_frame *fm;
     struct context *context;
     
-    char *kern_stack;
     pde_t *pgdir;
+    char *kern_stack;
+
+    void *chan;
 
     struct file *ofile[NOFILE];
     struct inode *cwd;
@@ -41,8 +47,10 @@ struct proc{
 };
 
 extern struct proc *proc;
+extern struct context *cpu_context;
 
 void proc_init();
+void scheduler();
 void sched();
 
 #endif
