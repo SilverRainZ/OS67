@@ -17,6 +17,10 @@
 /* inodes cache */
 static struct inode icache[NINODE];
 
+void inode_init(){
+    memset(icache, 0, sizeof(struct inode)*NINODE);
+}
+
 /* find the inode with specific dev and inum in memory, 
  * if not found, use first empty inode 
  * 注意: 这里只会申请一个可用的 inode 槽位, 增加一个内存引用, 不会锁住, 也不会从磁盘读出 */
@@ -292,7 +296,7 @@ int iread (struct inode *ip, char *dest, uint32_t off, uint32_t n){
     /* 偏移过大 || 溢出*/
     if (off > ip->size || off + n < off){
         panic("iread: incorrect offet");
-        return ERROR;
+        return -1;
     }
 
     if (off + n > ip->size){

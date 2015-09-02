@@ -21,6 +21,7 @@
 #include <proc.h>
 // fs
 #include <bcache.h>
+#include <inode.h>
 
 int osmain(void)
 {
@@ -61,10 +62,13 @@ int osmain(void)
     bcache_init();
     puts("block cache init...\n");
 
+    inode_init();
+    puts("inode cache init...\n");
+
     proc_init();
     puts("porcess init...\n");
 
-    sched();
+    scheduler();
     
     panic("you shouldn't see this :( \n");
     return 67;
