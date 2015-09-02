@@ -52,5 +52,10 @@ extern struct context *cpu_context;
 void proc_init();
 void scheduler();
 void sched();
+int fork();
+int wait();
+void sleep(void *chan);
+int kill(uint8_t pid);
+void exit();
 
 #endif

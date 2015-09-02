@@ -17,7 +17,9 @@ extern void _syscall();
 
 int fetchint(uint32_t addr, int *ip){
 
-    if (addr < USER_BASE || addr > USER_BASE + proc->size || addr + 4 > USER_BASE + proc->size){
+    if (addr < USER_BASE 
+            || addr > USER_BASE + proc->size 
+            || addr + 4 > USER_BASE + proc->size){
         printl("fetchint: failed, addr 0x%x\n", addr);
         return -1;
     }
@@ -61,12 +63,51 @@ int argstr(int n, char **pp){
     return fetchstr((uint32_t)addr, pp);
 }
 
+int argptr(int n, char **pp, int size){
+    int addr;
+
+    if(argint(n, &addr) < 0){
+        return -1;
+    }
+
+    if ((uint32_t)addr < USER_BASE 
+            || (uint32_t)addr >= USER_BASE + proc->size 
+            || (uint32_t)addr + size >= USER_BASE + proc->size){
+        return -1;
+    }
+
+    *pp = (char *)addr;
+
+    return 0;
+}
+
+int sys_none(){
+    return 1;
+}
+
 static int (*sys_routines[])(void) = {
     sys_fork,
     sys_wait,
     sys_exit,
-};
-
+    sys_none,   // sys_pipe(),
+    sys_none,   // sys_read(),
+    sys_kill,
+    sys_none,  // sys_exec(),
+    sys_none,  // sys_fstat,
+    sys_none,   // sys_chdir,
+    sys_none,   // sys_fdup,
+    sys_getpid,
+    sys_none,   // sys_sbrk,
+    sys_sleep,
+    sys_none,   // sys_uptime,
+    sys_none,   // sys_open,
+    sys_none,   // sys_write,
+    sys_none,   // sys_mknod,
+    sys_none,   // sys_unlink,
+    sys_none,   // sys_link,
+    sys_none,   // sys_mkdir,
+    sys_none,   // sys_close
+}; 
 void sys_init(){
     idt_install(ISR_SYSCALL, (uint32_t)_syscall, SEL_KCODE << 3, GATE_TRAP, IDT_PR | IDT_DPL_USER);
 }
@@ -96,4 +137,3 @@ void syscall(){
         proc->fm->eax = -1;
     }
 }
-

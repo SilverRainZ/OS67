@@ -129,13 +129,12 @@ void scheduler(){
             proc = pp;
 
             context_switch(&cpu_context, pp->context);
-            }
         }
     }
 }
 
 void sched(){
-    assert(proc->state != P_RUNABLE, "sched: ")
+    assert(proc->state != P_RUNABLE, "sched: no runable")
 
     proc->state = P_RUNABLE;
     context_switch(&proc->context, cpu_context);
@@ -203,15 +202,18 @@ int wait(){
 
 void exit(){
     struct proc *pp;
-    // int fd;
+    int fd;
 
     assert(proc != initproc, "exit: initproc can no exit");
 
-    // for (fd = 0; fd < NOFILE; fd++){
-    // 
-    // }
+    for (fd = 0; fd < NOFILE; fd++){
+        if (proc->ofile[fd]){
+            fclose(proc->ofile[fd]);
+            proc->ofile[fd] = 0;
+        }
+    }
 
-    // iput(proc->pwd);
+    iput(proc->cwd);
     proc->cwd = 0;
 
     wakeup(proc->parent);
@@ -245,13 +247,38 @@ int kill(uint8_t pid){
 }
 
 int fork(){
-    int i, pid;
-    struct proc *np;
+    int i;
+    struct proc *child;
 
-    if ((np = proc_alloc()) == 0){
+    if ((child = proc_alloc()) == 0){
         return -1;
     }
 
-    return 0;
+    child->pgdir = uvm_copy(proc->pgdir, proc->size);
+    if (child->pgdir == 0){
+        pmm_free((uint32_t)child->kern_stack);
+        child->kern_stack = 0;
+        child->state = P_UNUSED;
+        return -1;
+    }
+
+    child->size = proc->size;
+    child->parent = proc;
+    *child->fm = *proc->fm; // return form same address
+
+    child->fm->eax = 0;
+
+    for (i = 0; i < NOFILE; i++){
+        if (proc->ofile[i]){
+            child->ofile[i] = fdup(proc->ofile[i]);
+        }
+    }
+
+    child->cwd = idup(proc->cwd);
+    child->state = P_RUNABLE;
+
+    strncpy(child->name, proc->name, sizeof(proc->name));
+
+    return child->pid;
 }
 

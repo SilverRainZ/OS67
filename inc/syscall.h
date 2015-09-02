@@ -29,6 +29,10 @@
 #define SYS_MKDIR   20
 #define SYS_CLOSE   21
 
+int argint(int n, int *ip);
+int argstr(int n, char **pp);
+int argptr(int n, char **pp, int size);
+
 void sys_init();
 void syscall();
 
