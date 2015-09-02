@@ -63,8 +63,10 @@ void vmm_test();
 /* process address mapping */
 void kvm_init(pde_t *pgdir);
 void uvm_init_fst(pde_t *pgdir, char *init, uint32_t size); 
-void uvm_init();
+int uvm_load(pte_t *pgdir, uint32_t addr, struct inode *ip, uint32_t off, uint32_t size);
 void uvm_switch(struct proc *pp);
+void uvm_free(pte_t *pgdir);
+pde_t *uvm_copy(pte_t *pgdir, uint32_t size);
 
 /* isr 14 */
 void page_fault(struct int_frame *r);

@@ -1,11 +1,7 @@
 /* vmm.h
- * This file is modified form hurlex 
- * 虚拟内存映射
- * 建立正式的页目录和页表, 映射了512M内存(尽管实际上可能没有这么大)，
- * 初始时物理地址和虚拟地址相等
- * 同时实现了对页异常 int 14 的处理 page_fault()
- * 实现了map和unmap，供kmalloc使用
+ * 
  */
+
 // std
 #include <type.h>
 #include <asm.h>
@@ -19,6 +15,9 @@
 // mm
 #include <vmm.h> 
 #include <pmm.h>
+// fs
+#include <minix.h>
+#include <inode.h>
 // proc
 #include <proc.h>
 
@@ -56,6 +55,7 @@ void vmm_init(){
     /* register isr */
     idt_install(FAULT_PAGE, (unsigned)page_fault, SEL_KCODE << 3, GATE_INT, IDT_PR|IDT_DPL_KERN);
 
+    // map 4G memory, physcial address = virtual address
     for (i = 0, j = 0; i < PTE_COUNT; i++, j++){
         pgd_kern[i] = (uint32_t)pte_kern[j] | PTE_P | PTE_R | PTE_K;
     }
@@ -70,6 +70,7 @@ void vmm_init(){
     vmm_enable();
 }
 
+/* only work when pagetable = gpd_kern */
 void vmm_map(pde_t *pgdir, uint32_t va, uint32_t pa, uint32_t flags){
     uint32_t pde_idx = PDE_INDEX(va);
     uint32_t pte_idx = PTE_INDEX(va);
@@ -92,6 +93,7 @@ void vmm_map(pde_t *pgdir, uint32_t va, uint32_t pa, uint32_t flags){
     // printl("map: ret\n");
 }
 
+/* only work when pagetable = gpd_kern */
 void vmm_unmap(pde_t *pde, uint32_t va){
     uint32_t pde_idx = PDE_INDEX(va);
     uint32_t pte_idx = PTE_INDEX(va);
@@ -119,7 +121,7 @@ int vmm_get_mapping(pde_t *pgdir, uint32_t va, uint32_t *pa){
         printl("get_mapping: virtual address 0x%x is unmapped\n", va);
         return 0;
     }
-    if (pte[pte_idx] != 0 && pa){
+    if (pte[pte_idx] != 0 && (pte[pte_idx] & PTE_P) && pa){
         *pa = pte[pte_idx] & PAGE_MASK;
         printl("get_mapping: virtual address 0x%x is mapped to 0x%x\n", va, pte[pte_idx] & PAGE_MASK);
         return 1;
@@ -139,11 +141,16 @@ void page_fault(struct int_frame *r){
     uint32_t cr2;
 
     __asm__ volatile ("mov %%cr2, %0":"=r"(cr2));
-    printk("errro code: 0x%x\n", cr2);
+
+    printk("errro code1: 0x%x\n", cr2);
+    printk("errro code2: 0x%x\n", r->err_code);
+
     panic("Page Fault Excetpion\nSystem Halted!\n");
+
     for (;;) hlt();
 }
 
+// build a map of kernel space for a process's page table
 void kvm_init(pde_t *pgdir){
     uint32_t addr;
     uint32_t limit = PAGE_ALIGN_UP((uint32_t)&kernend);
@@ -155,6 +162,7 @@ void kvm_init(pde_t *pgdir){
     }
 }
 
+/* build a map of user space for a initproc's page table */
 void uvm_init_fst(pde_t *pgdir, char *init, uint32_t size){
     char *room;
 
@@ -180,3 +188,61 @@ void uvm_switch(struct proc *pp){
 
     sti();
 }
+
+/* only work when pagetable = gpd_kern */
+int uvm_load(pte_t *pgdir, uint32_t addr, struct inode *ip, uint32_t off, uint32_t size){
+    uint32_t i, n, pa;
+
+    assert((uint32_t)addr % PAGE_SIZE != 0, "uvm_load: addr must page aligned");
+
+    for (i = 0; i < size; i += PAGE_SIZE){
+        assert(vmm_get_mapping(pgdir, addr + i, &pa), "uvm_load: address no mapped");
+
+        if (size - i < PAGE_SIZE){
+            n = size - 1;
+        } else {
+            n = PAGE_SIZE;
+        }
+
+        // pa = va now
+        if (iread(ip, (char *)pa, off + i, n) != (int)n){
+            return -1;
+        }
+    }
+    return 0;
+}
+
+void uvm_free(pte_t *pgdir){
+    uint32_t i;
+
+    assert(pgdir, "uvm_free: no page table");
+
+    for (i = 0; i < PTE_COUNT; i++){
+        if (pgdir[i] & PTE_P){
+            pmm_free(pgdir[i] & PAGE_MASK);
+        }
+    }
+
+    pmm_free((uint32_t)pgdir);
+}
+
+pde_t *uvm_copy(pte_t *pgdir, uint32_t size){
+    pde_t *pgd;
+    uint32_t i, pa, mem;
+
+    pgd = (pde_t *)pmm_alloc();
+    kvm_init(pgd);
+
+    for (i = 0; i < size; i += PAGE_SIZE){
+        assert(vmm_get_mapping(pgdir, USER_BASE + i, &pa),"uvm_copy: pte not exixt or no present");
+
+        mem = pmm_alloc();
+
+        memcpy((void *)mem, (void *)pa, PAGE_SIZE);
+        vmm_map(pgd, USER_BASE + i, pa, PTE_W|PTE_U);
+    }
+    return pgd;
+}
+
+
+
