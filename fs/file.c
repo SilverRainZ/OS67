@@ -3,6 +3,7 @@
 #include <dbg.h>
 // libs
 #include <printk.h>
+#include <string.h>
 // fs
 #include <minix.h>
 #include <dir.h>
@@ -11,6 +12,10 @@
 #include <file.h>
 
 static struct file ftable[NFILE];
+
+void file_init(){
+    memset(ftable, 0, sizeof(struct file)*NFILE);
+}
 
 struct file *falloc(){
 
@@ -21,7 +26,7 @@ struct file *falloc(){
             return &ftable[i];
         }
     }
-    return NULL;
+    return 0;
 }
 
 struct file *fdup(struct file *fp){
@@ -35,19 +40,21 @@ void fclose(struct file *fp){
     assert(fp->ref >= 1, "fclose: file's ref < 1");
 
     fp->ref--;
-    if (fp->ref == 0){
-        if (fp->type == F_PIPE){
-            // TODO
-            return;
-        }
-        if (fp->type == F_INODE){
-            iput(fp->ip);
-            fp->type = F_NONE;
-            return;
-        }
+    if (fp->ref > 0){
+        return;
     }
 
-    panic("fclose: wrong type");
+    if (fp->type == F_PIPE){
+        // TODO
+        panic("fread: no support");
+        return;
+    }
+    if (fp->type == F_INODE){
+        iput(fp->ip);
+        fp->type = F_NONE;
+
+        return;
+    }
 }
 
 int fstat(struct file *fp, struct stat *st){
@@ -56,9 +63,10 @@ int fstat(struct file *fp, struct stat *st){
         ilock(fp->ip);
         istat(fp->ip, st);
         iunlock(fp->ip);
-        return OK;
+
+        return 0;
     }
-    return ERROR;
+    return -1;
 }
 
 int fread(struct file *fp, char *addr, uint32_t n){
@@ -70,6 +78,7 @@ int fread(struct file *fp, char *addr, uint32_t n){
 
     if (fp->type == F_PIPE){
         // TODO
+        panic("fread: no support");
     }
 
     if (fp->type == F_INODE){
@@ -91,6 +100,7 @@ int fwrite(struct file *fp, char *addr, uint32_t n){
 
     if (fp->type == F_PIPE){
         // TODO
+        panic("fwrite: no support");
     }
 
     if (fp->type == F_INODE){
@@ -98,11 +108,12 @@ int fwrite(struct file *fp, char *addr, uint32_t n){
         if (iwrite(fp->ip, addr, fp->off, n) != (int)n){
             panic("fwrite: fault");
         }
+        iunlock(fp->ip);
         return n;
     }
 
     panic("fwrite: wrong type");
-    return ERROR;
+    return -1;
 }
 
 

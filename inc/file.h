@@ -2,6 +2,7 @@
 #define __FILE_H
 
 #include <type.h>
+#include <stat.h>
 
 #define NFILE 128
 
@@ -18,5 +19,12 @@ struct file{
     struct inode *ip;
     uint32_t off;
 };
+
+
+void file_init();
+struct file *falloc();
+struct file *fdup();
+int fstat(struct file *fp, struct stat *st);
+void fclose(struct file *fp);
 
 #endif
