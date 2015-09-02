@@ -15,10 +15,7 @@
 // proc 
 #include <proc.h>
 
-extern struct context* cpu_context;
-extern void context_switch(struct context **old, struct context *new);
-
-unsigned int timer_ticks = 0;
+uint32_t timer_ticks = 0;
 
 void timer_phase(int hz){ 
     int divisor = 1193180 / hz; 
@@ -34,11 +31,11 @@ void timer_phase(int hz){
 void timer_handler(struct int_frame *r){
     /* trigger when every 18 clocks (approximately 1 second)  */
 
+    timer_ticks++;
     if (!proc) return;
 
-    timer_ticks++;
-    if (timer_ticks % 18 == 0){
-        context_switch(&proc->context, cpu_context);
+    if (timer_ticks % 100 == 0){
+        sched();
     }
 }
 
@@ -53,6 +50,7 @@ void timer_wait(int ticks){
 /* Sets up the system clock by installing the timer handler
  *  into IRQ0 */
 void timer_init(){
+    timer_phase(100);   // tigger 100 times pre second
     irq_install(IRQ_TIMER, timer_handler);
 }
  
