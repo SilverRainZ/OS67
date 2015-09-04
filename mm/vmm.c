@@ -181,12 +181,8 @@ void uvm_init_fst(pde_t *pgdir, char *init, uint32_t size){
 }
 
 void uvm_switch(struct proc *pp){
-    cli();
-
     tss_set(SEL_KDATA << 3, (uint32_t)pp->kern_stack + PAGE_SIZE);
     vmm_switch_pgd((uint32_t)pp->pgdir);
-
-    sti();
 }
 
 /* only work when pagetable = gpd_kern */
