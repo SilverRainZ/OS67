@@ -1,3 +1,5 @@
+#define __LOG_ON 1
+
 //std
 #include <type.h>
 #include <asm.h>
@@ -9,12 +11,39 @@
 #include <syscall.h>
 // mm
 #include <vmm.h>
+// fs
+#include <sysfile.h>
 // proc
 #include <proc.h>
 #include <sysproc.h>
 
 extern void _syscall();
 
+int sys_none();
+static int (*sys_routines[])(void) = {
+    sys_none,
+    sys_fork,
+    sys_wait,
+    sys_exit,
+    sys_none,   // sys_pipe(),
+    sys_none,   // sys_read(),
+    sys_kill,
+    sys_none,  // sys_exec(),
+    sys_fstat,
+    sys_chdir,
+    sys_none,   // sys_fdup,
+    sys_getpid,
+    sys_none,   // sys_sbrk,
+    sys_sleep,
+    sys_none,   // sys_uptime,
+    sys_open,
+    sys_write,
+    sys_none,   // sys_mknod,
+    sys_unlink,
+    sys_link,
+    sys_mkdir,
+    sys_close
+}; 
 int fetchint(uint32_t addr, int *ip){
 
     if (addr < USER_BASE 
@@ -85,29 +114,6 @@ int sys_none(){
     return 1;
 }
 
-static int (*sys_routines[])(void) = {
-    sys_fork,
-    sys_wait,
-    sys_exit,
-    sys_none,   // sys_pipe(),
-    sys_none,   // sys_read(),
-    sys_kill,
-    sys_none,  // sys_exec(),
-    sys_none,  // sys_fstat,
-    sys_none,   // sys_chdir,
-    sys_none,   // sys_fdup,
-    sys_getpid,
-    sys_none,   // sys_sbrk,
-    sys_sleep,
-    sys_none,   // sys_uptime,
-    sys_none,   // sys_open,
-    sys_none,   // sys_write,
-    sys_none,   // sys_mknod,
-    sys_none,   // sys_unlink,
-    sys_none,   // sys_link,
-    sys_none,   // sys_mkdir,
-    sys_none,   // sys_close
-}; 
 void sys_init(){
     idt_install(ISR_SYSCALL, (uint32_t)_syscall, SEL_KCODE << 3, GATE_TRAP, IDT_PR | IDT_DPL_USER);
 }
@@ -122,16 +128,6 @@ void syscall(){
 
     if (cn > 0 && cn < NSYSCALL && sys_routines[cn]){
         proc->fm->eax = sys_routines[cn]();
-
-        char *arg1;
-        int arg2 = 0;
-
-        argstr(0, &arg1);
-        argint(1, &arg2);
-
-        printl("syscall: arg: %s\n", arg1);
-        printl("syscall: arg: %d\n", arg2);
-
     } else {
         printl("syscall: no such syscall\n");
         proc->fm->eax = -1;
