@@ -1,3 +1,4 @@
+#define __LOG_ON 1
 /* vmm.h
  * 
  */
@@ -75,12 +76,12 @@ void vmm_map(pde_t *pgdir, uint32_t va, uint32_t pa, uint32_t flags){
     uint32_t pde_idx = PDE_INDEX(va);
     uint32_t pte_idx = PTE_INDEX(va);
 
-    printl("map: map 0x%x to 0x%x, flag = 0x%x\n", pa, va, flags);
+    // printl("map: map 0x%x to 0x%x, flag = 0x%x\n", pa, va, flags);
  
     pte_t *pte = (pte_t *)(pgdir[pde_idx] & PAGE_MASK);
     /* if pte == NULL */
     if (!pte){
-        printl("map: pte of 0x%x is NULL, attempt to alloc one\n", va);
+        // printl("map: pte of 0x%x is NULL, attempt to alloc one\n", va);
         pte = (pte_t *)pmm_alloc();
         pgdir[pde_idx] = (uint32_t)pte | PTE_P | PTE_R | flags;
         //assert(0,"pet = NULL");
@@ -97,11 +98,11 @@ void vmm_unmap(pde_t *pde, uint32_t va){
     uint32_t pde_idx = PDE_INDEX(va);
     uint32_t pte_idx = PTE_INDEX(va);
 
-    printl("unmap: unmap virtual address 0x%x\n", va);
+    // printl("unmap: unmap virtual address 0x%x\n", va);
     pte_t *pte = (pte_t *)(pde[pde_idx] & PAGE_MASK);
 
     if (!pte){
-        printl("unmap: unmap a unmapped page\n");
+        // printl("unmap: unmap a unmapped page\n");
         return;
     }
     /* unmap this poge */
@@ -229,13 +230,17 @@ pde_t *uvm_copy(pte_t *pgdir, uint32_t size){
     pgd = (pde_t *)pmm_alloc();
     kvm_init(pgd);
 
+    printl("uvm_copy: copy pgdir 0x%x -> 0x%x, size: %d\n",pgdir, pgd, size);
+
     for (i = 0; i < size; i += PAGE_SIZE){
         assert(vmm_get_mapping(pgdir, USER_BASE + i, &pa),"uvm_copy: pte not exixt or no present");
 
         mem = pmm_alloc();
 
+        printl("uvm_copy: phyaddr: 0x%x -> 0x%x\n", pa, mem);
+
         memcpy((void *)mem, (void *)pa, PAGE_SIZE);
-        vmm_map(pgd, USER_BASE + i, pa, PTE_W|PTE_U);
+        vmm_map(pgd, USER_BASE + i, mem, PTE_W | PTE_U | PTE_P);
     }
     return pgd;
 }

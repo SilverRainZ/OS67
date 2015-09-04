@@ -40,12 +40,12 @@ char* itoa(int value, char *str, int radix){
     return str;
 }
 
-char* uitoa(int value, char *str, int radix){
+char* uitoa(uint32_t value, char *str, int radix){
     char reverse[36];   
     char *p = reverse;
 
     *p++ = '\0';
-    while (value >= 0){
+    while (value != 0){
         *p++ = "0123456789abcdef"[value%radix];
         value /= radix;
         if (value == 0) break;

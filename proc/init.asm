@@ -7,8 +7,8 @@ align 4
 [global __init_start]
 __init_start:
     nop     ; hava a rest~
-    push 233
-    push (msg_arg1 - $$) + 0xc0000000
+    ; push 233
+    ; push (msg_arg1 - $$) + 0xc0000000
     mov eax, 1
     int 0x80
     jmp $

@@ -33,6 +33,15 @@ void fork_ret(){
     return;
 }
 
+static void print_proc(struct proc *pp){
+    uint32_t pa;
+    vmm_get_mapping(pp->pgdir, USER_BASE, &pa);
+
+    printl("print_proc:\n    name: %s\n",pp->name);
+    printl("    kern_stack: 0x%x\n",pp->kern_stack);
+    printl("    pgdir: 0x%x\n",pp->pgdir);
+    printl("    phy addr: 0x%x\n", pa);
+}
 static struct proc *proc_alloc(){
     struct proc *pp;
     char *tos;
@@ -126,13 +135,16 @@ void scheduler(){
                 continue;
             }
             printl("scheduler: proc `%s` will run\n", pp->name);
+            print_proc(pp);
+
+            printl("scheduler: switch pgdir & set tss\n"); 
             uvm_switch(pp);
-            printl("<<<<\n");
             pp->state = P_RUNNING;
 
             proc = pp;
 
             context_switch(&cpu_context, pp->context);
+            printl("scheduler: return form proc `%s`\n", pp->name);
         }
     }
 }
@@ -261,13 +273,17 @@ int fork(){
     }
 
     printl("fork: copying memory...\n");
+
     child->pgdir = uvm_copy(proc->pgdir, proc->size);
+
     if (child->pgdir == 0){
         pmm_free((uint32_t)child->kern_stack);
         child->kern_stack = 0;
         child->state = P_UNUSED;
         return -1;
     }
+
+    vmm_map(child->pgdir, (uint32_t)child->kern_stack, (uint32_t)child->kern_stack, PTE_P | PTE_R | PTE_K);
 
     printl("fork: copying attrib...\n");
     child->size = proc->size;
