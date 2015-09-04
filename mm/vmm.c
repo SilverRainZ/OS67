@@ -75,12 +75,12 @@ void vmm_map(pde_t *pgdir, uint32_t va, uint32_t pa, uint32_t flags){
     uint32_t pde_idx = PDE_INDEX(va);
     uint32_t pte_idx = PTE_INDEX(va);
 
-    // printl("map: map 0x%x to 0x%x, flag = 0x%x\n", pa, va, flags);
+    printl("map: map 0x%x to 0x%x, flag = 0x%x\n", pa, va, flags);
  
     pte_t *pte = (pte_t *)(pgdir[pde_idx] & PAGE_MASK);
     /* if pte == NULL */
     if (!pte){
-        // printl("map: pte of 0x%x is NULL, attempt to alloc one\n", va);
+        printl("map: pte of 0x%x is NULL, attempt to alloc one\n", va);
         pte = (pte_t *)pmm_alloc();
         pgdir[pde_idx] = (uint32_t)pte | PTE_P | PTE_R | flags;
         //assert(0,"pet = NULL");
@@ -90,7 +90,6 @@ void vmm_map(pde_t *pgdir, uint32_t va, uint32_t pa, uint32_t flags){
     pte[pte_idx] = (pa & PAGE_MASK) | flags;
 
     vmm_reflush(va);
-    // printl("map: ret\n");
 }
 
 /* only work when pagetable = gpd_kern */
@@ -98,12 +97,11 @@ void vmm_unmap(pde_t *pde, uint32_t va){
     uint32_t pde_idx = PDE_INDEX(va);
     uint32_t pte_idx = PTE_INDEX(va);
 
-    // printl("unmap: unmap virtual address 0x%x\n", va);
+    printl("unmap: unmap virtual address 0x%x\n", va);
     pte_t *pte = (pte_t *)(pde[pde_idx] & PAGE_MASK);
 
-    //assert(pte,"unmap fail.");
     if (!pte){
-        // printl("unmap: unmap a unmapped page\n");
+        printl("unmap: unmap a unmapped page\n");
         return;
     }
     /* unmap this poge */
@@ -189,6 +187,8 @@ void uvm_switch(struct proc *pp){
 int uvm_load(pte_t *pgdir, uint32_t addr, struct inode *ip, uint32_t off, uint32_t size){
     uint32_t i, n, pa;
 
+    printl("uvm_load: pgdir: 0x%x addr: 0x%x ip: %s offset: %x size: %d\n", pgdir, addr, ip->ino, off, size);
+
     assert((uint32_t)addr % PAGE_SIZE != 0, "uvm_load: addr must page aligned");
 
     for (i = 0; i < size; i += PAGE_SIZE){
@@ -239,6 +239,4 @@ pde_t *uvm_copy(pte_t *pgdir, uint32_t size){
     }
     return pgd;
 }
-
-
 

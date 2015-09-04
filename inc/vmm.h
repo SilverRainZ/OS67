@@ -51,7 +51,7 @@
 #define PTE_COUNT 1024
 
 /* export page dirctroy */
-extern pde_t pde_kern[PDE_SIZE];
+extern pde_t pgd_kern[PDE_SIZE];
 
 void vmm_init();
 void vmm_switch_pgd(uint32_t pgd);

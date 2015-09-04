@@ -1,3 +1,5 @@
+// #define __LOG_ON 1
+
 /* pmm.h
  * This file is modified form hurlex 
  * 内存物理页框分配，用栈管理从0x100000开始的所有有效物理地址
@@ -12,7 +14,7 @@
 #include <string.h>
 #include <printk.h>
 // mm
-#include <pmm.h>
+#include <pmm.h> 
 #include <vmm.h>
 
 /* these symbol's addr were remapped in ld script: script/link.ld
@@ -32,6 +34,7 @@ static uint32_t pmm_stack_top = 0;     // top of stack
 uint32_t pmm_count = 0;
 
 void pmm_mem_info(){
+#define DEBUG 1
     printl("=== display memory info start ===\n");
     printl("MEMORY: 1, RESERVED: 2, UNDEFINE: 3\n");
 
@@ -100,8 +103,7 @@ uint32_t pmm_alloc(){
     uint32_t addr = pmm_stack[--pmm_stack_top];
     assert(pmm_stack_top >= 0,"pmm_alloc: no physical page");
 
-     // memset((void *)addr, 0, PAGE_SIZE);
-    // printl("pmm_alloc: alloc page 0x%x, pmm_stack_top = %d\n", addr, pmm_stack_top);
+    printl("pmm_alloc: alloc page 0x%x, pmm_stack_top = %d\n", addr, pmm_stack_top);
     return addr;
 }
 
@@ -111,7 +113,7 @@ void pmm_free(uint32_t addr){
     memset((void *)addr, 1, PAGE_SIZE);
     assert(pmm_stack_top <= pmm_count ,"pmm_free: pmm stack overflow");
 
-   //  printl("pmm_free: free page 0x%x, pmm_stack_top = %d\n", addr, pmm_stack_top);
+    printl("pmm_free: free page 0x%x, pmm_stack_top = %d\n", addr, pmm_stack_top);
 }
 
 void pmm_test(){

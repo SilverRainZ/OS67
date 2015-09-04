@@ -1,3 +1,5 @@
+#define __LOG_ON 1
+
 /* sb.c
  * read or dump superblock
  * superblock can not be modified

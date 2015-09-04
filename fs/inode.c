@@ -1,3 +1,4 @@
+#define __LOG_ON 1
 // std
 #include <type.h>
 #include <asm.h>

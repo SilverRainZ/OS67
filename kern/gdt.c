@@ -18,7 +18,6 @@ struct gdt_ptr gp;
 extern void gdt_flush();    // extern func in loader.asm
 
 void tss_install(){
-    printl("tr: 0x%x\n", SEL_TSS << 3);
     __asm__ volatile("ltr %%ax" : : "a"((SEL_TSS << 3)));
 }
 

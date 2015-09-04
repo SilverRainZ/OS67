@@ -1,3 +1,5 @@
+// #define __LOG_ON 1
+
 /* block cache 
  * This file is modified form xv6
  */
@@ -37,7 +39,7 @@ void bcache_init(){
  * else alloc a new buffer
  */
 static struct buf* bget(char dev, uint32_t blkno){
-    //printl("bget: try to get blk-%d\n", blkno);
+    printl("bget: try to get blk-%d\n", blkno);
     struct buf *b;
 loop:   
     /* is the sector already cached? */
@@ -54,7 +56,7 @@ loop:
         }
     }
 
-    //printl("bget: blk-%d not cache,try to find a new one\n", blkno);
+    printl("bget: blk-%d not cache,try to find a new one\n", blkno);
     /* not cached: recycle some non-busy and clean buffer */
     for (b = bcache.head.prev; b != &bcache.head; b = b->prev){
         if ((b->flags & B_BUSY) == 0 && (b->flags & B_DIRTY) == 0){
@@ -70,7 +72,7 @@ loop:
 
 /* return a B_BUSY buffer with the content of indicated disk sector */
 struct buf* bread(char dev, uint32_t blkno){
-    //printl("bread: read blk-%d\n", blkno);
+    printl("bread: read blk-%d\n", blkno);
     struct buf *b;
     b = bget(dev, blkno);
     if (!(b->flags & B_VALID)){
@@ -80,7 +82,7 @@ struct buf* bread(char dev, uint32_t blkno){
 }
 
 void bwrite(struct buf* b){
-    //printl("bwrite: wirte blk-%d\n",b->blkno);
+    printl("bwrite: wirte blk-%d\n",b->blkno);
     assert(b->flags & B_BUSY,"bwrite: buffer no busy");
     b->flags |= B_DIRTY;
     ide_rw(b);
@@ -88,7 +90,7 @@ void bwrite(struct buf* b){
 
 /* release a B_BUSY buffer, mov it to the haed of MRU list */
 void brelse(struct buf *b){
-    //printl("brelse: relse blk-%d\n",b->blkno);
+    printl("brelse: relse blk-%d\n",b->blkno);
     assert(b->flags & B_BUSY,"brelse: buffer no busy");
 
     b->next->prev = b->prev;

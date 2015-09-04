@@ -1,6 +1,9 @@
+#define __LOG_ON
+
 // std
 #include <type.h>
 #include <dbg.h>
+#include <asm.h>
 // x86
 #include <pm.h>
 #include <isr.h>
@@ -124,6 +127,7 @@ void scheduler(){
             }
             printl("scheduler: proc `%s` will run\n", pp->name);
             uvm_switch(pp);
+            printl("<<<<\n");
             pp->state = P_RUNNING;
 
             proc = pp;
@@ -250,10 +254,13 @@ int fork(){
     int i;
     struct proc *child;
 
+    printl("fork: fork `%s`\n", proc->name);
+
     if ((child = proc_alloc()) == 0){
         return -1;
     }
 
+    printl("fork: copying memory...\n");
     child->pgdir = uvm_copy(proc->pgdir, proc->size);
     if (child->pgdir == 0){
         pmm_free((uint32_t)child->kern_stack);
@@ -262,12 +269,14 @@ int fork(){
         return -1;
     }
 
+    printl("fork: copying attrib...\n");
     child->size = proc->size;
     child->parent = proc;
     *child->fm = *proc->fm; // return form same address
 
     child->fm->eax = 0;
 
+    printl("fork: dup opened files\n");
     for (i = 0; i < NOFILE; i++){
         if (proc->ofile[i]){
             child->ofile[i] = fdup(proc->ofile[i]);
@@ -277,8 +286,9 @@ int fork(){
     child->cwd = idup(proc->cwd);
     child->state = P_RUNABLE;
 
-    strncpy(child->name, proc->name, sizeof(proc->name));
+    strncpy(child->name, "init2", 5);
 
+    printl("fork: done\n");
     return child->pid;
 }
 

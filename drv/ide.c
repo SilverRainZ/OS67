@@ -1,3 +1,4 @@
+#undef DEBUG
 /* ide.c
  * This file is modified form xv6
  * use DMA, assume we hava only a disk
