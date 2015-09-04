@@ -3,24 +3,7 @@
  * suppose %d %x %c %s now
  */
 //TODO %f doesn't work now, don't use it
-//#define __DEBUG
 
-#ifdef __DEBUG
-
-#include <stdio.h>
-#include <string.h>
-#undef NULL
-
-/* TEST */
-#include "../inc/type.h"
-#include "../inc/printk.h"
-int main(){
-    printk("big int test: %x\n", 0xbaadf00d);
-    printk("double test: %f and %f\n",305.53, 123.45);
-    return 0;
-}
-
-#else
 // std
 #include <type.h>
 #include <dbg.h>
@@ -29,8 +12,6 @@ int main(){
 // libs
 #include <string.h>
 #include <printk.h>
-
-#endif
 
 char* itoa(int value, char *str, int radix){
     char reverse[36];   
@@ -59,7 +40,7 @@ char* itoa(int value, char *str, int radix){
     return str;
 }
 
-char* uitoa(unsigned int value, char *str, int radix){
+char* uitoa(int value, char *str, int radix){
     char reverse[36];   
     char *p = reverse;
 
@@ -146,6 +127,7 @@ void vsprintk(char *buf, const char *fmt, va_list args){
     }
     *p = '\0';
 }
+
 void printk(const char *fmt, ...){
     //使用static会给调试带来麻烦
     char buf[256];
@@ -161,7 +143,9 @@ void printk(const char *fmt, ...){
 /* this function will output string to host's console 
  * but no display in screen, used for recording log
  */ 
-void printl(const char *fmt, ...){
+
+// be called when marco __LOG_ON is defined
+void _printl(const char *fmt, ...){
     char buf[256];
     va_list args;
     int i;
@@ -176,3 +160,9 @@ void printl(const char *fmt, ...){
         bochs_putc(buf[i]);
     }
 }
+
+// be called when marco __LOG_ON is undefined
+void _print_null(const char *fmt, ...){
+    return;
+}
+
