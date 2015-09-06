@@ -7,6 +7,7 @@
 #include <asm.h>
 // x86
 #include <pm.h>
+#include <pic.h>
 #include <isr.h>
 
 /* These are own ISRs that point to our special IRQ handler
@@ -45,18 +46,26 @@ void irq_uninstall(uint8_t irq){
     irq_routines[irq] = 0;
 }
 
+void irq_clear_mask(){
+    outb(PIC1_DATA, 0x0);                   // clear irq maske, enable all irq in Mister PIC
+    outb(PIC2_DATA, 0x0);                   // clear irq maske, enable all irq in Slave PIC
+}
+
 /* in short: map irq 0-15 to int 32-47 */
 void irq_remap(){
-    outb(0x20, 0x11);
-    outb(0xA0, 0x11);
-    outb(0x21, 0x20);
-    outb(0xA1, 0x28);
-    outb(0x21, 0x04);
-    outb(0xA1, 0x02);
-    outb(0x21, 0x01);
-    outb(0xA1, 0x01);
-    outb(0x21, 0x0);
-    outb(0xA1, 0x0);
+    outb(PIC1_CMD, ICW1_INIT + ICW1_ICW4);    // starts the initialization sequence (in cascade mode)
+    outb(PIC2_CMD, ICW1_INIT + ICW1_ICW4);
+
+    outb(PIC1_DATA, 0x20);                   // ICW2: Master PIC vector offset
+    outb(PIC2_DATA, 0x28);                   // ICW2: Slave PIC vector offset
+
+    outb(PIC1_DATA, 4);                      // ICW3: tell Master PIC that there is a slave PIC at IRQ2 (0000 0100)
+    outb(PIC2_DATA, 2);                      // ICW3: tell Slave PIC its cascade identity (0000 0010)
+ 
+    outb(PIC1_DATA, ICW4_8086);
+    outb(PIC2_DATA, ICW4_8086);
+ 
+    irq_clear_mask();
 }
 
 /* We first remap the interrupt controllers, and then we install
@@ -98,9 +107,9 @@ void irq_handler(struct int_frame *r){
     *  (meaning IRQ8 - 15), then we need to send an EOI to
     *  the slave controller */
     if (r->int_no >= 40){
-        outb(0xA0, 0x20);
+        outb(PIC2_CMD, PIC_EOI);
     }
     /* In either case, we need to send an EOI to the master
     *  interrupt controller too */
-    outb(0x20, 0x20);
+    outb(PIC1_CMD, PIC_EOI);
 }
