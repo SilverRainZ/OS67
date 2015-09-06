@@ -12,23 +12,24 @@
 #include <vga.h>
 // libs
 #include <printk.h>
+#include <proc.h>
 
 /* print current runlevel and register */
 void print_cur_status(){
     static int round = 0; uint16_t reg1, reg2, reg3, reg4;
-    __asm__ __volatile__( 	"mov %%cs, %0;"
-			"mov %%ds, %1;"
-			"mov %%es, %2;"
-			"mov %%ss, %3;"
-			: "=m"(reg1), "=m"(reg2), "=m"(reg3), "=m"(reg4));
+    __asm__ __volatile__(     "mov %%cs, %0;"
+            "mov %%ds, %1;"
+            "mov %%es, %2;"
+            "mov %%ss, %3;"
+            : "=m"(reg1), "=m"(reg2), "=m"(reg3), "=m"(reg4));
 
     printk("%d: @ring%d\n", round, reg1 & 0x3);
-	printk("%d: cs = %x\n", round, reg1);
-	printk("%d: ds = %x\n", round, reg2);
-	printk("%d: es = %x\n", round, reg3);
-	printk("%d: ss = %x\n", round, reg4);
+    printk("%d: cs = %x\n", round, reg1);
+    printk("%d: ds = %x\n", round, reg2);
+    printk("%d: es = %x\n", round, reg3);
+    printk("%d: ss = %x\n", round, reg4);
     // round?
-	++round;
+    ++round;
 }
 
 void print_stack_trace(){
@@ -43,6 +44,10 @@ void print_stack_trace(){
 
 void panic(const char *msg){
     setcolor(COL_L_RED, COL_BLACK);
+
+    if (proc){
+        printk("proc: `%s`(PID: %d)\n",proc->name, proc->pid);
+    }
     printk("*** Kernel panic ***\n");
     printk("%s\n", msg);
     printk("Current CPU status:\n");
