@@ -19,8 +19,11 @@
 // proc
 #include <proc.h>
 
+#include <pic.h>
+
 extern void _isr_stub_ret();
 extern void context_switch(struct context **old, struct context *new);
+
 
 static uint32_t cur_pid = 0;
 static struct proc *initproc = NULL;
@@ -29,19 +32,39 @@ struct context *cpu_context;
 
 struct proc *proc = NULL;
 
+/* import irq_remap, only use in fork_ret */
+extern void irq_remap();
+/* do not ask me why use irq_remap here, irq didn't work after fork()
+ * and I don't know why, and have to reinit it
+ * thx to fleuria
+ */
 void fork_ret(){
+    static int fst = 1;
+
+    if (fst == 1){
+        fst = 0;
+    } else {
+    
+    outb(PIC1_CMD, ICW1_INIT + ICW1_ICW4);    // starts the initialization sequence (in cascade mode)
+    outb(PIC2_CMD, ICW1_INIT + ICW1_ICW4);
+    }
+
     return;
 }
 
-static void print_proc(struct proc *pp){
+void print_proc(struct proc *pp){
     uint32_t pa;
+
     vmm_get_mapping(pp->pgdir, USER_BASE, &pa);
 
-    printl("print_proc:\n    name: %s\n",pp->name);
+    printl("print_proc:\n")
+    printl("    name: %s\n",pp->name);
+    printk("    pid: %d\n", pp->pid);
     printl("    kern_stack: 0x%x\n",pp->kern_stack);
     printl("    pgdir: 0x%x\n",pp->pgdir);
     printl("    phy addr: 0x%x\n", pa);
 }
+
 static struct proc *proc_alloc(){
     struct proc *pp;
     char *tos;
@@ -78,14 +101,14 @@ static struct proc *proc_alloc(){
 
 void proc_init(){
     struct proc *pp;
+    extern char __init_start;
+    extern char __init_end;
+
     printl("proc_userinit: clear ptable\n");
 
     memset(ptable, 0, sizeof(struct proc) * NPROC);
 
     printl("proc_userinit: prepare for init\n");
-
-    extern char __init_start;
-    extern char __init_end;
 
     pp = proc_alloc();
 
@@ -116,6 +139,7 @@ void proc_init(){
     printl("proc_init: init stack build\n");
 
     strcpy(pp->name, "init");
+
     pp->cwd = p2i("/");
     pp->state = P_RUNABLE;
 
@@ -129,13 +153,13 @@ void scheduler(){
     struct proc *pp;
 
     printl("scheduler: start\n");
+
     for (;;){
         for (pp = &ptable[0]; pp < &ptable[NPROC]; pp++){
             if (pp->state != P_RUNABLE){
                 continue;
             }
-            printl("scheduler: proc `%s` will run\n", pp->name);
-            print_proc(pp);
+            printl("scheduler: proc `%s`(PID: %d) will run\n", pp->name, pp->pid);
 
             printl("scheduler: switch pgdir & set tss\n"); 
             uvm_switch(pp);
@@ -143,8 +167,9 @@ void scheduler(){
 
             proc = pp;
 
+            printl(">>>> context switch\n");
             context_switch(&cpu_context, pp->context);
-            printl("scheduler: return form proc `%s`\n", pp->name);
+            printl("<<<< return form proc `%s`\n", pp->name);
         }
     }
 }
@@ -277,6 +302,7 @@ int fork(){
     child->pgdir = uvm_copy(proc->pgdir, proc->size);
 
     if (child->pgdir == 0){
+        panic("fork:");
         pmm_free((uint32_t)child->kern_stack);
         child->kern_stack = 0;
         child->state = P_UNUSED;
@@ -291,7 +317,6 @@ int fork(){
     *child->fm = *proc->fm; // return form same address
 
     child->fm->eax = 0;
-
     printl("fork: dup opened files\n");
     for (i = 0; i < NOFILE; i++){
         if (proc->ofile[i]){
@@ -300,9 +325,10 @@ int fork(){
     }
 
     child->cwd = idup(proc->cwd);
+
     child->state = P_RUNABLE;
 
-    strncpy(child->name, "init2", 5);
+    strncpy(child->name, proc->name, sizeof(proc->name));
 
     printl("fork: done\n");
     return child->pid;

@@ -240,7 +240,7 @@ pde_t *uvm_copy(pte_t *pgdir, uint32_t size){
         printl("uvm_copy: phyaddr: 0x%x -> 0x%x\n", pa, mem);
 
         memcpy((void *)mem, (void *)pa, PAGE_SIZE);
-        vmm_map(pgd, USER_BASE + i, mem, PTE_W | PTE_U | PTE_P);
+        vmm_map(pgd, USER_BASE + i, mem, PTE_R | PTE_U | PTE_P); // TODO (?)
     }
     return pgd;
 }

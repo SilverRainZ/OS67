@@ -11,6 +11,16 @@ __init_start:
     ; push (msg_arg1 - $$) + 0xc0000000
     mov eax, 1
     int 0x80
+    cmp eax, 0
+    jz child
+    jmp $
+child:
+    mov eax, 1
+    int 0x80
+    cmp eax, 0
+    jz child2
+    jmp $
+child2:
     jmp $
 
 msg_arg1:
