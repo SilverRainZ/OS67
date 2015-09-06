@@ -46,6 +46,11 @@ void irq_uninstall(uint8_t irq){
     irq_routines[irq] = 0;
 }
 
+void pic_init(){
+    outb(PIC1_CMD, ICW1_INIT + ICW1_ICW4);    // starts the initialization sequence (in cascade mode)
+    outb(PIC2_CMD, ICW1_INIT + ICW1_ICW4);
+}
+
 void irq_clear_mask(){
     outb(PIC1_DATA, 0x0);                   // clear irq maske, enable all irq in Mister PIC
     outb(PIC2_DATA, 0x0);                   // clear irq maske, enable all irq in Slave PIC
@@ -53,8 +58,7 @@ void irq_clear_mask(){
 
 /* in short: map irq 0-15 to int 32-47 */
 void irq_remap(){
-    outb(PIC1_CMD, ICW1_INIT + ICW1_ICW4);    // starts the initialization sequence (in cascade mode)
-    outb(PIC2_CMD, ICW1_INIT + ICW1_ICW4);
+    pic_init();
 
     outb(PIC1_DATA, 0x20);                   // ICW2: Master PIC vector offset
     outb(PIC2_DATA, 0x28);                   // ICW2: Slave PIC vector offset
