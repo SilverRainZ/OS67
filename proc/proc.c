@@ -32,8 +32,8 @@ struct proc *proc = NULL;
 
 /* import pic_init(), only use in fork_ret */
 extern void pic_init();
-/* do not ask me why use irq_remap here, irq didn't work after fork()
- * and I don't know why, and have to reinit it
+/* do not ask me why call pic_init here, irq didn't work after fork()
+ * I have to reinit it
  * thx to fleuria
  */
 void fork_ret(){
@@ -92,7 +92,7 @@ static struct proc *proc_alloc(){
             return pp;
         }
     }
-    return NULL;
+    return 0;
 }
 
 void proc_init(){
@@ -155,9 +155,10 @@ void scheduler(){
             if (pp->state != P_RUNABLE){
                 continue;
             }
-            printl("scheduler: proc `%s`(PID: %d) will run\n", pp->name, pp->pid);
 
-            printl("scheduler: switch pgdir & set tss\n"); 
+            printl("scheduler: proc `%s`(PID: %d) will run\n", pp->name, pp->pid);
+            // printl("scheduler: switch pgdir & set tss\n"); 
+
             uvm_switch(pp);
             pp->state = P_RUNNING;
 
@@ -165,7 +166,7 @@ void scheduler(){
 
             printl(">>>> context switch\n");
             context_switch(&cpu_context, pp->context);
-            printl("<<<< return form proc `%s`\n", pp->name);
+            printl("<<<< return form proc `%s`(PID: %d)\n", pp->name, pp->pid);
         }
     }
 }
@@ -173,7 +174,10 @@ void scheduler(){
 void sched(){
     assert(proc->state != P_RUNABLE, "sched: no runable")
 
-    proc->state = P_RUNABLE;
+    if (proc->state == P_RUNNING){
+        proc->state = P_RUNABLE;
+    }
+
     context_switch(&proc->context, cpu_context);
 }
 
@@ -188,6 +192,8 @@ void sleep(void *chan){
 
     // wake up
     proc->chan = 0;
+
+    printl("sleep: proc `%s`(PID: %d) is trying to wakeup...\n", proc->name, proc->pid);
 }
 
 void wakeup(void *chan){
@@ -252,8 +258,6 @@ void exit(){
 
     iput(proc->cwd);
     proc->cwd = 0;
-
-    wakeup(proc->parent);
 
     for (pp = ptable; pp < &proc[NPROC]; pp++){
         pp->parent = initproc;

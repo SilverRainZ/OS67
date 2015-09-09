@@ -55,6 +55,7 @@ void sched();
 int fork();
 int wait();
 void sleep(void *chan);
+void wakeup(void *chan);
 int kill(uint8_t pid);
 void exit();
 

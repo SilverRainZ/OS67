@@ -78,7 +78,7 @@ int fetchstr(uint32_t addr, char **pp){
 }
 
 int argint(int n, int *ip){
-    // TODO why diff wiht xv6?
+    // TODO
     return fetchint(proc->fm->user_esp + 4*n, ip);
 }
 
@@ -111,7 +111,7 @@ int argptr(int n, char **pp, int size){
 }
 
 int sys_none(){
-    return 1;
+    return -1;
 }
 
 void sys_init(){
@@ -122,7 +122,6 @@ void syscall(){
     int cn;
 
     printl("syscall: number: %d, form ring@%d\n", proc->fm->eax, proc->fm->cs&0x3);
-    printl("syscall: stack pointer: 0x%x\n", proc->fm->user_esp);
 
     cn = proc->fm->eax;
 

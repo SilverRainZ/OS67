@@ -32,6 +32,9 @@ void timer_handler(struct int_frame *r){
     /* trigger when every 18 clocks (approximately 1 second)  */
 
     timer_ticks++;
+
+    wakeup(&timer_ticks);
+
     if (!proc) return;
 
     if (timer_ticks % 100 == 0){
