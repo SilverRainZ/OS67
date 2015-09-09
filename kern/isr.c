@@ -33,14 +33,6 @@ void isr_init(){
 void isr_stub(struct int_frame *r){
     assert(r->int_no >= 0, "isr_stub: wrong intrrupt number < 0");
 
-    /* in kernel space, we use pgd_kern as page table, 
-     * so we can alloc or free any memory 
-     * it maybe slow, but easy to process all kinds of (physical or virtual)address
-     */
-    if (proc){
-        vmm_switch_pgd((uint32_t)pgd_kern);
-    }
-
     if (r->int_no < ISR_IRQ0 || r->int_no == ISR_UNKNOWN){
         fault_handler(r);
     }
@@ -52,10 +44,5 @@ void isr_stub(struct int_frame *r){
     } 
     else {
         panic("isr_stub: wrong intrrupt number");
-    }
-
-    /* before leaving kernel space, restore page table */
-    if (proc){
-        vmm_switch_pgd((uint32_t)proc->pgdir);
     }
 }

@@ -79,14 +79,21 @@ void vmm_map(pde_t *pgdir, uint32_t va, uint32_t pa, uint32_t flags){
     // printl("map: map 0x%x to 0x%x, flag = 0x%x\n", pa, va, flags);
  
     pte_t *pte = (pte_t *)(pgdir[pde_idx] & PAGE_MASK);
-    /* if pte == NULL */
+
     if (!pte){
-        // printl("map: pte of 0x%x is NULL, attempt to alloc one\n", va);
-        pte = (pte_t *)pmm_alloc();
-        pgdir[pde_idx] = (uint32_t)pte | PTE_P | PTE_R | flags;
-        //assert(0,"pet = NULL");
-        memset(pte, 0, PAGE_SIZE);
-    } 
+        if (va < USER_BASE){
+            pte = (pte_t *)pmm_alloc();
+
+            pgdir[pde_idx] = (uint32_t)pte | PTE_P | PTE_R | flags;
+        } else {
+            // printl("map: pte of 0x%x is NULL, attempt to alloc one\n", va);
+            
+            pte = (pte_t *)(pgd_kern[pde_idx] & PAGE_MASK);
+            pgdir[pde_idx] = (uint32_t)pte | PTE_P | PTE_R | flags;
+            //assert(0,"pet = NULL");
+            memset(pte, 0, PAGE_SIZE);
+        }
+    }
 
     pte[pte_idx] = (pa & PAGE_MASK) | flags;
 
@@ -152,11 +159,11 @@ void page_fault(struct int_frame *r){
 // build a map of kernel space for a process's page table
 void kvm_init(pde_t *pgdir){
     uint32_t addr;
-    uint32_t limit = PAGE_ALIGN_UP((uint32_t)&kernend);
+    // uint32_t limit = PAGE_ALIGN_UP((uint32_t)&kernend);
 
     assert(pgdir != 0, "kvm_init: null pgdir");
 
-    for (addr = 0; addr < limit; addr += PAGE_SIZE){
+    for (addr = 0; addr < USER_BASE; addr += PAGE_SIZE){
         vmm_map(pgdir, addr, addr, PTE_P | PTE_R | PTE_K);
     }
 }
