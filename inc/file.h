@@ -3,6 +3,7 @@
 
 #include <type.h>
 #include <stat.h>
+#include <file.h>
 
 #define NFILE 128
 
@@ -15,7 +16,7 @@ struct file{
     uint16_t ref;
     uint8_t readable;
     uint8_t writeable;
-    // struct pipe *pipe;
+    struct pipe *pipe;
     struct inode *ip;
     uint32_t off;
 };
