@@ -71,13 +71,6 @@ default: Makefile
 	$(MAKE) bin/floppy.img
 	$(MAKE) bin/cinit
 
-# copy kernel file to floppy
-install : bin/floppy.img bin/kernel
-	sudo mount bin/floppy.img /mnt/kernel
-	sudo cp bin/kernel /mnt/kernel
-	sleep 1
-	sudo umount /mnt/kernel
-
 # make a disk with minix v1 file system
 fs: $(UPROG)
 	$(DEL) bin/rootfs.img
