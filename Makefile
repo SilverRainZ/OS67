@@ -12,7 +12,7 @@ LD = ld
 OBJCPY = objcopy
 CFLAGS = -c -O0 -Wall -Werror -nostdinc -fno-builtin -fno-stack-protector -funsigned-char \
 		 -finline-functions -finline-small-functions -findirect-inlining \
-		 -finline-functions-called-once -Iinc -m32 -ggdb -gstabs+
+		 -finline-functions-called-once -Iinc -m32 -ggdb -gstabs+ 
 OBJS = bin/loader.o \
 	   bin/main.o bin/dbg.o bin/timer.o bin/asm.o \
 	   bin/gdt.o bin/idt.o \
@@ -22,7 +22,11 @@ OBJS = bin/loader.o \
 	   bin/pmm.o bin/vmm.o \
 	   bin/bcache.o bin/sb.o bin/bitmap.o bin/inode.o \
 	   bin/dir.o bin/p2i.o bin/fstest.o bin/file.o bin/sysfile.o \
-	   bin/init.o bin/proc.o bin/sysproc.o
+	   bin/init.o bin/proc.o bin/sysproc.o	\
+	   bin/pipe.o
+UOBJS = bin/usys.o bin/cinit.o
+
+UPROGS = bin/cinit
 
 # create a 1.44MB floppy include kernel and bootsector
 bin/floppy.img: boot/floppy.asm bin/bootsect.bin bin/kernel 
@@ -46,8 +50,14 @@ bin/kernel: script/link.ld $(OBJS)
 
 # compile c file in all directory
 bin/%.o: */%.c
-	$(CC) $(CFLAGS) -c $^ -o $@  
-	$(CC) $(CFLAGS) -S $^ -o lst/$*.s
+	$(CC) $(CFLAGS) -fno-pic -fno-strict-aliasing -MD  -c $^ -o $@  
+	# $(CC) $(CFLAGS) -S $^ -o lst/$*.s
+
+bin/usys.o: usr/usys.asm
+	$(AS) -f elf32 -g -F stabs -l lst/usys.s $< -o $@ 
+
+bin/cinit: $(UOBJS)
+	$(LD) -e main -Ttext 0xc0000000 -melf_i386 -static -o $@ $(UOBJS)
 
 #----------------------------------------
 
@@ -59,6 +69,7 @@ init:
 
 default: Makefile
 	$(MAKE) bin/floppy.img
+	$(MAKE) bin/cinit
 
 # copy kernel file to floppy
 install : bin/floppy.img bin/kernel
@@ -68,12 +79,13 @@ install : bin/floppy.img bin/kernel
 	sudo umount /mnt/kernel
 
 # make a disk with minix v1 file system
-fs:
+fs: $(UPROG)
 	$(DEL) bin/rootfs.img
 	bximage bin/rootfs.img -hd=10M -imgmode=flat -mode=create -q
 	mkfs.minix bin/rootfs.img -1 -n14
 	sudo mount -o loop -t minix bin/rootfs.img /mnt/fs
-	sudo cp -r usr/* /mnt/fs/
+	sudo cp usr/README /mnt/fs/
+	sudo cp bin/cinit /mnt/fs
 	sleep 1
 	sudo umount /mnt/fs
 
@@ -103,7 +115,6 @@ clean:
 	$(DEL) bin/*.tmp 
 	$(DEL) bin/kernel 
 	$(DEL) bin/kernel.elf
-	$(DEL) bin/rootfs.img
 	$(DEL) bin/floppy.img
 
 # clean list file under lst/
