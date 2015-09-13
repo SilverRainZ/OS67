@@ -151,7 +151,6 @@ irq%1:
 ; ***** System Call int 0x80
 [global _syscall]
 _syscall:
-    cli
     push 0
     push 0x80
     jmp _isr_stub
