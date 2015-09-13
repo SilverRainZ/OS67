@@ -1,6 +1,5 @@
 #include <usys.h>
 
 int main(){
-    _fork();
-    _exit();
+    __asm__("int $255");
 }

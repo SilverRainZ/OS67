@@ -22,7 +22,7 @@ OBJS = bin/loader.o \
 	   bin/pmm.o bin/vmm.o \
 	   bin/bcache.o bin/sb.o bin/bitmap.o bin/inode.o \
 	   bin/dir.o bin/p2i.o bin/fstest.o bin/file.o bin/sysfile.o \
-	   bin/init.o bin/proc.o bin/sysproc.o	\
+	   bin/init.o bin/proc.o bin/sysproc.o bin/exec.o \
 	   bin/pipe.o
 UOBJS = bin/usys.o bin/cinit.o
 
@@ -50,8 +50,8 @@ bin/kernel: script/link.ld $(OBJS)
 
 # compile c file in all directory
 bin/%.o: */%.c
-	$(CC) $(CFLAGS) -fno-pic -fno-strict-aliasing -MD  -c $^ -o $@  
-	# $(CC) $(CFLAGS) -S $^ -o lst/$*.s
+	$(CC) $(CFLAGS) -c $^ -o $@  
+	$(CC) $(CFLAGS) -S $^ -o lst/$*.s
 
 bin/usys.o: usr/usys.asm
 	$(AS) -f elf32 -g -F stabs -l lst/usys.s $< -o $@ 

@@ -4,7 +4,7 @@
 #include <type.h>
 
 // ?
-#define ELF_MAGIC   0x464c457fu
+#define ELF_MAGIC   0x464c457f
 /* elf 32 header */
 struct elf32hdr {
   uint32_t magic;   // equal ELF_MAGIC
@@ -41,6 +41,6 @@ struct proghdr{
     uint32_t memsz;
     uint32_t flag;
     uint32_t align;
-}
+};
 
 #endif

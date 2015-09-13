@@ -84,12 +84,12 @@ void vmm_map(pde_t *pgdir, uint32_t va, uint32_t pa, uint32_t flags){
         if (va < USER_BASE){
             pte = (pte_t *)pmm_alloc();
 
-            pgdir[pde_idx] = (uint32_t)pte | PTE_P | PTE_R | flags;
+            pgdir[pde_idx] = (uint32_t)pte | PTE_P | flags;
         } else {
             // printl("map: pte of 0x%x is NULL, attempt to alloc one\n", va);
             
             pte = (pte_t *)(pgd_kern[pde_idx] & PAGE_MASK);
-            pgdir[pde_idx] = (uint32_t)pte | PTE_P | PTE_R | flags;
+            pgdir[pde_idx] = (uint32_t)pte | PTE_P | flags;
             //assert(0,"pet = NULL");
             memset(pte, 0, PAGE_SIZE);
         }
@@ -252,3 +252,19 @@ pde_t *uvm_copy(pte_t *pgdir, uint32_t size){
     return pgd;
 }
 
+int uvm_alloc(pte_t *pgdir, uint32_t old_sz, uint32_t new_sz){
+    uint32_t mem;
+    uint32_t start;
+
+    if (new_sz < old_sz){
+        return old_sz;
+    }
+
+    for (start = PAGE_ALIGN_UP(old_sz); start < new_sz; start += PAGE_SIZE){
+        mem = pmm_alloc(); 
+        memset((void *)mem, 0, PAGE_SIZE);
+        vmm_map(pgdir, USER_BASE + start, mem, PTE_W | PTE_U);
+    }
+
+    return new_sz;
+}

@@ -7,6 +7,7 @@
 #include <printk.h>
 // proc
 #include <proc.h>
+#include <exec.h>
 #include <sysproc.h>
 
 int sys_fork(){
@@ -20,6 +21,16 @@ int sys_wait(){
 int sys_exit(){
     exit();
     return 0; // no reach
+}
+
+int sys_exec(){
+    char *path;
+
+    if (argstr(0, &path) < 0){
+        return -1;
+    }
+    printl("sys_exec: param: path = %s\n", path);
+    return exec(path);
 }
 
 int sys_kill(){
