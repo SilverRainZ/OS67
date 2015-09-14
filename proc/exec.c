@@ -1,6 +1,8 @@
 #define __LOG_ON 1
 // std
 #include <type.h>
+#include <dbg.h>
+#include <asm.h>
 // libs
 #include <printk.h>
 #include <string.h>
@@ -8,6 +10,7 @@
 #include <inode.h>
 #include <p2i.h>
 // mm
+#include <pmm.h>
 #include <vmm.h>
 // proc
 #include <proc.h>
@@ -15,9 +18,9 @@
 #include <elf.h>
 
 static void print_elfhdr(struct elf32hdr *eh){
-    printl("print_eh:\n");
+    printl("print_elfhdr:\n");
     printl("    magic: 0x%x\n", eh->magic);
-    printl("    name: %s\n", eh->elf);
+    printl("    elf: %s\n", eh->elf);
     printl("    entry: 0x%x\n", eh->entry);
     printl("    phoff: 0x%x\n", eh->phoff);
     printl("    phnum: %d\n", eh->phnum);
@@ -46,13 +49,18 @@ int exec(char *path){
     
     printl("exec: try to read `%s` form disk...\n", path);
 
+    pgdir = 0;
+    i = off = 0;
+
+    pgdir = (pde_t *)pmm_alloc();
+    kvm_init(pgdir);
+
+    // exception handle pgdir
+    //
     if ((ip = p2i(path)) == 0){
         return -1;
     }
     ilock(ip);
-
-    pgdir = 0;
-    i = off = 0;
 
     // read elf header
     if (iread(ip, (char *)&eh, 0, sizeof(eh)) < (int)sizeof(eh)){
@@ -60,7 +68,6 @@ int exec(char *path){
     }
 
     printl("exec: parsering elf\n");
-
     print_elfhdr(&eh);
 
     if (eh.magic != ELF_MAGIC){
@@ -76,25 +83,22 @@ int exec(char *path){
             goto bad;
         }
         print_proghdr(&ph);
-        printl("exec: 1\n");
         if (ph.type != ELF_PROG_LOAD){
             continue;
         }
-        printl("exec: 2\n");
         if (ph.memsz < ph.filesz){
             goto bad;
         }
-        printl("exec: 3\n");
-        if ((sz = uvm_alloc(pgdir, sz, ph.vaddr + ph.memsz)) == 0){
+        if ((sz = uvm_alloc(pgdir, sz + USER_BASE, ph.vaddr + ph.memsz)) == 0){
             goto bad;
         }
-        printl("exec: 4\n");
         if (uvm_load(pgdir, ph.vaddr, ip, ph.off, ph.filesz) < 0){
             goto bad;
         }
-        iunlockput(ip);
-        ip = 0;
     }
+
+    iunlockput(ip);
+    ip = 0;
 
     printl("exec: build user stack(TODO)\n");
     /* build user stack */
@@ -115,13 +119,13 @@ int exec(char *path){
     }
     */
 
-    printl("exec: prepare for new process\n");
 
     for (name = s = path; *s; s++){
         if (*s == '/'){
             name = s + 1;
         }
     }
+    printl("exec: prepare for new process `%s`\n", name);
 
     strncpy(proc->name, name, sizeof(proc->name));
 
@@ -132,6 +136,8 @@ int exec(char *path){
     proc->fm->user_esp = sp;
     uvm_switch(proc);
     uvm_free(old_pgdir);
+    old_pgdir  = 0;
+    old_pgdir ++;
     return 0;
 
 bad:

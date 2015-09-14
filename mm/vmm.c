@@ -71,7 +71,6 @@ void vmm_init(){
     vmm_enable();
 }
 
-/* only work when pagetable = gpd_kern */
 void vmm_map(pde_t *pgdir, uint32_t va, uint32_t pa, uint32_t flags){
     uint32_t pde_idx = PDE_INDEX(va);
     uint32_t pte_idx = PTE_INDEX(va);
@@ -81,26 +80,21 @@ void vmm_map(pde_t *pgdir, uint32_t va, uint32_t pa, uint32_t flags){
     pte_t *pte = (pte_t *)(pgdir[pde_idx] & PAGE_MASK);
 
     if (!pte){
-        if (va < USER_BASE){
+        if (va >= USER_BASE){
             pte = (pte_t *)pmm_alloc();
-
+            memset(pte, 0, PAGE_SIZE);
             pgdir[pde_idx] = (uint32_t)pte | PTE_P | flags;
         } else {
-            // printl("map: pte of 0x%x is NULL, attempt to alloc one\n", va);
-            
             pte = (pte_t *)(pgd_kern[pde_idx] & PAGE_MASK);
             pgdir[pde_idx] = (uint32_t)pte | PTE_P | flags;
-            //assert(0,"pet = NULL");
-            memset(pte, 0, PAGE_SIZE);
         }
     }
 
-    pte[pte_idx] = (pa & PAGE_MASK) | flags;
+    pte[pte_idx] = (pa & PAGE_MASK) | PTE_P | flags;
 
     vmm_reflush(va);
 }
 
-/* only work when pagetable = gpd_kern */
 void vmm_unmap(pde_t *pde, uint32_t va){
     uint32_t pde_idx = PDE_INDEX(va);
     uint32_t pte_idx = PTE_INDEX(va);
@@ -195,9 +189,9 @@ void uvm_switch(struct proc *pp){
 int uvm_load(pte_t *pgdir, uint32_t addr, struct inode *ip, uint32_t off, uint32_t size){
     uint32_t i, n, pa;
 
-    printl("uvm_load: pgdir: 0x%x addr: 0x%x ip: %s offset: %x size: %d\n", pgdir, addr, ip->ino, off, size);
+    printl("uvm_load: pgdir: 0x%x addr: 0x%x ip: inode-%d offset: 0x%x size: 0x%x\n", pgdir, addr, ip->ino, off, size);
 
-    assert((uint32_t)addr % PAGE_SIZE != 0, "uvm_load: addr must page aligned");
+    assert((uint32_t)addr % PAGE_SIZE == 0, "uvm_load: addr must page aligned");
 
     for (i = 0; i < size; i += PAGE_SIZE){
         assert(vmm_get_mapping(pgdir, addr + i, &pa), "uvm_load: address no mapped");
@@ -216,13 +210,19 @@ int uvm_load(pte_t *pgdir, uint32_t addr, struct inode *ip, uint32_t off, uint32
     return 0;
 }
 
+/* free user space only */
 void uvm_free(pte_t *pgdir){
     uint32_t i;
 
     assert(pgdir, "uvm_free: no page table");
 
-    for (i = 0; i < PTE_COUNT; i++){
+    i = PDE_INDEX(USER_BASE);
+
+    printl("uvm_free: form 0x%x to 0x%x\n", i << 22, PTE_COUNT << 22);
+
+    for (; i < PTE_COUNT; i++){
         if (pgdir[i] & PTE_P){
+            printl("uvm_free: free pte 0x%x\n", pgdir[i]);
             pmm_free(pgdir[i] & PAGE_MASK);
         }
     }
@@ -256,6 +256,8 @@ int uvm_alloc(pte_t *pgdir, uint32_t old_sz, uint32_t new_sz){
     uint32_t mem;
     uint32_t start;
 
+    printl("uvm_alloc: pgdir: 0x%x 0x%x -> 0x%x\n", pgdir, old_sz, new_sz);
+
     if (new_sz < old_sz){
         return old_sz;
     }
@@ -263,7 +265,7 @@ int uvm_alloc(pte_t *pgdir, uint32_t old_sz, uint32_t new_sz){
     for (start = PAGE_ALIGN_UP(old_sz); start < new_sz; start += PAGE_SIZE){
         mem = pmm_alloc(); 
         memset((void *)mem, 0, PAGE_SIZE);
-        vmm_map(pgdir, USER_BASE + start, mem, PTE_W | PTE_U);
+        vmm_map(pgdir, start, mem, PTE_P | PTE_R | PTE_U);  // diff with PTE_U PTE_R ?
     }
 
     return new_sz;

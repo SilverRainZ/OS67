@@ -8,6 +8,12 @@ align 4
 
 __init_start:
     nop     ; hava a rest~
+    mov eax, 1
+    int 0x80
+    cmp eax, 0
+    jz child
+    jmp $
+child:
     push (msg_arg0 - $$) + 0xc0000000
     mov eax, 7  ; exec
     int 0x80
