@@ -79,7 +79,7 @@ int fetchstr(uint32_t addr, char **pp){
 
 int argint(int n, int *ip){
     // TODO
-    return fetchint(proc->fm->user_esp + 4*n, ip);
+    return fetchint(proc->fm->user_esp + 4*n + 4, ip);  // "+4" for eip
 }
 
 int argstr(int n, char **pp){
