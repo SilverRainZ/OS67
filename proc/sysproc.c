@@ -5,6 +5,7 @@
 #include <syscall.h>
 // libs
 #include <printk.h>
+#include <string.h>
 // proc
 #include <proc.h>
 #include <exec.h>
@@ -24,13 +25,35 @@ int sys_exit(){
 }
 
 int sys_exec(){
-    char *path;
+    char *path, *argv[MAX_ARGC];
+    int i;
+    uint32_t uargv, uarg; // pointer to argv[]
 
-    if (argstr(0, &path) < 0){
+    if (argstr(0, &path) < 0 || argint(1, (int *)&uargv) < 0){
         return -1;
     }
-    printl("sys_exec: param: path = %s\n", path);
-    return exec(path);
+
+    printl("sys_exec: get path %s argv: 0x%x\n", path, uargv);
+
+    memset(argv, 0, sizeof(argv));
+
+    for (i = 0; ; i++){
+        if (i >= MAX_ARGC){
+            return -1;  // too many arguments
+        }
+        if (fetchint(uargv + 4*i, (int *)&uarg) < 0){
+            return -1;
+        }
+        if (uarg == 0){
+            argv[i] = 0;
+            break;
+        }
+        if (fetchstr(uarg, &argv[i]) < 0){
+            return -1;
+        }
+    }
+
+    return exec(path, argv);
 }
 
 int sys_kill(){

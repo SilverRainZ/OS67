@@ -29,6 +29,8 @@
 #define SYS_MKDIR   20
 #define SYS_CLOSE   21
 
+int fetchint(uint32_t addr, int *ip);
+int fetchstr(uint32_t addr, char **pp);
 int argint(int n, int *ip);
 int argstr(int n, char **pp);
 int argptr(int n, char **pp, int size);

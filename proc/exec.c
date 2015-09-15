@@ -17,7 +17,7 @@
 #include <exec.h>
 #include <elf.h>
 
-static void print_elfhdr(struct elf32hdr *eh){
+void print_elfhdr(struct elf32hdr *eh){
     printl("print_elfhdr:\n");
     printl("    magic: 0x%x\n", eh->magic);
     printl("    elf: %s\n", eh->elf);
@@ -26,7 +26,7 @@ static void print_elfhdr(struct elf32hdr *eh){
     printl("    phnum: %d\n", eh->phnum);
 }
 
-static void print_proghdr(struct proghdr *ph){
+void print_proghdr(struct proghdr *ph){
     printl("print_proghdr:\n");
     printl("    type: 0x%x\n", ph->type);
     printl("    off: 0x%x\n", ph->off);
@@ -38,10 +38,10 @@ static void print_proghdr(struct proghdr *ph){
     printl("    align: 0x%x\n", ph->align);
 }
 
-int exec(char *path){
+int exec(char *path, char **argv){
     int i;
     char *s, *name;
-    uint32_t sz, sp, off;
+    uint32_t sz, sp, off, argc, pa, ustack[3 + MAX_ARGC + 1];
     pde_t *pgdir, *old_pgdir;
     struct inode *ip;
     struct elf32hdr eh;
@@ -68,7 +68,7 @@ int exec(char *path){
     }
 
     printl("exec: parsering elf\n");
-    print_elfhdr(&eh);
+    // print_elfhdr(&eh);
 
     if (eh.magic != ELF_MAGIC){
         goto bad;
@@ -82,7 +82,7 @@ int exec(char *path){
         if (iread(ip, (char *)&ph, off, sizeof(ph)) != sizeof(ph)){
             goto bad;
         }
-        print_proghdr(&ph);
+        // print_proghdr(&ph);
         if (ph.type != ELF_PROG_LOAD){
             continue;
         }
@@ -100,7 +100,7 @@ int exec(char *path){
     iunlockput(ip);
     ip = 0;
 
-    printl("exec: build user stack(TODO)\n");
+    printl("exec: build user stack\n");
     /* build user stack */
     sz = PAGE_ALIGN_UP(sz);
     if ((sz = uvm_alloc(pgdir, sz, sz + 2*PAGE_SIZE)) == 0){
@@ -108,17 +108,32 @@ int exec(char *path){
     }
     // leave a page unaccessable TODO
     sp = sz;
+    if (vmm_get_mapping(pgdir, sz - PAGE_SIZE, &pa) == 0){  // sz is no mapped
+        goto bad;
+    }
+    pa += PAGE_SIZE;
 
-    /*
     for (argc = 0; argv[argc]; argc++){
         if (argc > MAX_ARGC) {
             goto bad;
         }
         // "+1" leava room for '\0'  "&~3" align 4
-        sp = sp - (strlen(argv[argc]) + 1) & ~3;    
-    }
-    */
+        sp -= (strlen(argv[argc]) + 1) & ~3;    
+        pa -= (strlen(argv[argc]) + 1) & ~3;    
 
+        strcpy((char *)pa, argv[argc]);
+        ustack[3+argc] = sp;  // argv[argc]
+    }
+
+    ustack[3+argc] = 0;
+
+    ustack[0] = 0xffffffff;
+    ustack[1] = argc;   // count of arguments
+    ustack[2] = sp - (argc+1)*4;    // pointer of argv[0]
+
+    sp -= (3 + argc + 1)*4;
+    pa -= (3 + argc + 1)*4;
+    memcpy((void *)pa, ustack, (3 + argc + 1)*4);   // combine
 
     for (name = s = path; *s; s++){
         if (*s == '/'){
@@ -135,13 +150,15 @@ int exec(char *path){
     proc->fm->eip = eh.entry;
     proc->fm->user_esp = sp;
     uvm_switch(proc);
+
+    printl("exec: free old pgdir");
     uvm_free(old_pgdir);
     old_pgdir  = 0;
     old_pgdir ++;
     return 0;
 
 bad:
-    printl("exec: bad");
+    printl("exec: bad\n");
     if (pgdir){
         uvm_free(pgdir);
     }

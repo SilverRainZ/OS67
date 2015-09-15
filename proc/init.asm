@@ -8,18 +8,18 @@ align 4
 
 __init_start:
     nop     ; hava a rest~
-    mov eax, 1
-    int 0x80
-    cmp eax, 0
-    jz child
-    jmp $
-child:
-    push (msg_arg0 - $$) + 0xc0000000
+    push (msg_argv - $$) + 0xc0000000   ; arguments
+    push (msg_init - $$) + 0xc0000000   ; path
+    push 0  ; eip
     mov eax, 7  ; exec
     int 0x80
     jmp $
 
-msg_arg0:
+msg_init:
     db "/cinit", 0
+; char **argv = {'init', 0}
+msg_argv:
+    dd (msg_init - $$) + 0xc0000000
+    dd 0
 
 __init_end:
