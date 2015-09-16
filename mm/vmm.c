@@ -218,8 +218,6 @@ void uvm_free(pte_t *pgdir){
 
     i = PDE_INDEX(USER_BASE);
 
-    printl("uvm_free: form 0x%x to 0x%x\n", i << 22, PTE_COUNT << 22);
-
     for (; i < PTE_COUNT; i++){
         if (pgdir[i] & PTE_P){
             printl("uvm_free: free pte 0x%x\n", pgdir[i]);

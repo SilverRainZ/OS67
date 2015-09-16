@@ -1,4 +1,5 @@
 #define __LOG_ON 1
+
 // std
 #include <type.h>
 #include <asm.h>
@@ -304,7 +305,7 @@ int iread (struct inode *ip, char *dest, uint32_t off, uint32_t n){
         n = ip->size - off;
     }
 
-    printl("iread: inode-%d offset: %d read: %d\n", ip->ino, off, n);
+    printl("iread: inode-%d offset: 0x%x read: 0x%x\n", ip->ino, off, n);
     /*  tot: 已读取的字节数
      *  n: 要读取的字节数
      *  off: 当前文件指针偏移
@@ -333,7 +334,7 @@ int iwrite(struct inode *ip, char *src, uint32_t off, uint32_t n){
     uint32_t tot, m;
     struct buf *bp;
 
-    printl("iwrite: inode-%d offset: %d len: %d\n", ip->ino, off, n);
+    printl("iwrite: inode-%d offset: 0x%x len: 0x%x\n", ip->ino, off, n);
 
     /* if (ip->mode == T_DEV){
         // TODO
