@@ -101,7 +101,7 @@ loadloader:
     mov dh,0    ; head
     mov cl,2    ; sector
     mov dl,0x00 ; driver a:
-; kernel 在软gg盘的第35个扇区,0x4400,换算为c0-h1-s17
+; kernel locates after bootloader, which is the second sector
 
 readloop:
     mov si,0    ; err counter 
