@@ -1,3 +1,4 @@
+#define __LOG_ON 1
 // std
 #include <type.h>
 #include <dbg.h>
@@ -68,7 +69,7 @@ static struct inode *_path2inode(char *path, int parent, char *name){
             return 0;
         }
 
-        if (parent && *path != '\0'){
+        if (parent && *path == '\0'){
             iunlock(ip);
             return ip;
         }
