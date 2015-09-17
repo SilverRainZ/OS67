@@ -146,12 +146,12 @@ int exec(char *path, char **argv){
 
     old_pgdir = proc->pgdir;
     proc->pgdir = pgdir;
-    proc->size = sz;
+    proc->size = sz - USER_BASE;
     proc->fm->eip = eh.entry;
     proc->fm->user_esp = sp;
     uvm_switch(proc);
 
-    printl("exec: free old pgdir");
+    printl("exec: free old pgdir\n");
     uvm_free(old_pgdir);
     old_pgdir  = 0;
     old_pgdir ++;
