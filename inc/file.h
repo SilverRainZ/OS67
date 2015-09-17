@@ -25,6 +25,8 @@ struct file{
 void file_init();
 struct file *falloc();
 struct file *fdup();
+int fread(struct file *fp, char *addr, uint32_t n);
+int fwrite(struct file *fp, char *addr, uint32_t n);
 int fstat(struct file *fp, struct stat *st);
 void fclose(struct file *fp);
 

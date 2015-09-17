@@ -46,6 +46,7 @@ static int (*sys_routines[])(void) = {
 }; 
 int fetchint(uint32_t addr, int *ip){
 
+    printl("fetchint: size: 0x%x\n",proc->size);
     if (addr < USER_BASE 
             || addr > USER_BASE + proc->size 
             || addr + 4 > USER_BASE + proc->size){

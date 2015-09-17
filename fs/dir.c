@@ -1,3 +1,4 @@
+#define __LOG_ON 1
 // std
 #include <type.h>
 #include <dbg.h>
@@ -88,8 +89,10 @@ int dir_link(struct inode *dip, char *name, struct inode *fip){
 
 
     /* increase nlinks*/
+    /*
     fip->nlinks++;
     iupdate(fip);
+    */
 
     return OK;
 }
