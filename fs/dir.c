@@ -97,3 +97,22 @@ int dir_link(struct inode *dip, char *name, struct inode *fip){
     return OK;
 }
 
+/* is directory empty?
+ * only invoked when dip is locked */
+int dir_isempty(struct inode *dip){
+    uint32_t off;
+    struct dir_entry de;
+
+    assert(S_ISDIR(dip->mode), "dir_isempty: no dir");
+
+    /* skip "'."' and ".." */
+    for (off = 2*sizeof(de); off < dip->size; off += sizeof(de)){
+        if (iread(dip, (char *)&de, off, sizeof(de) != sizeof(de))){
+            panic("dir_isempty: read fault");
+        }
+        if (de.ino != 0) {
+            return 0;
+        }
+    }
+    return 1;
+}

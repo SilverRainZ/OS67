@@ -4,5 +4,6 @@
 extern int _fork();
 extern int _exit();
 extern int _link();
+extern int _unlink();
 
 #endif

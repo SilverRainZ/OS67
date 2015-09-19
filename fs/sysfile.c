@@ -1,9 +1,11 @@
 #define __LOG_ON 1
 // std
 #include <type.h>
+#include <dbg.h>
 #include <syscall.h>
 // libs
 #include <printk.h>
+#include <string.h>
 // proc
 #include <proc.h>
 // fs
@@ -113,6 +115,7 @@ int sys_fstat(){
     return fstat(f, st);
 }
 
+/* int _link(char *old, char *new); */
 int sys_link(){
     char name[NAME_LEN], *new, *old;
     struct inode *dp, *ip;
@@ -152,11 +155,75 @@ int sys_link(){
     iunlockput(ip);
 
     return 0;
+
 bad:
     printl("sys_link: bad\n");
     ip->nlinks--;
     iupdate(ip);
     iunlockput(ip);
+
+    return -1;
+}
+
+/* int _unlink(char *path) */
+int sys_unlink(){
+    uint32_t off;
+    char name[NAME_LEN], *path;
+    struct inode *ip, *dip;
+    struct dir_entry de;
+
+    if (argstr(0, &path) < 0){
+        return -1;
+    }
+    
+    printl("sys_unlink: unlink [%s]\n", path);
+
+    if ((dip = p2ip(path, name)) == 0){
+        return -1;
+    }
+
+    ilock(dip);
+    print_i(dip);
+
+    if (strcmp(name, ".") == 0 || strcmp(name, "..") == 0){
+        return -1;
+    }
+
+    if ((ip = dir_lookup(dip, name, &off)) == 0){
+        goto bad;
+    }
+
+    ilock(ip);
+    print_i(ip);
+
+    assert(ip->nlinks >= 1, "sys_unlink: nlinks < 1");
+
+    /* we do not link any directory, so directory's nlinks always be 2 (self and ".") */
+    if (S_ISDIR(ip->mode) && !dir_isempty(ip)){
+        iunlockput(ip);
+        goto bad;
+    }
+
+    memset(&de, 0, sizeof(de));
+    if (iwrite(dip, (char *)&de, off, sizeof(de)) != sizeof(de)){
+        panic("sys_unlink: wirte fault");
+    }
+
+    /* empty directory */
+    if (S_ISDIR(ip->mode)){
+        dip->nlinks--;   // for ip/..
+        iupdate(dip);
+    }
+    iunlockput(dip);
+
+    ip->nlinks--;
+    iupdate(ip);
+    iunlockput(ip);
+
+    return 0;
+
+bad:
+    iunlockput(dip);
 
     return -1;
 }
@@ -169,8 +236,5 @@ int sys_mkdir(){
     return 0;
 }
 int sys_chdir(){
-    return 0;
-}
-int sys_unlink(){
     return 0;
 }
