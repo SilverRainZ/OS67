@@ -1,6 +1,8 @@
+#define __LOG_ON 1
 // std
 #include <type.h>
 #include <dbg.h>
+#include <asm.h>
 // libs
 #include <printk.h>
 #include <string.h>
@@ -17,110 +19,72 @@
 #include <stat.h>
 
 void fs_test(){
+    struct inode *ip, *dip;
     printl("=== fs_test start ===\n");
 
-    /* iread() iwrite() 
-    struct inode *ip;
-    struct inode *dip;
-    char content[100];
-    int len;
-
-    ip = p2i("/README");
-    ilock(ip);
-    len = iread(ip, content, 0, ip->size);
-    iunlockput(ip);
-    printl("fs_test: read %d byte\n", len);
-    printl("fs_test: content: [%s]\n", content);
-
-    char write_test[] = "iwrite test :|\n";
-    ip = p2i("/bin/README");
-    ilock(ip);
-    len = iwrite(ip, write_test, 0, sizeof(write_test));
-    printl("fs_test: write %d byte\n", len);
-    len = iread(ip, content, 0, ip->size);
-    iunlockput(ip);
-
-    printl("fs_test: content: [%s]\n", content);
-    */
-
-    /* dir_link() dir_lookup() 
-    ip = p2i("/bin/README");
-    ilock(ip);
-    ip->nlinks++;
-
-    dip = p2i("/");
-    ilock(dip);
-    dir_link(dip, "README2",ip->ino);
-    iunlockput(dip);
-
-    iupdate(ip);
-    iunlockput(ip);
-    */
-
-    /** p2i()
-    ip = p2i("/bin/README1");
-    if (!ip){
-        printk("NO FOUND\n");
-    } **/
-
-    /* stat 
-    struct inode *ip;
-    ip = p2i("/bin/README");
-    ilock(ip);
-    if (S_ISDIR(ip->mode)) {
-        printk("/bin/README is no dir\n");
-    }
-    iunlockput(ip);
-
-    struct inode *dip;
-    dip = p2i("/bin");
-    ilock(dip);
-    if (S_ISDIR(dip->mode)) {
-        printk("bin DIR\n");
-    }
-    iunlockput(dip);
-    */
-
-    /*
-    // ========== new file 
-    struct inode *ip;
-    char content[] = "Here is a new file\n";
-
-    ip = ialloc(ROOT_DEV);
-    ilock(ip);
-    ip->mode |= S_IFREG;
-
-    iwrite(ip, content, ip->size, sizeof(content));
-
-    struct inode *dip = p2i("/");
-    ilock(dip);
-    dir_link(dip, "TEST", ip);
-
-    iunlockput(dip);
-    iunlockput(ip);
-    */
-    
-    /* 
-    // ========= new dir
-    struct inode *ip;
-    struct inode *dip;
+    printl("================ add a new directory `/bin`\n");
+    char dirname[] = "bin";
 
     ip = ialloc(ROOT_DEV);
     ilock(ip);
     ip->mode |= S_IFDIR;
+    ip->nlinks = 2; // "." and "/"
     iupdate(ip);
 
     dip = p2i("/");
     ilock(dip);
 
+    dip->nlinks++;
+
     dir_link(ip, ".", ip);
     dir_link(ip, "..", dip);
-    dir_link(dip, "dir", ip);
+    dir_link(dip, dirname, ip);
 
-    iunlockput(dip);
+    print_i(ip);
+    print_i(dip);
+
     iunlockput(ip);
-    */
+    iunlockput(dip);
 
+    printl("================ add a new file `/bin/fstest`\n");
+    char fname[] = "fstest";
+    char content[] = "fs_test\n";
+    ip = ialloc(ROOT_DEV);
+    ilock(ip);
+    ip->mode |= S_IFREG;
+    ip->nlinks = 1;
+    iwrite(ip, content, ip->size, sizeof(content));
+
+    dip = p2i("/bin");
+    ilock(dip);
+    dir_link(dip, fname, ip);
+
+    print_i(ip);
+    print_i(dip);
+    iunlockput(ip);
+    iunlockput(dip);
+
+    printl("================ delete file `/bin/fstest`\n");
+    char dname[NAME_LEN];
+    struct dir_entry de;
+    uint32_t off;
+
+    dip = p2ip("/bin/fstest", dname);
+    ilock(dip);
+    ip = dir_lookup(dip, dname, &off);
+    ilock(ip);
+
+    memset(&de, 0, sizeof(de));
+    iwrite(dip, (char *)&de, off, sizeof(de));
+    iupdate(dip);
+    ip->nlinks--;
+    iupdate(ip);
+
+    print_i(ip);
+    print_i(dip);
+    iunlockput(ip);
+    iunlockput(dip);
+    
     printl("=== fs_test end ===\n");
 }
 
