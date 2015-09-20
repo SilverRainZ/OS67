@@ -123,7 +123,7 @@ static void itrunc(struct inode *ip){
 
     /* free INDIRECT block */
     if (ip->zone[NDIRECT]){
-        printl("itrunc:  direct block\n");
+        printl("itrunc:  indirect block\n");
 
         bp = bread(ip->dev,ip->zone[NDIRECT]);
         zone2 = (uint16_t *)bp->data;
@@ -369,6 +369,8 @@ int iwrite(struct inode *ip, char *src, uint32_t off, uint32_t n){
 }
 
 void print_i(struct inode *ip){
+    int i;
+
     printl("print_i 0x%x\n", ip);
     printl("  ino: %d\n", ip->ino);
     printl("  ref: %d\n", ip->ref);
@@ -384,6 +386,14 @@ void print_i(struct inode *ip){
 
     printl("  size: %d\n", ip->size);
     printl("  nlinks: %d\n", ip->nlinks);
+
+    printl("  zones:\n");
+
+    for (i = 0; i < NDIRECT ; i++){
+        if (ip->zone[i]){
+            printl("        blk-%d\n", ip->zone[i]);
+        }
+    }
 }
 
 void istat(struct inode *ip, struct stat *st){

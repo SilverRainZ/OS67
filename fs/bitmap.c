@@ -2,6 +2,7 @@
  * alloc/free data_block/inode
  */
 // std
+#define __LOG_ON 1
 #include <type.h> 
 #include <dbg.h> 
 // libs
@@ -44,7 +45,7 @@ int balloc(uint16_t dev){
             m = 1 << (bi%8);
             if ((bp->data[bi/8] & m) == 0){ // This block is free
                 v_blkno = sb.fst_data_zone + b + bi - 1;
-                printl("balloc: alloc blk-%d\n", v_blkno);
+                printl("balloc: alloc blk-%d zmap blk-%d bi: %d\n", v_blkno, ZMAP_BLK(sb, b), bi);
 
                 bp->data[bi/8] |= m;
                 bwrite(bp);                 // mark this block as uesed in bitmap
@@ -56,7 +57,7 @@ int balloc(uint16_t dev){
         brelse(bp);
     }
     panic("balloc: out of blocks");
-    return ERROR;
+    return -1;
 }
 
 void bfree(uint16_t dev, uint16_t blkno){
@@ -64,18 +65,20 @@ void bfree(uint16_t dev, uint16_t blkno){
     struct super_block sb;
     uint32_t bi, m;
 
-    printl("bfree: free blk-%d\n", blkno);
-
     read_sb(dev, &sb);
 
     assert(blkno >= sb.fst_data_zone ,"bfree: free a non-data block");
     assert(blkno < sb.nzones, "bfree: block number out of range");
 
-    m = 1 << (blkno%8);
-    bi = blkno/8;
-    bp = bread(dev, ZMAP_BLK(sb, blkno - sb.fst_data_zone));  // 找到该block对应的bitmap所在的block
+    blkno -= sb.fst_data_zone - 1;
 
-    assert(bp->data[bi/8] & m, "bfree: freeing a non-free block");
+    bp = bread(dev, ZMAP_BLK(sb, blkno));  // 找到该block对应的bitmap所在的block
+
+    bi = blkno%BPB;
+    m = 1 << (bi%8);
+
+    printl("bfree: free blk-%d zmapblk-%d bi: %d\n", blkno, ZMAP_BLK(sb, blkno - sb.fst_data_zone), bi);
+    assert(bp->data[bi/8] & m, "bfree: freeing a free block");
 
     bp->data[bi/8] &= ~m;
     bwrite(bp);
