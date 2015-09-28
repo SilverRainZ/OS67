@@ -24,51 +24,74 @@
 #include <bcache.h>
 #include <inode.h>
 
+/* 好无聊 */
+static void print_ok(){
+    int i;
+    for (i = 27; i <= 80; i++){
+        putchar(' ');
+    }
+
+    putchar('[');
+    setcolor(COL_L_GREEN, COL_BLACK);
+    puts("OK");
+    setcolor(COL_L_GREY, COL_BLACK);
+    putchar(']');
+}
 int osmain(void)
 {
     vga_init();
 
+    puts("Installing GDT...     ");
     gdt_init();
-    puts("GDT installed...\n");
+    print_ok();
 
+    puts("Installing IDT...     ");
     idt_init();
-    puts("IDT installed...\n");
+    print_ok();
 
+    puts("Installing ISR...     ");
     isr_init();
-    puts("ISRs installed...\n");
+    print_ok();
 
-    setcolor(COL_D_GREY, COL_CYAN);
-    puts("Welcome to OS67...\n");
-    setcolor(COL_L_GREY, COL_BLACK);
-
+    puts("timer init...         ");
     timer_init(); 
-    puts("timer init...\n");
+    print_ok();
 
+    puts("pmm init...           ");
     pmm_init();
-    puts("pmm init...\n");
     pmm_mem_info();
+    print_ok();
     // pmm_test();
     
+    puts("vmm init...           ");
     vmm_init();
-    puts("vmm init...\n");
+    print_ok();
     // vmm_test();
     
+    puts("kb init...            ");
     kb_init();
-    puts("kb init...\n");
+    print_ok();
 
+    puts("ide init...           ");
     ide_init();
-    puts("ide init...\n");
+    print_ok();
     // ide_test();
 
+    puts("block cache init...   ");
     bcache_init();
-    puts("block cache init...\n");
+    print_ok();
 
+    puts("inode cache init...   ");
     inode_init();
-    puts("inode cache init...\n");
+    print_ok();
 
+    puts("porcess init...       ");
     proc_init();
-    puts("porcess init...\n");
+    print_ok();
 
+    setcolor(COL_CYAN, COL_BLACK);
+    puts("Welcome to OS67...\n");
+    setcolor(COL_L_GREY, COL_BLACK);
 
     scheduler();
     
