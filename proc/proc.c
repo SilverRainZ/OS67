@@ -100,6 +100,8 @@ void proc_init(){
     extern char __init_start;
     extern char __init_end;
 
+    cur_pid = 0;
+
     printl("proc_userinit: clear ptable\n");
 
     memset(ptable, 0, sizeof(struct proc) * NPROC);
@@ -110,7 +112,6 @@ void proc_init(){
 
     pp->pgdir = (pde_t *)pmm_alloc();
     printl("proc_userinit: get pgdir: 0x%x\n", pp->pgdir);
-
 
     kvm_init(pp->pgdir);
     vmm_map(pp->pgdir, (uint32_t)pp->kern_stack, (uint32_t)pp->kern_stack, PTE_P | PTE_R | PTE_K);
