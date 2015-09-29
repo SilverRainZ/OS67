@@ -1,6 +1,11 @@
 #ifndef __SYSFILE_H
 #define __SYSFILE_H
 
+#define O_RONLY     0x0
+#define O_WONLY     0x1
+#define O_RW        0x2
+#define O_CREATE    0x4
+
 int sys_open();
 int sys_write();
 int sys_read();
