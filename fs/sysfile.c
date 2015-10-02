@@ -3,6 +3,7 @@
 #include <type.h>
 #include <dbg.h>
 #include <syscall.h>
+#include <pipe.h>
 // libs
 #include <printk.h>
 #include <string.h>
@@ -365,6 +366,35 @@ int sys_chdir(){
     iunlock(ip);
     iput(proc->cwd);
     proc->cwd = ip;
+
+    return 0;
+}
+
+int sys_pipe(){
+    int *fd;
+    struct file *rf, *wf;
+    int fd0, fd1;
+ 
+    if (argptr(0, (void *)&fd, 2*sizeof(*fd)) < 0){
+        return -1;
+    }
+
+    printl("sys_pipe: ptr: 0x%x\n", fd);
+
+    if (pipe_alloc(&rf, &wf) < 0){
+        return -1;
+    }
+
+    if ((fd0 = fdalloc(rf)) < 0 || (fd1 = fdalloc(wf)) < 0){
+        if (fd >= 0){
+            proc->ofile[fd0] = 0;
+        }
+        fclose(rf);
+        fclose(wf);
+        return -1;
+    }
+    fd[0] = fd0;
+    fd[1] = fd1;
 
     return 0;
 }

@@ -18,8 +18,8 @@ void file_init(){
 }
 
 struct file *falloc(){
-
     int i;
+
     for (i = 0; i < NFILE; i++){
         if (ftable[i].ref == 0){
             ftable[i].ref = 1;
