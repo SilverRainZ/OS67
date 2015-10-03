@@ -69,10 +69,10 @@ init:
 
 default: Makefile
 	$(MAKE) bin/floppy.img
-	$(MAKE) bin/cinit
 
 # make a disk with minix v1 file system
 fs: $(UPROG)
+	$(MAKE) bin/cinit
 	$(DEL) bin/rootfs.img
 	bximage bin/rootfs.img -hd=10M -imgmode=flat -mode=create -q
 	mkfs.minix bin/rootfs.img -1 -n14
