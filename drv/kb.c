@@ -139,7 +139,7 @@ void kb_handler(struct int_frame *r){
 
     /* is a escape char? */
     if (KB_IS_ESCAPE(sc)){
-        printl("kb_handler: ESCAPT\n");
+        printl("kb_handler: ESCAPE\n");
         kb_mode |= E0ESC;
         return;
     } 
@@ -178,7 +178,8 @@ void kb_handler(struct int_frame *r){
 
     /* on release */
     if (KB_IS_RELEASE(sc)){
-        printl("kb_handler: release\n");
+        printl("kb_handler: release, clear E0ESC\n");
+        kb_mode &= ~E0ESC;
     } 
     /* on press */
     else if (ch != 0) {
