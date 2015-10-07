@@ -4,6 +4,8 @@
 // libs
 #include <printk.h>
 #include <string.h>
+// pipe
+#include <pipe.h>
 // fs
 #include <minix.h>
 #include <dir.h>
@@ -45,8 +47,7 @@ void fclose(struct file *fp){
     }
 
     if (fp->type == F_PIPE){
-        // TODO
-        panic("fread: no support");
+        pipe_close(fp->pipe, fp->writeable);
         return;
     }
     if (fp->type == F_INODE){
@@ -77,8 +78,7 @@ int fread(struct file *fp, char *addr, uint32_t n){
     }
 
     if (fp->type == F_PIPE){
-        // TODO
-        panic("fread: no support");
+        return pipe_read(fp->pipe, addr, n);
     }
 
     if (fp->type == F_INODE){
@@ -99,8 +99,7 @@ int fwrite(struct file *fp, char *addr, uint32_t n){
     }
 
     if (fp->type == F_PIPE){
-        // TODO
-        panic("fwrite: no support");
+        pipe_write(fp->pipe, addr, n);
     }
 
     if (fp->type == F_INODE){
@@ -115,5 +114,3 @@ int fwrite(struct file *fp, char *addr, uint32_t n){
     panic("fwrite: wrong type");
     return -1;
 }
-
-
