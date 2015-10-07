@@ -19,4 +19,6 @@ void pipe_close(struct pipe *p, int writeable);
 int pipe_write(struct pipe *p, char *addr, int n);
 int pipe_read(struct pipe *p, char *addr, int n);
 
+int pipe_push(struct pipe *p, char ch);
+char pipe_pop(struct pipe *p);
 #endif

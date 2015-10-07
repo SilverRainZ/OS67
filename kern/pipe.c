@@ -1,3 +1,4 @@
+// #define __LOG_ON 1
 // std
 #include <type.h>
 #include <dbg.h>
@@ -5,6 +6,7 @@
 #include <printk.h>
 // mm
 #include <pmm.h>
+#include <vmm.h>
 // fs
 #include <file.h>
 // pipe
@@ -12,28 +14,30 @@
 // proc
 #include <proc.h>
 
-int pipe_alloc(struct file **f0, struct file **f1){
+int pipe_alloc(struct file **fr, struct file **fw){
     struct pipe *p;
 
     p = 0; 
-    *f0 = *f1 = 0;
-    *f0 = falloc();
-    *f1 = falloc();
-    assert(*f0 || *f1,"pipe_alloc:");
+    *fr = *fw = 0;
+    *fr = falloc();
+    *fw = falloc();
+    assert(*fr || *fw,"pipe_alloc:");
 
     p = (struct pipe *)pmm_alloc();
 
     p->readopen = p->writeopen = 1;
     p->nread = p->nwrite = 0;
 
-    (*f0)->type = F_PIPE;
-    (*f0)->readable = 1;
-    (*f0)->writeable = 0;
-    (*f0)->pipe = p;
-    (*f1)->type = F_PIPE;
-    (*f1)->readable = 0;
-    (*f1)->writeable = 1;
-    (*f1)->pipe = p;
+    (*fr)->type = F_PIPE;
+    (*fr)->readable = 1;
+    (*fr)->writeable = 0;
+    (*fr)->pipe = p;
+    (*fw)->type = F_PIPE;
+    (*fw)->readable = 0;
+    (*fw)->writeable = 1;
+    (*fw)->pipe = p;
+
+    printl("pipe_alloc: pipe: 0x%x, file read: 0x%x, file write 0x%x\n", p, fr, fw);
 
     return 0;
 }
@@ -88,4 +92,31 @@ int pipe_read(struct pipe *p, char *addr, int n){
     wakeup(&p->nwrite);
 
     return i;
+}
+
+/* write one byte into pipe, only use in kb.c, return immediately after called */
+int pipe_push(struct pipe *p, char ch){
+    if (p->nwrite == p->nread + PIPE_SIZE){ // if full, return
+        printl("pipe_push: full\n");
+        return -1;
+    }
+    p->data[p->nwrite++ % PIPE_SIZE] = ch;
+
+    printl("pipe_push: pipe 0x%x, nread: %d, nwrite: %d, push: 0x%x\n", p, p->nread, p->nwrite, ch);
+    return 0;
+}
+
+/* write one byte into pipe, only use in timer.c, return immediately after called */
+char pipe_pop(struct pipe *p){
+    char ch;
+
+    if (p->nread == p->nwrite && p->writeopen){
+        printl("pipe_pop: empty\n");
+        return 0;
+    }
+
+    ch = p->data[p->nread++ % PIPE_SIZE];
+    printl("pipe_pop: pipe 0x%x, nread: %d, nwrite: %d, pop: 0x%x\n", p, p->nread, p->nwrite, ch);
+
+    return ch;
 }
