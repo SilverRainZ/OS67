@@ -310,8 +310,6 @@ int fork(){
         return -1;
     }
 
-    vmm_map(child->pgdir, (uint32_t)child->kern_stack, (uint32_t)child->kern_stack, PTE_P | PTE_R | PTE_K);
-
     printl("fork: copying attrib...\n");
     child->size = proc->size;
     child->parent = proc;
@@ -326,7 +324,6 @@ int fork(){
     }
 
     child->cwd = idup(proc->cwd);
-
     child->state = P_RUNABLE;
 
     strncpy(child->name, proc->name, sizeof(proc->name));

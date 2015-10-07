@@ -75,8 +75,6 @@ void vmm_map(pde_t *pgdir, uint32_t va, uint32_t pa, uint32_t flags){
     uint32_t pde_idx = PDE_INDEX(va);
     uint32_t pte_idx = PTE_INDEX(va);
 
-    // printl("map: map 0x%x to 0x%x, flag = 0x%x\n", pa, va, flags);
- 
     pte_t *pte = (pte_t *)(pgdir[pde_idx] & PAGE_MASK);
 
     if (!pte){
@@ -91,8 +89,6 @@ void vmm_map(pde_t *pgdir, uint32_t va, uint32_t pa, uint32_t flags){
     }
 
     pte[pte_idx] = (pa & PAGE_MASK) | PTE_P | flags;
-
-    vmm_reflush(va);
 }
 
 void vmm_unmap(pde_t *pde, uint32_t va){
@@ -123,7 +119,7 @@ int vmm_get_mapping(pde_t *pgdir, uint32_t va, uint32_t *pa){
     }
     if (pte[pte_idx] != 0 && (pte[pte_idx] & PTE_P) && pa){
         *pa = pte[pte_idx] & PAGE_MASK;
-        printl("get_mapping: virtual address 0x%x is mapped to 0x%x\n", va, pte[pte_idx] & PAGE_MASK);
+        printl("get_mapping: pgdir 0x%x virtual address 0x%x is mapped to 0x%x\n", pgdir, va, pte[pte_idx] & PAGE_MASK);
         return 1;
     }
     return 0;
@@ -150,10 +146,13 @@ void page_fault(struct int_frame *r){
     for (;;) hlt();
 }
 
-// build a map of kernel space for a process's page table
+/* build a map of kernel space and unalloc memory for a process's page table
+ * 这里简单地把从 0 到 0xc0000000 的所有内存（包含内核，未分配内存 和 不存在的内存）映射到页表中 */
 void kvm_init(pde_t *pgdir){
     uint32_t addr;
     // uint32_t limit = PAGE_ALIGN_UP((uint32_t)&kernend);
+
+    printl("kvm_init: pgdir: 0x%x\n", pgdir);
 
     assert(pgdir != 0, "kvm_init: null pgdir");
 
@@ -233,6 +232,8 @@ pde_t *uvm_copy(pte_t *pgdir, uint32_t size){
     uint32_t i, pa, mem;
 
     pgd = (pde_t *)pmm_alloc();
+    memset(pgd, 0, PAGE_SIZE);
+
     kvm_init(pgd);
 
     printl("uvm_copy: copy pgdir 0x%x -> 0x%x, size: %d\n",pgdir, pgd, size);
@@ -241,10 +242,10 @@ pde_t *uvm_copy(pte_t *pgdir, uint32_t size){
         assert(vmm_get_mapping(pgdir, USER_BASE + i, &pa),"uvm_copy: pte not exixt or no present");
 
         mem = pmm_alloc();
+        memcpy((void *)mem, (void *)pa, PAGE_SIZE);
 
         printl("uvm_copy: phyaddr: 0x%x -> 0x%x\n", pa, mem);
 
-        memcpy((void *)mem, (void *)pa, PAGE_SIZE);
         vmm_map(pgd, USER_BASE + i, mem, PTE_R | PTE_U | PTE_P); // TODO (?)
     }
     return pgd;
