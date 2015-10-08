@@ -20,6 +20,8 @@
 #include <vmm.h>
 // proc
 #include <proc.h>
+// pipe
+#include <pipe.h>
 // fs
 #include <bcache.h>
 #include <inode.h>
@@ -32,11 +34,12 @@ static void print_ok(){
     }
 
     putchar('[');
-    setcolor(COL_L_GREEN, COL_BLACK);
+    vga_setcolor(COL_L_GREEN, COL_BLACK);
     puts("OK");
-    setcolor(COL_L_GREY, COL_BLACK);
+    vga_setcolor(COL_L_GREY, COL_BLACK);
     putchar(']');
 }
+
 int osmain(void)
 {
     vga_init();
@@ -89,9 +92,9 @@ int osmain(void)
     proc_init();
     print_ok();
 
-    setcolor(COL_CYAN, COL_BLACK);
+    vga_setcolor(COL_CYAN, COL_BLACK);
     puts("Welcome to OS67...\n");
-    setcolor(COL_L_GREY, COL_BLACK);
+    vga_setcolor(COL_L_GREY, COL_BLACK);
 
     scheduler();
     

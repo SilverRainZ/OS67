@@ -12,50 +12,43 @@
 #include <vga.h>
 
 /* it is strange that i can't use 
- * char* vgamem = 0xb8000, 
+ * char* vga_mem = 0xb8000, 
  * it can only disp blank char */
-struct vga_char{
-    char _char: 8;
-    char f_color: 4;
-    char b_color: 4;
-};
-struct vga_char *vgamem;    // vga[25][80] 
+struct vga_char*vga_mem;    // vga[25][80] at 0xb800
 struct vga_char color;      // use vag_char structure to store color
 
-struct point_s cur;
+struct point cur;
 
-void move_cur(){
-    unsigned temp;
-    temp = cur.y * 80 + cur.x;
+static void move_cur(){
+    uint16_t tmp;
 
-    /* This sends a command to indicies 14 and 15 in the
-    *  CRT Control Register of the VGA controller. These
-    *  are the high and low bytes of the index that show
-    *  where the hardware cursor is to be 'blinking'. To
-    *  learn more, you should look up some VGA specific
-    *  programming documents. A great start to graphics:
-    *  http://www.brackeen.com/home/vga */
-    outb(0x3D4, 14);
-    outb(0x3D5, temp >> 8);
-    outb(0x3D4, 15);
-    outb(0x3D5, temp);
+    tmp = cur.y * 80 + cur.x;
+
+    /* cursor high port to vga index register */
+    outb(VGA_CRT_IC, 0xe);
+    outb(VGA_CRT_DC, tmp >> 8);
+    /* cursor low port to vga index register */
+    outb(VGA_CRT_IC, 0xf);
+    outb(VGA_CRT_DC, tmp);
 }
 
-void scroll(){
-    unsigned short blank = color._char|((color.b_color<<4)|color.f_color)<<8;
+static void scroll(){
+    uint16_t blank = color.ch | ((color.bc<<4)|color.fc)<<8;
+
     if (cur.y >= 25){   // it is strange, so be it temporarily  
-        memcpy (vgamem, vgamem + 80, 80*24*2);
-        memsetw((unsigned short *)vgamem + 80*24, blank, 80);
+        memcpy (vga_mem, vga_mem + 80, 80*24*2);
+        memsetw((uint16_t *)vga_mem + 80*24, blank, 80);
         cur.y--;
     }
 }
 
 void cls(){
     int x, y;
-    struct vga_char blank = {' ',COL_L_GREY,COL_BLACK};
+    struct vga_char blank = {' ', COL_L_GREY, COL_BLACK};
+
     for (y = 0; y < 25; y++){
         for (x = 0; x < 80; x++){
-            vgamem[y*80 + x] = blank;
+            vga_mem[y*80 + x] = blank;
         }
     }
     cur.x = cur.y = 0;
@@ -66,10 +59,10 @@ void vga_init(){
     cur.x = 0;
     cur.y = 5; // a ugly practice 
     move_cur();
-    vgamem = (struct vga_char *)0xb8000;
-    color._char = ' ';
-    color.f_color = COL_L_GREY;
-    color.b_color = COL_BLACK;
+    vga_mem = (struct vga_char *)0xb8000;
+    color.ch = ' ';
+    color.fc = COL_L_GREY;
+    color.bc = COL_BLACK;
 }
 
 void putchar(char ch){
@@ -81,14 +74,15 @@ void putchar(char ch){
         case '\n': cur.y = cur.y + 1; cur.x = 0; break;
         case '\b': cur.y -= (cur.x == 0)?1:0;
                    cur.x = (cur.x + 80 - 1)%80;
-                   vgamem[cur.y*80 + cur.x]._char = ' ';
-                   vgamem[cur.y*80 + cur.x].f_color = color.f_color;
-                   vgamem[cur.y*80 + cur.x].b_color = color.b_color;
+                   vga_mem[cur.y*80 + cur.x].ch = ' ';
+                   vga_mem[cur.y*80 + cur.x].fc = color.fc;
+                   vga_mem[cur.y*80 + cur.x].bc = color.bc;
                    break;
+        case '\t': do putchar(' '); while (cur.x % 4 != 0); break;
         default: {
-                     vgamem[cur.y*80 + cur.x]._char = ch;
-                     vgamem[cur.y*80 + cur.x].f_color = color.f_color;
-                     vgamem[cur.y*80 + cur.x].b_color = color.b_color;
+                     vga_mem[cur.y*80 + cur.x].ch = ch;
+                     vga_mem[cur.y*80 + cur.x].fc = color.fc;
+                     vga_mem[cur.y*80 + cur.x].bc = color.bc;
                      cur.y += (cur.x + 1)/80;
                      cur.x = (cur.x + 1)%80;
                  }
@@ -101,19 +95,20 @@ void puts(char *str){
     for (; *str != '\0'; str++) putchar(*str);
 }
 
-void setcolor(char f_color, char b_color){
-    if (f_color < 0||f_color > 16||b_color < 0||b_color > 16)
+void vga_setcolor(char fc, char bc){
+    if (fc < 0 || fc > 16 || bc < 0 || bc > 16){
         return;
-    color.f_color = f_color;
-    color.b_color = b_color;
+    }
+    color.fc = fc;
+    color.bc = bc;
 }
 
-struct point_s getcur(){
+struct point vga_getcur(){
     return cur;
 }
 
-void setcur(int x, int y){
-    if (x < 0||x >= 80||y < 0||y >= 25){
+void vga_setcur(int x, int y){
+    if (x < 0 || x >= 80||y < 0||y >= 25){
         return;
     }
     cur.x = x;
@@ -122,4 +117,3 @@ void setcur(int x, int y){
 
 void vga_test(){
 }
-

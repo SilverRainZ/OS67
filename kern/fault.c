@@ -127,8 +127,6 @@ void fault_init()
 }
 
 void fault_handler(struct int_frame *r){
-    setcolor(COL_RED, COL_BLACK);
-
     if (r->int_no < 32){
         printk("error code: %d\n", r->err_code);
         panic(fault_msg[r->int_no]);

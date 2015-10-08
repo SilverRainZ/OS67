@@ -43,7 +43,7 @@ void print_stack_trace(){
 }
 
 void panic(const char *msg){
-    setcolor(COL_L_RED, COL_BLACK);
+    vga_setcolor(COL_L_RED, COL_BLACK);
 
     if (proc){
         printk("proc: `%s`(PID: %d)\n",proc->name, proc->pid);

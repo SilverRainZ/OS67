@@ -18,16 +18,27 @@
 #define COL_L_BROWN 14
 #define COL_WHITE   15
 /* L_ == Light D_ == Dark */
-struct point_s{
+
+#define VGA_CRT_IC  0x3d4   // vga index register port
+#define VGA_CRT_DC  0x3d5   // vga data register port
+
+struct point{
     int x;
     int y;
 };
+
+struct vga_char{
+    char ch: 8;
+    char fc: 4; // foreground color
+    char bc: 4; // background color
+};
+
 void vga_init();
 void cls();
 void putchar_at(int x, int y, char ch);
 void putchar(char ch);
 void puts(char *str);
-void setcolor(char f_color, char b_color);
-struct point_s getcur();
-void setcur(int x, int y);
+void vga_setcolor(char f_color, char b_color);
+struct point vga_getcur();
+void vga_setcur(int x, int y);
 #endif
