@@ -15,9 +15,13 @@
 #include <bitmap.h>
 #include <inode.h>
 #include <stat.h>
+// dev
+#include <dev.h>
 
 /* inodes cache */
 static struct inode icache[NINODE];
+
+extern struct dev dtable[];  // extern variable form dev/dev.c, list of all device
 
 void inode_init(){
     memset(icache, 0, sizeof(struct inode)*NINODE);
@@ -287,13 +291,15 @@ void stati(struct inode *ip, struct stat *st){
 */
 
 /* read data from inode */
-int iread (struct inode *ip, char *dest, uint32_t off, uint32_t n){
+int iread(struct inode *ip, char *dest, uint32_t off, uint32_t n){
     uint32_t tot, m;
     struct buf *bp;
 
-    /* if (ip->mode == ){
-        // TODO
-    } */
+    /* is a char device? */
+    if (S_ISCHR(ip->mode)){
+        printl("iread: inode-%d is device %d, forward to 0x%x\n", ip->ino, ip->zone[0], dtable[ip->zone[0]].read);
+        return dtable[ip->zone[0]].read(ip, dest, n);
+    }
 
     /* 偏移过大 || 溢出*/
     if (off > ip->size || off + n < off){
@@ -334,11 +340,13 @@ int iwrite(struct inode *ip, char *src, uint32_t off, uint32_t n){
     uint32_t tot, m;
     struct buf *bp;
 
-    printl("iwrite: inode-%d offset: 0x%x len: 0x%x\n", ip->ino, off, n);
+    /* is a char device? */
+    if (S_ISCHR(ip->mode)){
+        printl("iwrite: inode-%d is device %d\n", ip->ino, ip->zone[0]);
+        return dtable[ip->zone[0]].write(ip, src, n);
+    }
 
-    /* if (ip->mode == T_DEV){
-        // TODO
-    } */
+    printl("iwrite: inode-%d offset: 0x%x len:a0x%x\n", ip->ino, off, n);
 
     if (off > ip->size || off + n < off ){
         panic("iwrite: incorrect offset or read length\n");

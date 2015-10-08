@@ -25,6 +25,8 @@
 // fs
 #include <bcache.h>
 #include <inode.h>
+// dev
+#include <dev.h>
 
 /* 好无聊 */
 static void print_ok(){
@@ -80,12 +82,20 @@ int osmain(void)
     print_ok();
     // ide_test();
 
-    puts("block cache init...   ");
+    puts("buffer cache init...  ");
     bcache_init();
     print_ok();
 
     puts("inode cache init...   ");
     inode_init();
+    print_ok();
+
+    puts("file table init...    ");
+    file_init();
+    print_ok();
+
+    puts("virtual device init...");
+    dev_init();
     print_ok();
 
     puts("porcess init...       ");

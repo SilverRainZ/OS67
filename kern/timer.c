@@ -1,3 +1,4 @@
+#define __LOG_ON 1
 /* timer.c 
  * This file is modified form Bram's Kernel Development Tutorial
  * enable programmable interval timer(PIT)
@@ -29,8 +30,6 @@ void timer_phase(int hz){
 } 
 
 void timer_handler(struct int_frame *r){
-    /* trigger when every 18 clocks (approximately 1 second)  */
-
     timer_ticks++;
 
     wakeup(&timer_ticks);

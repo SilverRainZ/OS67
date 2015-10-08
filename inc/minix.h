@@ -41,6 +41,7 @@ struct d_inode{
     uint8_t nlinks; // number of dircetory link to it
 
     /* zone[0] - zone[6] point to to direct blocks
+     * - for indoe which is virtual device, zone[0] used to store device index
      * zone[7] points to a indirect block table
      * zone[8]  points to a double indirect block table (unused)
      * so this file system's real max file size = (7 + 512) * 1024 byte = 519 kb

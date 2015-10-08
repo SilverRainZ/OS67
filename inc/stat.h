@@ -22,10 +22,11 @@
 
 #define S_ISREG(m)      (((m) & S_IFMT) == S_IFREG)     /* is a reg file */
 #define S_ISDIR(m)      (((m) & S_IFMT) == S_IFDIR)     /* is a directory */
-// #define S_ISCHR(m)      (((m) & S_IFMT) == S_IFCHR)     /* is a char spec */
+#define S_ISCHR(m)      (((m) & S_IFMT) == S_IFCHR)     /* is a char spec */
+/* all device are regard as char device */
 // #define S_ISBLK(m)      (((m) & S_IFMT) == S_IFBLK)     /* is a block spec */
 // #define S_ISLNK(m)      (((m) & S_IFMT) == S_IFLNK)     /* is a symlink */
-#define S_ISFIFO(m)     (((m) & S_IFMT) == S_IFIFO)     /* is a pipe/FIFO */
+// #define S_ISFIFO(m)     (((m) & S_IFMT) == S_IFIFO)     /* is a pipe/FIFO */
 
  struct stat {
      uint16_t dev;

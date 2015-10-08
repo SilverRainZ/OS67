@@ -1,4 +1,4 @@
-// #define __LOG_ON 1
+#define __LOG_ON 1
 // std
 #include <type.h>
 #include <dbg.h>
@@ -76,7 +76,11 @@ int pipe_write(struct pipe *p, char *addr, int n){
 int pipe_read(struct pipe *p, char *addr, int n){
     int i;
 
+    printl("pipe_read: pipe: 0x%x, addr: 0x%s, len: \n", p, addr, n);
+
     while (p->nread == p->nwrite && p->writeopen){  // pile is empty and writeable
+        printl("pipe_read: empty, wait\n");
+
         if (proc->killed){
             return -1;
         }
@@ -89,7 +93,6 @@ int pipe_read(struct pipe *p, char *addr, int n){
 
         addr[i] = p->data[p->nread++ % PIPE_SIZE];
     }
-    wakeup(&p->nwrite);
 
     return i;
 }
@@ -103,6 +106,9 @@ int pipe_push(struct pipe *p, char ch){
     p->data[p->nwrite++ % PIPE_SIZE] = ch;
 
     printl("pipe_push: pipe 0x%x, nread: %d, nwrite: %d, push: 0x%x\n", p, p->nread, p->nwrite, ch);
+
+    wakeup(&p->nread);
+
     return 0;
 }
 

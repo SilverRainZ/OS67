@@ -1,3 +1,4 @@
+#define __LOG_ON 1
 // std
 #include <type.h>
 #include <dbg.h>
@@ -73,15 +74,19 @@ int fstat(struct file *fp, struct stat *st){
 int fread(struct file *fp, char *addr, uint32_t n){
     int len = 0;
 
+    printl("fread: fp 0x%x, addr 0x%x, len %d ", fp, addr, n);
     if (!fp->readable){
-        return ERROR;
+        printl("no readable\n");
+        return -1;
     }
 
     if (fp->type == F_PIPE){
+        printl("type: F_PIPE\n");
         return pipe_read(fp->pipe, addr, n);
     }
 
     if (fp->type == F_INODE){
+        printl("type: F_INODE\n");
         ilock(fp->ip);
         if ((len = iread(fp->ip, addr, fp->off, n)) > 0){
             fp->off += len;

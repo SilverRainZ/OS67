@@ -23,7 +23,7 @@
 #include <pipe.h>
 
 static uint32_t kb_mode = 0;
-struct file *kb_bufin, *kb_bufout;
+extern struct file *con_bufin;  // extern variable form dev/con.c
 
 /* maybe scancode set 1 ?*/
 static char kb_map[128] = {
@@ -186,7 +186,7 @@ void kb_handler(struct int_frame *r){
         printl("kb_handler: char: [%c]\n", ch);
 
         /* write to kernel input buffer */
-        if (pipe_push(kb_bufin->pipe, ch) < 0){
+        if (pipe_push(con_bufin->pipe, ch) < 0){
             printl("kb: buffer overflow.\n");
         }
     }
@@ -194,5 +194,4 @@ void kb_handler(struct int_frame *r){
 
 void kb_init(){
     irq_install(IRQ_KB, kb_handler);
-    pipe_alloc(&kb_bufout, &kb_bufin);
 }
