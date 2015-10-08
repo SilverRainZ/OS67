@@ -11,6 +11,8 @@
 #include <dir.h>
 #include <p2i.h>
 #include <stat.h>
+// proc
+#include <proc.h>
 
 /* 抽取路径中的第一个名字, 返回余下部分 
  * skip the first elem of path, return this elem
@@ -55,8 +57,7 @@ static struct inode *_path2inode(char *path, int parent, char *name){
     if (*path == '/'){
         ip = iget(ROOT_DEV, ROOT_INO);
     } else {
-        // TODO
-        panic("namx: no pwd");
+        ip = proc->cwd;
     }     
 
     /* NB: 这里是检测 path 的地址而非 值 */
