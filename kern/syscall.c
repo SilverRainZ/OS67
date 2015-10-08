@@ -26,7 +26,7 @@ static int (*sys_routines[])(void) = {
     sys_wait,
     sys_exit,
     sys_none,   // sys_pipe(),
-    sys_none,   // sys_read(),
+    sys_read,
     sys_kill,
     sys_exec,
     sys_fstat,
@@ -35,10 +35,10 @@ static int (*sys_routines[])(void) = {
     sys_getpid,
     sys_none,   // sys_sbrk,
     sys_sleep,
-    sys_none,   // sys_uptime,
+    sys_uptime,
     sys_open,
     sys_write,
-    sys_none,   // sys_mknod,
+    sys_mknod,
     sys_unlink,
     sys_link,
     sys_mkdir,
@@ -122,7 +122,7 @@ void sys_init(){
 void syscall(){
     int cn;
 
-    printl("syscall: number: %d, form ring@%d\n", proc->fm->eax, proc->fm->cs&0x3);
+    printl(">>>>>>> syscall: number: %d, form ring@%d\n", proc->fm->eax, proc->fm->cs&0x3);
 
     cn = proc->fm->eax;
 

@@ -35,6 +35,8 @@ static int argfd(int n, int *pfd, struct file **pf){
     if (pf){
         *pf = f;
     }
+
+    printl("argfd: fd: %d, file 0x%x\n", fd, f);
     return 0;
 bad:
     printl("argfd: failed %d\n", n);
@@ -77,6 +79,7 @@ int sys_read(){
     if (argfd(0, 0, &f) < 0  || argint(2, &n) < 0 || argptr(1, &p, n) < 0){
         return -1;
     }
+    printl("sys_read: file 0x%x, dest: 0x%x, sz: %d\n", f, p, n);
 
     return fread(f, p, n);
 }
@@ -89,7 +92,6 @@ int sys_write(){
     if (argfd(0, 0, &f) < 0  || argint(2, &n) < 0 || argptr(1, &p, n) < 0){
         return -1;
     }
-
     return fwrite(f, p, n);
 }
 
@@ -229,7 +231,7 @@ bad:
     return -1;
 }
 
-static struct inode *create(char *path, uint16_t mode){
+static struct inode *create(char *path, uint16_t mode, int di){
     uint32_t off;
     struct inode *ip, *dip;
     char name[NAME_LEN];
@@ -266,6 +268,12 @@ static struct inode *create(char *path, uint16_t mode){
         if (dir_link(ip, ".", ip) < 0 || dir_link(ip, "..", dip) < 0){
             panic("create: dir_link: make . & ..");
         }
+    } 
+    
+    if (S_ISCHR(mode)){
+        /* device index */
+        ip->zone[0] = di;
+        iupdate(ip);
     }
 
     if (dir_link(dip, name, ip) < 0){
@@ -287,10 +295,10 @@ int sys_open(){
         return -1;
     }
 
-    printl("sys_open: path: [%s], mode: %d\n");
+    printl("sys_open: path: [%s], mode: %d\n", path, omode);
 
     if (omode & O_CREATE){
-       ip = create(path, S_IFREG);
+       ip = create(path, S_IFREG, 0);
        if (ip == 0){
            return -1;
        }
@@ -336,11 +344,31 @@ int sys_mkdir(){
 
     printl("sys_mkdir: path: [%s]\n", path);
 
-    if ((ip = create(path, S_IFDIR)) == 0){
+    if ((ip = create(path, S_IFDIR, 0)) == 0){
         return -1;
     }
     iunlockput(ip);
 
+    return 0;
+}
+
+/* make up a device file */
+int sys_mknod(){
+    struct inode *ip;
+    char *path;
+    int len, di;
+
+    if ((len = argstr(0, &path)) < 0 || argint(1, &di) < 0){
+        return -1;
+    }
+
+    printl("sys_mknod: path: [%s], device index: %d\n", path, di);
+
+    if ((ip = create(path, S_IFCHR, di)) == 0){
+            return -1;
+    }
+
+    iunlockput(ip);
     return 0;
 }
 
