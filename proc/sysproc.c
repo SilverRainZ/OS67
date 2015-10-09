@@ -71,8 +71,6 @@ int sys_getpid(){
     return proc->pid;
 }
 
-extern void pic_init();
-
 int sys_sleep(){
     int n, trick0;
 
@@ -95,9 +93,6 @@ int sys_sleep(){
     }
 
     printl("sys_sleep: proc `%s`(PID: %d) weakup, acutal time: %d0ms\n", proc->name, proc->pid, timer_ticks - trick0);
-
-    // yes, we call pic_init again... :(
-    pic_init();
     return 0;
 }
 

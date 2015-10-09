@@ -158,7 +158,6 @@ void scheduler(){
             }
 
             printl("scheduler: proc `%s`(PID: %d) will run\n", pp->name, pp->pid);
-            // printl("scheduler: switch pgdir & set tss\n"); 
 
             uvm_switch(pp);
             pp->state = P_RUNNING;
@@ -195,6 +194,9 @@ void sleep(void *chan){
     proc->chan = 0;
 
     printl("sleep: proc `%s`(PID: %d) is trying to wakeup...\n", proc->name, proc->pid);
+
+    // yes, we call pic_init again... :(
+    pic_init();
 }
 
 void wakeup(void *chan){
