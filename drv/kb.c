@@ -17,13 +17,10 @@
 #include <vga.h>
 // libs
 #include <printk.h>
-// fs
-#include <file.h>
-// pipe
-#include <pipe.h>
+// dev
+#include <con.h>
 
 static uint32_t kb_mode = 0;
-extern struct file *con_bufin;  // extern variable form dev/con.c
 
 /* maybe scancode set 1 ?*/
 static char kb_map[128] = {
@@ -166,6 +163,9 @@ void kb_handler(struct int_frame *r){
     if (kb_mode & CTRL){
         printl("kb_handler: CTRL\n");
         switch(ch){
+            case 'd': ch = CON_EOF; break;
+
+
             // TODO
             // console control char
         }
@@ -186,7 +186,7 @@ void kb_handler(struct int_frame *r){
         printl("kb_handler: char: [%c]\n", ch);
 
         /* write to kernel input buffer */
-        if (pipe_push(con_bufin->pipe, ch) < 0){
+        if (con_buf_in(ch) < 0){
             printl("kb: buffer overflow.\n");
         }
     }
