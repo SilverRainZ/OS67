@@ -63,6 +63,7 @@ int sys_dup(){
     if (argfd(0, 0, &f) < 0){
         return -1;
     }
+    printl("sys_dup: file 0x%x\n", f);
     if ((fd = fdalloc(f)) < 0){
         return -1;
     }

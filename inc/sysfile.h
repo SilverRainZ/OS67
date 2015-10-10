@@ -16,5 +16,6 @@ int sys_mknod();
 int sys_chdir();
 int sys_link();
 int sys_unlink();
+int sys_dup();
 
 #endif

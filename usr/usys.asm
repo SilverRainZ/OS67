@@ -10,7 +10,7 @@ sys_kill    EQU 6
 sys_exec    EQU 7
 sys_fstat   EQU 8
 sys_chdir   EQU 9
-sys_fdup    EQU 10
+sys_dup     EQU 10
 sys_getpid  EQU 11
 sys_sbrk    EQU 12
 sys_sleep   EQU 13
@@ -40,7 +40,7 @@ syscall _kill
 syscall _exec  
 syscall _fstat 
 syscall _chdir 
-syscall _fdup  
+syscall _dup  
 syscall _getpid
 syscall _sbrk  
 syscall _sleep 

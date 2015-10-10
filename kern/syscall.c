@@ -31,7 +31,7 @@ static int (*sys_routines[])(void) = {
     sys_exec,
     sys_fstat,
     sys_chdir,
-    sys_none,   // sys_fdup,
+    sys_dup,
     sys_getpid,
     sys_none,   // sys_sbrk,
     sys_sleep,
