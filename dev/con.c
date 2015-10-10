@@ -27,11 +27,10 @@ void con_init(){
 
 /* receive char form kb_hander, write to con_buf */
 int con_buf_in(char ch){
-    while (con_buf.nwrite == con_buf.nread + NCON_BUF){ // full
+    if (con_buf.nwrite == con_buf.nread + NCON_BUF){ // full
         if (proc->killed){
             return -1;
         }
-        wakeup(&con_buf.nread);
         return -1;
     }
     con_buf.buf[con_buf.nwrite++ % NCON_BUF] = ch;
@@ -47,9 +46,12 @@ int con_read(struct inode *ip, char *dest, uint32_t n){
 
     assert(ip, "con_read: null ip");
 
+    printl("con_read: inode-%d dest: 0x%x len: %d ", ip->ino, dest, n);
     while (n > 0){
-        while (con_buf.nread == con_buf.nwrite){    // empty
+        if (con_buf.nread == con_buf.nwrite){    // empty
+            printl(" empty ");
             if (proc->killed){
+                printl("fail\n");
                 return -1;      // TODO why (?)
             }
             sleep(&con_buf.nread);
@@ -70,6 +72,7 @@ int con_read(struct inode *ip, char *dest, uint32_t n){
         }
     }
 
+    printl("actually read: %d\n", ar - n);
     return ar - n;
 }
 
@@ -77,6 +80,8 @@ int con_write(struct inode *ip, char *src, uint32_t n){
     uint32_t i;
 
     assert(ip, "con_read: null ip");
+
+    printl("con_read: inode-%d src: 0x%x len: %d ", ip->ino, src, n);
 
     for (i = 0; i < n; i++){
         putchar(src[i]);
