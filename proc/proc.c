@@ -184,6 +184,7 @@ void sched(){
 void sleep(void *chan){
     assert(proc, "sleep: no proc");
 
+    printl("sleep: proc `%s`(PID: %d) is going to sleep...\n", proc->name, proc->pid);
     // go to sleep
     proc->chan = chan;
     proc->state = P_SLEEPING;
@@ -193,7 +194,7 @@ void sleep(void *chan){
     // wake up
     proc->chan = 0;
 
-    printl("sleep: proc `%s`(PID: %d) is trying to wakeup...\n", proc->name, proc->pid);
+    printl("sleep: proc `%s`(PID: %d)  wakeup...\n", proc->name, proc->pid);
 
     // yes, we call pic_init again... :(
     pic_init();
@@ -213,6 +214,7 @@ int wait(){
     uint8_t havekids, pid;
     struct proc* pp;
 
+    printl("wait: waiting...\n");
     for (;;){
         havekids = 0;
         for (pp = ptable; pp <= &ptable[NPROC]; pp++){
@@ -223,16 +225,21 @@ int wait(){
             havekids = 1;
             
             if (pp->state == P_ZOMBIE){
+                printl("wait: recycle proc `%s`(PID: %d)\n", pp->name, pp->pid);
                 // can be clear
                 pid = pp->pid;
+
+                /* free mem */
                 pmm_free((uint32_t)pp->kern_stack);
                 pp->kern_stack = 0;
-                // vm_free
+                uvm_free(pp->pgdir);
+
                 pp->state = P_UNUSED;
                 pp->pid = 0;
                 pp->parent = 0;
                 pp->name[0] = 0;
                 pp->killed = 0;
+
                 return pid;
             }
         }
@@ -252,6 +259,7 @@ void exit(){
 
     assert(proc != initproc, "exit: initproc can no exit");
 
+    printl("exit: closing opening file\n");
     for (fd = 0; fd < NOFILE; fd++){
         if (proc->ofile[fd]){
             fclose(proc->ofile[fd]);
@@ -262,13 +270,20 @@ void exit(){
     iput(proc->cwd);
     proc->cwd = 0;
 
+    wakeup(proc->parent);
+
+    printl("exit: collecting subprocess\n");
     for (pp = ptable; pp < &proc[NPROC]; pp++){
-        pp->parent = initproc;
-        if (pp->state == P_ZOMBIE){
-            wakeup(initproc);
+        if (pp->parent == proc){
+            pp->parent = initproc;
+            if (pp->state == P_ZOMBIE){
+                wakeup(initproc);
+            }
         }
     }
 
+
+    printl("exit: ZOMBIE\n");
     proc->state = P_ZOMBIE;
     sched();
     panic("exit: return form sched");
@@ -333,4 +348,3 @@ int fork(){
     printl("fork: done\n");
     return child->pid;
 }
-
