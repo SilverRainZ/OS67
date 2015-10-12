@@ -44,6 +44,33 @@ static int (*sys_routines[])(void) = {
     sys_mkdir,
     sys_close
 }; 
+
+/* syscall name for debug */
+static char *sys_name[NSYSCALL + 1] = {
+    "sys_none",
+    "sys_fork ",
+    "sys_exit",
+    "sys_wait",
+    "sys_pipe",
+    "sys_read",
+    "sys_kill",
+    "sys_exec",
+    "sys_fstat",
+    "sys_chdir",
+    "sys_dup ",
+    "sys_getpi",
+    "sys_sbrk",
+    "sys_sleep",
+    "sys_uptime",
+    "sys_open",
+    "sys_write",
+    "sys_mknod",
+    "sys_unlink",
+    "sys_link",
+    "sys_mkdir",
+    "sys_close"
+};
+
 int fetchint(uint32_t addr, int *ip){
 
     printl("fetchint: size: 0x%x\n",proc->size);
@@ -122,11 +149,11 @@ void sys_init(){
 void syscall(){
     int cn;
 
-    printl(">>>>>>> syscall: number: %d, form ring@%d\n", proc->fm->eax, proc->fm->cs&0x3);
+    printl(">>>>>>> syscall %s: number: %d, form ring@%d\n", sys_name[proc->fm->eax], proc->fm->eax, proc->fm->cs&0x3);
 
     cn = proc->fm->eax;
 
-    if (cn > 0 && cn < NSYSCALL && sys_routines[cn]){
+    if (cn > 0 && cn <= NSYSCALL && sys_routines[cn]){
         proc->fm->eax = sys_routines[cn]();
     } else {
         printl("syscall: no such syscall\n");
