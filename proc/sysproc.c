@@ -20,6 +20,7 @@ int sys_wait(){
 }
 
 int sys_exit(){
+    printl("sys_exit: proc `%s`(PID: %d) exit\n", proc->name, proc->pid);
     exit();
     return 0; // no reach
 }

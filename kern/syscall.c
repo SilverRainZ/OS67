@@ -23,8 +23,8 @@ int sys_none();
 static int (*sys_routines[])(void) = {
     sys_none,
     sys_fork,
-    sys_wait,
     sys_exit,
+    sys_wait,
     sys_none,   // sys_pipe(),
     sys_read,
     sys_kill,

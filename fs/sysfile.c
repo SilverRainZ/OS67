@@ -305,7 +305,7 @@ int sys_open(){
        }
     } else {
         if ((ip = p2i(path)) == 0){
-            printl("sys_open: file not exist"); 
+            printl("sys_open: file not exist\n"); 
             return -1;
         }
 
