@@ -46,12 +46,12 @@ int con_read(struct inode *ip, char *dest, uint32_t n){
 
     assert(ip, "con_read: null ip");
 
-    printl("con_read: inode-%d dest: 0x%x len: %d ", ip->ino, dest, n);
+    printl("con_read: inode-%d dest: 0x%x len: %d \n", ip->ino, dest, n);
     while (n > 0){
         if (con_buf.nread == con_buf.nwrite){    // empty
-            printl(" empty ");
+            printl("con_read: empty\n");
             if (proc->killed){
-                printl("fail\n");
+                printl("con_read: fail\n");
                 return -1;      // TODO why (?)
             }
             sleep(&con_buf.nread);
@@ -72,7 +72,7 @@ int con_read(struct inode *ip, char *dest, uint32_t n){
         }
     }
 
-    printl("actually read: %d\n", ar - n);
+    printl("con_read: actually read: %d\n", ar - n);
     return ar - n;
 }
 
@@ -81,7 +81,7 @@ int con_write(struct inode *ip, char *src, uint32_t n){
 
     assert(ip, "con_read: null ip");
 
-    printl("con_read: inode-%d src: 0x%x len: %d ", ip->ino, src, n);
+    printl("con_write: inode-%d src: 0x%x len: %d\n", ip->ino, src, n);
 
     for (i = 0; i < n; i++){
         putchar(src[i]);
