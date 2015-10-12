@@ -1,4 +1,4 @@
-#define __LOG_ON
+// #define __LOG_ON
 
 // std
 #include <type.h>

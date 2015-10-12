@@ -8,6 +8,13 @@ align 4
 
 __init_start:
     nop     ; hava a rest~
+    mov eax, 1
+    int 0x80    ; a free process is necessary
+    cmp eax, 0
+    jz child
+    jmp $
+
+child:
     push (msg_argv - $$) + 0xc0000000   ; arguments
     push (msg_init - $$) + 0xc0000000   ; path
     push 0  ; eip
