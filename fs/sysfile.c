@@ -116,6 +116,7 @@ int sys_fstat(){
     if (argfd(0, 0, &f) < 0 || argptr(1, (void *)&st, sizeof(st)) < 0){
         return -1;
     }
+    printl("sys_fstat: fp: 0x%x, istat: 0x%x\n", f, st);
     return fstat(f, st);
 }
 

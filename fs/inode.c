@@ -1,4 +1,4 @@
-#define __LOG_ON 1
+// #define __LOG_ON 1
 
 // std
 #include <type.h>
@@ -280,16 +280,6 @@ static uint32_t bmap(struct inode *ip, uint32_t bn){
     return zone1;
 }
 
-/*
-void stati(struct inode *ip, struct stat *st){
-    st->dev = ip->dev;
-    st->ino = ip->inum;
-    st->type = ip->type;
-    st->nlinks = ip->nlinks;
-    st->size = ip->size;
-}
-*/
-
 /* read data from inode */
 int iread(struct inode *ip, char *dest, uint32_t off, uint32_t n){
     uint32_t tot, m;
@@ -407,6 +397,6 @@ void print_i(struct inode *ip){
 void istat(struct inode *ip, struct stat *st){
     st->dev = ip->dev;
     st->mode = ip->mode;
-    st->ino = st->ino;
-    st->size = st->size;
+    st->ino = ip->ino;
+    st->size = ip->size;
 }
