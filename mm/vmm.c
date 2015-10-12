@@ -184,7 +184,6 @@ void uvm_switch(struct proc *pp){
     vmm_switch_pgd((uint32_t)pp->pgdir);
 }
 
-/* only work when pagetable = gpd_kern */
 int uvm_load(pte_t *pgdir, uint32_t addr, struct inode *ip, uint32_t off, uint32_t size){
     uint32_t i, n, pa;
 
@@ -196,7 +195,7 @@ int uvm_load(pte_t *pgdir, uint32_t addr, struct inode *ip, uint32_t off, uint32
         assert(vmm_get_mapping(pgdir, addr + i, &pa), "uvm_load: address no mapped");
 
         if (size - i < PAGE_SIZE){
-            n = size - 1;
+            n = size - i;
         } else {
             n = PAGE_SIZE;
         }
