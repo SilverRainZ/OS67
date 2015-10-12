@@ -102,10 +102,6 @@ int osmain(void)
     proc_init();
     print_ok();
 
-    vga_setcolor(COL_CYAN, COL_BLACK);
-    puts("Welcome to OS67...\n");
-    vga_setcolor(COL_L_GREY, COL_BLACK);
-
     scheduler();
     
     panic("you shouldn't see this :( \n");

@@ -8,9 +8,12 @@
 #define stdout  1 
 #define stderr  2
 
+#define CON_EOF     254
+#define CON_INT     255
+
 int uio_init();
 
-char getch(int fd);
+char getch();
 char getchar();
 int gets(char *str);
 

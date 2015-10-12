@@ -163,9 +163,8 @@ void kb_handler(struct int_frame *r){
     if (kb_mode & CTRL){
         printl("kb_handler: CTRL\n");
         switch(ch){
-            case 'd': ch = CON_EOF; break;
-
-
+            case 'd': printl("kb_handler: EOF\n"); ch = CON_EOF; break;
+            case 'c': printl("kb_handler: INT\n"); ch = CON_INT; break;
             // TODO
             // console control char
         }

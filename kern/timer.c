@@ -37,8 +37,10 @@ void timer_handler(struct int_frame *r){
     if (!proc) return;
 
     if (timer_ticks % 100 == 0){
-        sched();
+        printl("timer_handler: timer alive, trick: %d\n", timer_ticks);
     }
+
+    sched();
 }
 
 /* This will continuously loop until the given time has

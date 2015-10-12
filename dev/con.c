@@ -58,18 +58,8 @@ int con_read(struct inode *ip, char *dest, uint32_t n){
         }
         ch = con_buf.buf[con_buf.nread++ % NCON_BUF];
 
-        if (ch == CON_EOF){
-            if (n < ar){
-                con_buf.nread--;    // TODO (?)
-            }
-            break;
-        }
         *dest++ = ch;
         n--;
-
-        if (ch == '\n'){
-            break;
-        }
     }
 
     printl("con_read: actually read: %d\n", ar - n);

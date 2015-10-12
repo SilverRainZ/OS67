@@ -7,8 +7,8 @@
 #define NCON_BUF    512
 
 /* console control char */
-#define CON_INT     1
-#define CON_EOF     2
+#define CON_EOF     254
+#define CON_INT     255
 
 /* pipe-like sturcture */
 struct con_buf{

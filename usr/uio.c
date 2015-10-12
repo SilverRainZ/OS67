@@ -58,10 +58,10 @@ void printf(char *fmt, ...){
     puts(buf);
 }
 
-char getch(int fd){
+char getch(){
     char ch;
 
-    _read(fd, &ch, 1);
+    _read(stdin, &ch, 1);
 
     return ch;
 }
@@ -69,16 +69,41 @@ char getch(int fd){
 char getchar(){
     char ch;
 
-    ch = getch(stdin);
-    putchar(ch);
+    ch = getch();
+    if (ch != '\b' 
+            && ch != CON_EOF 
+            && ch != CON_INT){
+        putchar(ch);
+    }
 
     return ch;
 }
 
-int _gets(int fd, char *str){
-    return _read(fd, str, strlen(str));
-}
-
 int gets(char *str){
-    return _read(stdin, str, strlen(str));
+    char ch;
+    char *h = str;
+
+    while (1){
+        ch = getchar();
+        if (ch == CON_EOF){
+            ch = '\n';
+        }
+        if (ch == CON_INT){
+            return -1;
+        }
+        if (ch == '\n'){
+            break;
+        }
+        if (ch == '\b'){
+            if (str > h){
+                str--;
+                putchar(ch);
+            }
+            continue;
+        }
+        *str++ = ch;
+    }
+    *str++ = '\0';
+
+    return str - h;
 }
