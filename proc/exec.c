@@ -113,17 +113,20 @@ int exec(char *path, char **argv){
     }
     pa += PAGE_SIZE;
 
+    printl("exec: argv ");
     for (argc = 0; argv[argc]; argc++){
         if (argc > MAX_ARGC) {
             goto bad;
         }
+        printl("%d: %s ",argc, argv[argc]);
         // "+1" leava room for '\0'  "&~3" align 4
-        sp -= (strlen(argv[argc]) + 1) & ~3;    
-        pa -= (strlen(argv[argc]) + 1) & ~3;    
+        sp = (sp - strlen(argv[argc]) + 1) & ~3;    // sync with pa
+        pa = (pa - strlen(argv[argc]) + 1) & ~3;    
 
         strcpy((char *)pa, argv[argc]);
         ustack[3+argc] = sp;  // argv[argc]
     }
+    printl("\n");
 
     ustack[3+argc] = 0;
 
