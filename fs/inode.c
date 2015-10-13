@@ -248,36 +248,42 @@ void iunlockput(struct inode *ip){
  * if not such  block, alloc one
  */
 static uint32_t bmap(struct inode *ip, uint32_t bn){
-    uint32_t zone1, *zones2;
+    uint16_t zno;
+    uint16_t *zone2;
     struct buf *bp;
 
     assert(bn < NDIRECT + NINDIRECT,"bmap: out of range");
 
     if (bn < NDIRECT){
-        if ((zone1 = ip->zone[bn]) == 0) {
-           zone1 = ip->zone[bn] = balloc(ip->dev);
+        if ((zno = ip->zone[bn]) == 0) {
+            zno = ip->zone[bn] = balloc(ip->dev);
+            printl("bmap: zone-%d no exist, alloc blk-%d\n", bn, zno);
         }
-        printl("bmap: inode-%d zone num: %d, return direct blk-%d\n", ip->ino, bn, zone1);
-        return zone1;
+        printl("bmap: inode-%d zone-%d, return direct blk-%d\n", ip->ino, bn, zno);
+        return zno;
     }
 
     bn -= NDIRECT; 
 
-    if ((zone1 = ip->zone[NDIRECT]) == 0){
-        zone1 = ip->zone[NDIRECT] = balloc(ip->dev);
+    if ((ip->zone[NDIRECT]) == 0){
+        ip->zone[NDIRECT] = balloc(ip->dev);
+        printl("bmap: INDIRECT zones no exist, alloc blk-%d\n", ip->zone[NDIRECT]);
     }
 
-    bp = bread(ip->dev, ip->zone[NDIRECT]);
-    zones2 = (uint32_t *)bp->data;
+    printl("bmap: read INDIRECT zones table blk-%d\n", ip->zone[NDIRECT]);
 
-    if ((zone1 = zones2[bn]) == 0){
-        zones2[bn] = balloc(ip->dev);
+    bp = bread(ip->dev, ip->zone[NDIRECT]);
+    zone2 = (uint16_t *)bp->data;
+
+    if ((zno = zone2[bn]) == 0){
+        zno = zone2[bn] = balloc(ip->dev);
         bwrite(bp);
+        printl("bmap: zone-%d no exist, alloc INDIRECT blk-%d\n", bn + NDIRECT, zno);
     }
 
     brelse(bp);
-    printl("bmap: return indirect blk-%d\n", zone1);
-    return zone1;
+    printl("bmap: inode-%d, zone-%d, return INDIRECT blk-%d\n", ip->ino, bn + NDIRECT, zno);
+    return zno;
 }
 
 /* read data from inode */
@@ -298,6 +304,7 @@ int iread(struct inode *ip, char *dest, uint32_t off, uint32_t n){
     }
 
     if (off + n > ip->size){
+        printl("iread: off + n > size, ignore\n");
         n = ip->size - off;
     }
 
@@ -318,6 +325,7 @@ int iread(struct inode *ip, char *dest, uint32_t off, uint32_t n){
         /* 从当前偏移相对于该扇区的偏移处起开始读取
          * (在中间的循环这个值常常是0) 
          */
+        printl("iread: read off 0x%x len %d\n", off%BSIZE, m);
         memcpy(dest, bp->data + off%BSIZE, m);
         brelse(bp);
     }
