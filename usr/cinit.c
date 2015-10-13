@@ -18,7 +18,7 @@ int main(){
     }
 
     if (_wait() < 0) goto bad;
-    puts("sh exit\n");
+    puts("shell exit.\n");
     for (;;);
 
 bad:    

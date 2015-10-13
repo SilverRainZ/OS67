@@ -87,6 +87,7 @@ int gets(char *str){
         ch = getchar();
         if (ch == CON_EOF){
             ch = '\n';
+            putchar(ch);
         }
         if (ch == CON_INT){
             return -1;
