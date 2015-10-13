@@ -77,7 +77,7 @@ int exec(char *path, char **argv){
     printl("exec: load program section to memory\n");
 
     // load program to memory
-    sz = 0;
+    sz = USER_BASE;
     for (i = 0, off = eh.phoff; i < eh.phnum; i++, off += sizeof(ph)){
         if (iread(ip, (char *)&ph, off, sizeof(ph)) != sizeof(ph)){
             goto bad;
@@ -89,7 +89,7 @@ int exec(char *path, char **argv){
         if (ph.memsz < ph.filesz){
             goto bad;
         }
-        if ((sz = uvm_alloc(pgdir, sz + USER_BASE, ph.vaddr + ph.memsz)) == 0){
+        if ((sz = uvm_alloc(pgdir, sz, ph.vaddr + ph.memsz)) == 0){
             goto bad;
         }
         if (uvm_load(pgdir, ph.vaddr, ip, ph.off, ph.filesz) < 0){
