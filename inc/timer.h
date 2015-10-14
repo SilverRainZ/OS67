@@ -11,5 +11,4 @@
 extern uint32_t timer_ticks;
 
 void timer_init();
-void timer_wait();
 #endif

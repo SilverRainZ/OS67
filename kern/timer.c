@@ -43,14 +43,6 @@ void timer_handler(struct int_frame *r){
     sched();
 }
 
-/* This will continuously loop until the given time has
- *  been reached */
-void timer_wait(int ticks){
-    unsigned long eticks;
-    eticks = timer_ticks + ticks;
-    while(timer_ticks < eticks);
-}
-
 /* Sets up the system clock by installing the timer handler
  *  into IRQ0 */
 void timer_init(){

@@ -18,7 +18,7 @@ OBJS = bin/loader.o \
 	   bin/gdt.o bin/idt.o \
 	   bin/isr.o bin/irq.o bin/fault.o bin/syscall.o \
 	   bin/vga.o bin/kb.o bin/ide.o \
-	   bin/string.o	bin/queue.o bin/vsprint.o bin/printk.o \
+	   bin/string.o bin/vsprint.o bin/printk.o \
 	   bin/pmm.o bin/vmm.o \
 	   bin/bcache.o bin/sb.o bin/bitmap.o bin/inode.o \
 	   bin/dir.o bin/p2i.o bin/fstest.o bin/file.o bin/sysfile.o \

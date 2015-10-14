@@ -13,8 +13,6 @@
 #include <asm.h>
 // x86
 #include <isr.h>
-//mm
-#include <heap.h>
 // libs
 #include <string.h>
 #include <printk.h>
