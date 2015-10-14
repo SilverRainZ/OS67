@@ -31,10 +31,15 @@ extern uint8_t kernend;
 
 static uint32_t pmm_stack[PAGE_MAX_SIZE + 1];
 static uint32_t pmm_stack_top = 0;     // top of stack
-uint32_t pmm_count = 0;
+static uint32_t pmm_count = 0;
+static uint32_t mem_size = 0;
+
+
+uint32_t pmm_get_mem_sz(){
+    return mem_size;
+}
 
 void pmm_mem_info(){
-#define DEBUG 1
     printl("=== display memory info start ===\n");
     printl("MEMORY: 1, RESERVED: 2, UNDEFINE: 3\n");
 
@@ -83,6 +88,8 @@ void pmm_init(){
 
            uint32_t addr = ((uint32_t)&kernend + PMM_PAGE_SIZE) & 0xfffff000;
            uint32_t limit = ARD_entry[i].base_addr_low + ARD_entry[i].len_low;
+
+           mem_size = limit;
 
            while (addr < limit && addr <= PMM_MAX_SIZE){
                //pmm_free(addr);

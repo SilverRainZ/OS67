@@ -156,7 +156,7 @@ void kvm_init(pde_t *pgdir){
 
     assert(pgdir != 0, "kvm_init: null pgdir");
 
-    for (addr = 0; addr < USER_BASE; addr += PAGE_SIZE){
+    for (addr = 0; addr < pmm_get_mem_sz(); addr += PAGE_SIZE){
         vmm_map(pgdir, addr, addr, PTE_P | PTE_R | PTE_K);
     }
 }
