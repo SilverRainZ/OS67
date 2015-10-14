@@ -25,10 +25,11 @@ OBJS = bin/loader.o \
 	   bin/init.o bin/proc.o bin/sysproc.o bin/exec.o \
 	   bin/pipe.o bin/dev.o bin/con.o
 
-UOBJ_CINIT = bin/cinit.o bin/usys.o bin/uio.o bin/string.o bin/vsprint.o
-UOBJ_SH = bin/sh.o bin/usys.o bin/uio.o bin/string.o bin/vsprint.o
+UDEPS = bin/usys.o bin/uio.o bin/string.o bin/vsprint.o
 
-UPROGS = bin/cinit bin/sh
+UOBJS = $(UPROGS:%=%.o)
+
+UPROGS =  bin/cinit bin/sh bin/cat bin/ls
 
 # create a 1.44MB floppy include kernel and bootsector
 bin/floppy.img: boot/floppy.asm bin/bootsect.bin bin/kernel 
@@ -58,11 +59,9 @@ bin/%.o: */%.c
 bin/usys.o: usr/usys.asm
 	$(AS) -f elf32 -g -F stabs -l lst/usys.s $< -o $@ 
 
-bin/cinit: $(UOBJ_CINIT)
-	$(LD) -e main -Ttext 0xc0000000 -melf_i386 -static -o $@ $+
+$(UPROGS): $(UDEPS)
+	$(LD) -e main -Ttext 0xc0000000 -melf_i386 -static $+ $@.o -o $@ 
 
-bin/sh: $(UOBJ_SH)
-	$(LD) -e main -Ttext 0xc0000000 -melf_i386 -static -o $@ $+
 #----------------------------------------
 
 init:
@@ -75,17 +74,15 @@ default: Makefile
 	$(MAKE) bin/floppy.img
 
 # make a disk with minix v1 file system
-fs: $(UPROG)
-	$(MAKE) bin/cinit
-	$(MAKE) bin/sh
+fs: $(UOBJS) $(UDEPS)
+	for i in $(UPROGS); do $(MAKE) $$i; done
 	$(DEL) bin/rootfs.img
 	bximage bin/rootfs.img -hd=10M -imgmode=flat -mode=create -q
 	mkfs.minix bin/rootfs.img -1 -n14
 	sudo mount -o loop -t minix bin/rootfs.img /mnt/fs
 	sudo cp usr/README /mnt/fs/
-	sudo cp bin/cinit /mnt/fs
-	sudo cp bin/sh /mnt/fs
 	sudo cp usr/logo.txt /mnt/fs
+	for i in $(UPROGS); do sudo cp $$i /mnt/fs; done
 	sleep 1
 	sudo umount /mnt/fs
 
