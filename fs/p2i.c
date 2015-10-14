@@ -57,7 +57,7 @@ static struct inode *_path2inode(char *path, int parent, char *name){
     if (*path == '/'){
         ip = iget(ROOT_DEV, ROOT_INO);
     } else {
-        ip = proc->cwd;
+        ip = idup(proc->cwd);
     }     
 
     /* NB: 这里是检测 path 的地址而非 值 */
