@@ -58,7 +58,7 @@ int exec(char *path, char **argv){
     // exception handle pgdir
     //
     if ((ip = p2i(path)) == 0){
-        return -1;
+        goto bad;
     }
     ilock(ip);
 
@@ -145,6 +145,7 @@ int exec(char *path, char **argv){
     }
     printl("exec: prepare for new process `%s`\n", name);
 
+    cli();  // 不清楚此处是否会有死锁或冲突的风险， 反正关中断也不要钱
     strncpy(proc->name, name, sizeof(proc->name));
 
     old_pgdir = proc->pgdir;
@@ -158,6 +159,8 @@ int exec(char *path, char **argv){
     uvm_free(old_pgdir);
     old_pgdir  = 0;
     old_pgdir ++;
+    sti();
+
     return 0;
 
 bad:

@@ -153,6 +153,7 @@ void scheduler(){
 
     for (;;){
         for (pp = &ptable[0]; pp < &ptable[NPROC]; pp++){
+            cli();  // 不清楚此处是否会有死锁或冲突的风险， 反正关中断也不要钱
             if (pp->state != P_RUNABLE){
                 continue;
             }
@@ -167,6 +168,7 @@ void scheduler(){
             printl(">>>> context switch\n");
             context_switch(&cpu_context, pp->context);
             printl("<<<< return form proc `%s`(PID: %d)\n", pp->name, pp->pid);
+            sti();
         }
     }
 }
@@ -177,7 +179,6 @@ void sched(){
     if (proc->state == P_RUNNING){
         proc->state = P_RUNABLE;
     }
-
     context_switch(&proc->context, cpu_context);
 }
 
@@ -185,9 +186,16 @@ void sleep(void *chan){
     assert(proc, "sleep: no proc");
 
     printl("sleep: proc `%s`(PID: %d) is going to sleep...\n", proc->name, proc->pid);
-    // go to sleep
+    /* go to sleep
+     * NB: This operation MUST be atomic
+     * 这是一处确定有死锁风险的代码，当 chan 赋值后，如果父进程的 wait 马上执行，
+     * 那么 wait 将因为找不到任何需要唤醒的进程而退出，此后本进程才进入 P_SLEEPING 状态。 
+     * 只是这时已经没有进程能够唤醒它了。
+     */
+    cli();
     proc->chan = chan;
     proc->state = P_SLEEPING;
+    sti();
 
     sched();
 
@@ -270,6 +278,7 @@ void exit(){
     iput(proc->cwd);
     proc->cwd = 0;
 
+    cli();
     wakeup(proc->parent);
 
     printl("exit: collecting subprocess\n");
@@ -282,9 +291,10 @@ void exit(){
         }
     }
 
-
     printl("exit: ZOMBIE\n");
     proc->state = P_ZOMBIE;
+    sti();
+
     sched();
     panic("exit: return form sched");
 }
@@ -341,9 +351,9 @@ int fork(){
     }
 
     child->cwd = idup(proc->cwd);
-    child->state = P_RUNABLE;
-
     strncpy(child->name, proc->name, sizeof(proc->name));
+
+    child->state = P_RUNABLE;
 
     printl("fork: done\n");
     return child->pid;
