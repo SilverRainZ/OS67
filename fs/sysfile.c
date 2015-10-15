@@ -390,6 +390,8 @@ int sys_chdir(){
 
     ilock(ip);
     if (!S_ISDIR(ip->mode)){
+        printl("sys_chdir: no directory\n");
+        iunlock(ip);
         return -1;
     }
 
