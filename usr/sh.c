@@ -92,7 +92,7 @@ int main(int _argc, char **_argv){
                 printf("cd: missing directory.\n");
             } else {
                 if (_chdir(argv[1]) < 0){
-                    printf("cd: can not change directroy to %s", argv[1]);
+                    printf("cd: can not change directroy to %s\n", argv[1]);
                 }
             }
         } else {

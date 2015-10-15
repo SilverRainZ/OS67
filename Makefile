@@ -29,7 +29,7 @@ UDEPS = bin/usys.o bin/uio.o bin/string.o bin/vsprint.o
 
 UOBJS = $(UPROGS:%=%.o)
 
-UPROGS =  bin/cinit bin/sh bin/cat bin/ls
+UPROGS =  bin/cinit bin/sh bin/cat bin/ls bin/pwd
 
 # create a 1.44MB floppy include kernel and bootsector
 bin/floppy.img: boot/floppy.asm bin/bootsect.bin bin/kernel 
@@ -82,6 +82,7 @@ fs: $(UOBJS) $(UDEPS)
 	sudo mount -o loop -t minix bin/rootfs.img /mnt/fs
 	sudo cp usr/README /mnt/fs/
 	sudo cp usr/logo.txt /mnt/fs
+	sudo cp -r usr /mnt/fs
 	for i in $(UPROGS); do sudo cp $$i /mnt/fs; done
 	sleep 1
 	sudo umount /mnt/fs

@@ -40,7 +40,7 @@ int main(int argc, char **argv){
 
     while (st.size){
         if (_read(fd, (char *)&de, sizeof(de)) != sizeof(de)){
-            printf("cat: read fault\n", dir);
+            printf("cat: read fault\n");
             goto exit;
         }
         puts(de.name);

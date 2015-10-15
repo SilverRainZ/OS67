@@ -34,7 +34,7 @@ int main(int argc, char **argv){
     for (i = 0; i < st.size; i += CAT_BUF){
         n = CAT_BUF < st.size - i ? CAT_BUF : st.size - i;
         if (_read(fd, buf, n) != n){
-            printf("cat: read fault\n", argv[1]);
+            printf("cat: read fault\n");
             goto exit;
         }
         puts(buf);
