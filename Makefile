@@ -1,6 +1,8 @@
 # makefile
 
 .PHONY: init install run fs bochs qemu clean log count
+.IGNORE: init
+
 MAKE = make -r
 AS = nasm
 CC = gcc
@@ -13,17 +15,17 @@ OBJCPY = objcopy
 CFLAGS = -c -O0 -Wall -Werror -nostdinc -fno-builtin -fno-stack-protector -funsigned-char \
 		 -finline-functions -finline-small-functions -findirect-inlining \
 		 -finline-functions-called-once -Iinc -m32 -ggdb -gstabs+ 
+ROOTFS = bin/rootfs
 OBJS = bin/loader.o \
 	   bin/main.o bin/dbg.o bin/timer.o bin/asm.o \
-	   bin/gdt.o bin/idt.o \
-	   bin/isr.o bin/irq.o bin/fault.o bin/syscall.o \
+	   bin/gdt.o bin/idt.o bin/isr.o bin/irq.o bin/fault.o bin/syscall.o \
 	   bin/vga.o bin/kb.o bin/ide.o \
 	   bin/string.o bin/vsprint.o bin/printk.o \
 	   bin/pmm.o bin/vmm.o \
-	   bin/bcache.o bin/sb.o bin/bitmap.o bin/inode.o \
-	   bin/dir.o bin/p2i.o bin/fstest.o bin/file.o bin/sysfile.o \
+	   bin/bcache.o bin/sb.o bin/bitmap.o bin/inode.o bin/dir.o bin/p2i.o bin/fstest.o bin/file.o bin/sysfile.o \
 	   bin/init.o bin/proc.o bin/sysproc.o bin/exec.o \
-	   bin/pipe.o bin/dev.o bin/con.o
+	   bin/pipe.o \
+	   bin/dev.o bin/con.o
 
 UDEPS = bin/usys.o bin/uio.o bin/string.o bin/vsprint.o
 
@@ -59,33 +61,33 @@ bin/%.o: */%.c
 bin/usys.o: usr/usys.asm
 	$(AS) -f elf32 -g -F stabs -l lst/usys.s $< -o $@ 
 
-$(UPROGS): $(UDEPS)
-	$(LD) -e main -Ttext 0xc0000000 -melf_i386 -static $+ $@.o -o $@ 
+$(UPROGS): script/ulink.ld $(UDEPS) $(UBOJS)
+	$(LD) -T$< -melf_i386 -static $+ $@.o -o $@ 
 
 #----------------------------------------
 
 init:
-	sudo mkdir /mnt/kernel
-	sudo mkdir /mnt/fs
 	mkdir lst
 	mkdir bin
+	mkdir $(ROOTFS)
 
 default: Makefile
 	$(MAKE) bin/floppy.img
 
 # make a disk with minix v1 file system
-fs: $(UOBJS) $(UDEPS)
+fs: $(UPROGS)
 	for i in $(UPROGS); do $(MAKE) $$i; done
 	$(DEL) bin/rootfs.img
 	bximage bin/rootfs.img -hd=10M -imgmode=flat -mode=create -q
 	mkfs.minix bin/rootfs.img -1 -n14
-	sudo mount -o loop -t minix bin/rootfs.img /mnt/fs
-	sudo cp usr/README /mnt/fs/
-	sudo cp usr/logo.txt /mnt/fs
-	sudo cp -r usr /mnt/fs
-	for i in $(UPROGS); do sudo cp $$i /mnt/fs; done
+	sudo mount -o loop -t minix bin/rootfs.img $(ROOTFS)
+	cp usr/README $(ROOTFS) 
+	mkdir $(ROOTFS)/bin
+	mkdir $(ROOTFS)/share
+	cp usr/logo.txt $(ROOTFS)/share
+	for i in $(UPROGS); do cp $$i $(ROOTFS)/bin; done
 	sleep 1
-	sudo umount /mnt/fs
+	sudo umount $(ROOTFS)
 
 # check root file system
 fsck:

@@ -23,7 +23,7 @@ child:
     jmp $
 
 msg_init:
-    db "/cinit", 0
+    db "/bin/cinit", 0
 ; char **argv = {'init', 0}
 msg_argv:
     dd (msg_init - $$) + 0xc0000000

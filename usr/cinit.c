@@ -10,7 +10,7 @@ int main(){
 
     int pid = _fork();
     if (pid == 0){
-        if (_exec("/sh", argv) < 0){
+        if (_exec("/bin/sh", argv) < 0){
             goto bad;
         }
     } else if (pid < 0){

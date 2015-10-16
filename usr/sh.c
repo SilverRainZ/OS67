@@ -2,14 +2,16 @@
 #include <uio.h>
 #include <string.h>
 
-#define LEN_CMD  100
+#define LEN_CMD  128
 #define MAX_ARGC 20
 
+char *path  = "/bin/";
 
 int getcmd(char *cmd){
     int len;
+
     printf("$ ");
-    if ((len = gets(cmd)) < 0) return -1;
+    if ((len = gets(cmd, LEN_CMD)) < 0) return -1;
     return len;
 }
 
@@ -44,7 +46,7 @@ void welcome(){
     int fd;
     char logo[150] = "";
 
-    if ((fd = _open("/logo.txt", O_RONLY)) < 0){
+    if ((fd = _open("/share/logo.txt", O_RONLY)) < 0){
         puts("Fail to open /logo.txt\n");
         goto bad;
     }
@@ -58,14 +60,15 @@ void welcome(){
     puts(logo);
 
 bad:
-    _close(fd);
+    if (fd != -1) _close(fd);
 }
 
-int main(int _argc, char **_argv){
+
+int main(){
+    int argc, pid, len;
     char cmd[LEN_CMD];
-    int argc, pid;
     char *argv[MAX_ARGC];
-    int len;
+    char argv0[LEN_CMD/2];
 
     welcome();
     for (;;){
@@ -75,10 +78,6 @@ int main(int _argc, char **_argv){
 
         len = getcmd(cmd);
         if (len < 0) break;
-        if (len > LEN_CMD) {
-            printf("\ncommand to long\n");
-            continue;
-        }
 
         if (parse(argv, &argc, cmd) < 0){
             printf("parse fail, too many arguments\n");
@@ -95,11 +94,16 @@ int main(int _argc, char **_argv){
                     printf("cd: can not change directroy to %s\n", argv[1]);
                 }
             }
+        /* external command in /bin */
         } else {
+            memset(argv0, 0, sizeof(argv0));
+            strcpy(argv0, "/bin/");
+            strcat(argv0, argv[0]);
+
             pid = _fork();
             if (pid == 0){
-                if (_exec(argv[0], argv) < 0){
-                    printf("argv: can not exec %s\n", argv[0]);
+                if (_exec(argv0, argv) < 0){
+                    printf("argv: can not exec %s\n", argv0);
                     _exit();
                 }
             } else if (pid > 0){
