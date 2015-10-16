@@ -61,7 +61,7 @@ void printf(char *fmt, ...){
 char getch(){
     char ch;
 
-    _read(stdin, &ch, 1);
+    if (_read(stdin, &ch, 1) <= 0) return 0;
 
     return ch;
 }
@@ -70,41 +70,19 @@ char getchar(){
     char ch;
 
     ch = getch();
-    if (ch != '\b' 
-            && ch != CON_EOF 
-            && ch != CON_INT){
+    if (ch != '\b' && ch != '\0'){
         putchar(ch);
     }
 
     return ch;
 }
 
-int gets(char *str){
-    char ch;
-    char *h = str;
+/* int gets(char *str) is UNSAFE */
+int gets(char *str, uint32_t n){
+    int an;
 
-    while (1){
-        ch = getchar();
-        if (ch == CON_EOF){
-            ch = '\n';
-            putchar(ch);
-        }
-        if (ch == CON_INT){
-            return -1;
-        }
-        if (ch == '\n'){
-            break;
-        }
-        if (ch == '\b'){
-            if (str > h){
-                str--;
-                putchar(ch);
-            }
-            continue;
-        }
-        *str++ = ch;
-    }
-    *str++ = '\0';
-
-    return str - h;
+    an = _read(stdin, str, n - 1);   // leave room for '\0'
+    if (an < 0) return -1;
+    str[an] = '\0';
+    return an;
 }

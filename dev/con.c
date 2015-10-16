@@ -56,7 +56,30 @@ int con_read(struct inode *ip, char *dest, uint32_t n){
             }
             sleep(&con_buf.nread);
         }
+
         ch = con_buf.buf[con_buf.nread++ % NCON_BUF];
+        
+        if (ch == CON_EOF){
+            break;
+        }
+        if (ch == CON_INT){
+            return -1;
+        }
+
+        if (ch == '\b'){
+            if (ar - n != 0){
+                dest--;
+                n++;
+                putchar(ch);
+            }
+            continue;
+        }
+
+        putchar(ch);
+
+        if (ch == '\n'){
+            break;
+        }
 
         *dest++ = ch;
         n--;

@@ -7,37 +7,40 @@
 char buf[CAT_BUF];
 
 int main(int argc, char **argv){
-    int i, n;
+    int n;
     int fd = -1;
     struct stat st;
 
-    if (argc == 1){
-        printf("cat: no support now.\n");
-        goto exit;
-    }
-
-    if ((fd = _open(argv[1], O_RONLY)) < 0){
-        printf("cat: can not open `%s`\n", argv[1]);
-        goto exit;
-    }
-
-    if (_fstat(fd, &st) < 0){
-        printf("cat: can not get stat of `%s`\n", argv[1]);
-        goto exit;
-    }
-
-    if (!S_ISREG(st.mode)){
-        printf("cat: `%s` is not a file\n", argv[1]);
-        goto exit;
-    }
-
-    for (i = 0; i < st.size; i += CAT_BUF){
-        n = CAT_BUF < st.size - i ? CAT_BUF : st.size - i;
-        if (_read(fd, buf, n) != n){
-            printf("cat: read fault\n");
+    if (argc > 1){
+        _close(0);
+        if ((fd = _open(argv[1], O_RONLY)) < 0){
+            printf("cat: can not open `%s`\n", argv[1]);
             goto exit;
         }
+
+        if (fd != stdin){
+            printf("cat: wrong file descriptor %d", fd);
+            goto exit;
+        }
+
+        if (_fstat(fd, &st) < 0){
+            printf("cat: can not get stat of `%s`\n", argv[1]);
+            goto exit;
+        }
+
+        if (!S_ISREG(st.mode)){
+            printf("cat: `%s` is not a file\n", argv[1]);
+            goto exit;
+        }
+    }
+
+    for (;;){
+        n = _read(stdin, buf, sizeof(buf));
+        buf[n] = '\0';
         puts(buf);
+        if (n != sizeof(buf)){
+            break;
+        }
     }
 
 exit:
