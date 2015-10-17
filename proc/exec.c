@@ -120,8 +120,8 @@ int exec(char *path, char **argv){
         }
         printl("%d: %s ",argc, argv[argc]);
         // "+1" leava room for '\0'  "&~3" align 4
-        sp = (sp - strlen(argv[argc]) + 1) & ~3;    // sync with pa
-        pa = (pa - strlen(argv[argc]) + 1) & ~3;    
+        sp = (sp - (strlen(argv[argc]) + 1)) & ~3;    // sync with pa
+        pa = (pa - (strlen(argv[argc]) + 1)) & ~3;    
 
         strcpy((char *)pa, argv[argc]);
         ustack[3+argc] = sp;  // argv[argc]
