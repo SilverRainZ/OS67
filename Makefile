@@ -29,9 +29,9 @@ OBJS = bin/loader.o \
 
 UDEPS = bin/usys.o bin/uio.o bin/string.o bin/vsprint.o
 
-UOBJS = $(UPROGS:%=%.o)
+UPROGS =  bin/cinit bin/sh bin/cat bin/ls bin/pwd bin/mkdir bin/rm
 
-UPROGS =  bin/cinit bin/sh bin/cat bin/ls bin/pwd
+UOBJS := $(UPROGS:%=%.o)
 
 # create a 1.44MB floppy include kernel and bootsector
 bin/floppy.img: boot/floppy.asm bin/bootsect.bin bin/kernel 
@@ -61,8 +61,8 @@ bin/%.o: */%.c
 bin/usys.o: usr/usys.asm
 	$(AS) -f elf32 -g -F stabs -l lst/usys.s $< -o $@ 
 
-$(UPROGS): script/ulink.ld $(UDEPS) $(UBOJS)
-	$(LD) -T$< -melf_i386 -static $+ $@.o -o $@ 
+$(UPROGS): script/ulink.ld $(UOBJS) $(UDEPS)
+	$(LD) -T$< -melf_i386 -static $@.o $(UDEPS) -o $@
 
 #----------------------------------------
 
@@ -76,7 +76,6 @@ default: Makefile
 
 # make a disk with minix v1 file system
 fs: $(UPROGS)
-	for i in $(UPROGS); do $(MAKE) $$i; done
 	$(DEL) bin/rootfs.img
 	bximage bin/rootfs.img -hd=10M -imgmode=flat -mode=create -q
 	mkfs.minix bin/rootfs.img -1 -n14
