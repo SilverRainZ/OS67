@@ -36,6 +36,9 @@
 #define RPL_KERN    0x0
 #define RPL_USER    0x3
 
+#define CPL_KERN    0x0
+#define CPL_USER    0x3
+
 struct gdt_entry{
     uint16_t limit_low;
     uint16_t base_low;

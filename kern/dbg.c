@@ -45,10 +45,12 @@ void print_stack_trace(){
 void panic(const char *msg){
     vga_setcolor(COL_L_RED, COL_BLACK);
 
+    printk("*** Kernel panic ***\n");
+
     if (proc){
         printk("proc: `%s`(PID: %d)\n",proc->name, proc->pid);
     }
-    printk("*** Kernel panic ***\n");
+
     printk("%s\n", msg);
     printk("Current CPU status:\n");
     print_cur_status();

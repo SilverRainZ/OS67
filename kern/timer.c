@@ -8,6 +8,7 @@
 #include <asm.h>
 #include <dbg.h>
 // x86
+#include <pm.h>
 #include <isr.h>
 #include <timer.h>
 // drv
@@ -32,9 +33,13 @@ void timer_phase(int hz){
 void timer_handler(struct int_frame *r){
     timer_ticks++;
 
-    wakeup(&timer_ticks);
-
     if (!proc) return;
+
+    if (proc->killed && (proc->fm->cs & 0x3) == CPL_USER){
+        exit();
+    }
+
+    wakeup(&timer_ticks);
 
     if (timer_ticks % 100 == 0){
         printl("timer_handler: timer alive, trick: %d\n", timer_ticks);

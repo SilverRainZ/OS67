@@ -127,12 +127,28 @@ void fault_init()
 }
 
 void fault_handler(struct int_frame *r){
-    if (r->int_no < 32){
-        printk("error code: %d\n", r->err_code);
-        panic(fault_msg[r->int_no]);
+    /* fault happen in kernel(ring0) */
+    if (proc == 0 || (r->cs & 0x3) == CPL_KERN){
+        if (r->int_no < 32){
+            printk("error code: %d\n", r->err_code);
+            panic(fault_msg[r->int_no]);
+        }
+        else {
+            panic("Unkonwn Interrupt, System Halted!\n");
+        }
     }
-    else {
-        panic("Unkonwn Interrupt, System Halted!\n");
+    vga_setcolor(COL_L_RED, COL_BLACK);
+    printk("** User panic ***\n");  // 不知道是否真的有 User panic 2333
+    printk("proc: `%s`(PID: %d)\n", proc->name, proc->pid);
+    printk("reason: %s\n", fault_msg[proc->fm->int_no]);
+    printk("eip = 0x%x\n", proc->fm->eip);
+    printk("esp = 0x%x\n", proc->fm->user_esp);
+    printk("killed~\n");
+    vga_setcolor(COL_L_GREY, COL_BLACK);
+
+    proc->killed = 1;
+
+    if (proc && proc->killed && (proc->fm->cs & 0x3) == CPL_USER){
+        exit();
     }
-    for (;;);
 }
