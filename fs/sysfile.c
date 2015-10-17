@@ -233,6 +233,17 @@ bad:
     return -1;
 }
 
+static char illch[] = {' ', '\t', '\n', '\b', '/', '?', '*', '&', '>', '<', '|', 0}; 
+static int islegal(char *name){
+    int i, j;
+    for (i = 0; i < strlen(name); i++){
+        for (j = 0; j < strlen(illch); j++){
+            if (name[i] == illch[j]) return 0;
+        }
+    }
+    return 1;
+}
+
 static struct inode *create(char *path, uint16_t mode, int di){
     uint32_t off;
     struct inode *ip, *dip;
@@ -241,6 +252,12 @@ static struct inode *create(char *path, uint16_t mode, int di){
     if ((dip = p2ip(path, name)) == 0){
         return 0;
     }
+
+    if (!islegal(name)){    // illegal filename
+        iput(dip);
+        return 0;
+    }
+
     ilock(dip);
 
     if ((ip = dir_lookup(dip, name, &off)) != 0){
