@@ -43,9 +43,10 @@ int main(int argc, char **argv){
             printf("cat: read fault\n");
             goto exit;
         }
-        puts(de.name);
-        putchar('\n');
-
+        if (de.ino != 0){
+            puts(de.name);
+            putchar('\n');
+        }
         st.size -= sizeof(de);
     }
 
