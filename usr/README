@@ -1,1 +1,23 @@
-It is OS67's fisrt file.
+--------------------------------------------------------------------------------
+                              OS67 release 0.01
+                     <https://github.com/LastAvenger/OS67>
+--------------------------------------------------------------------------------
+
+WHAT IS OS67?
+    OS67 is a unix-like toy kernel, which comes with some user routines.
+
+HARDWARE REQUIREMENTS
+    - A single-core i386+ CPU
+    - 10 MB or more memory space
+    - A IDE harddisk which has Minix v1 file system
+    - A PS/2 Keyboard
+    Recommand runs on Bochs
+
+BUG TRACKER
+    See <https://github.com/LastAvenger/OS67/issues>
+
+LICENSE
+    GNU General Public License Version 3
+
+See <https://github.com/LastAvenger/OS67/blob/master/README.md> for more
+information.
