@@ -96,33 +96,3 @@ int pipe_read(struct pipe *p, char *addr, int n){
 
     return i;
 }
-
-/* write one byte into pipe, only use in kb.c, return immediately after called */
-int pipe_push(struct pipe *p, char ch){
-    if (p->nwrite == p->nread + PIPE_SIZE){ // if full, return
-        printl("pipe_push: full\n");
-        return -1;
-    }
-    p->data[p->nwrite++ % PIPE_SIZE] = ch;
-
-    printl("pipe_push: pipe 0x%x, nread: %d, nwrite: %d, push: 0x%x\n", p, p->nread, p->nwrite, ch);
-
-    wakeup(&p->nread);
-
-    return 0;
-}
-
-/* write one byte into pipe, only use in timer.c, return immediately after called */
-char pipe_pop(struct pipe *p){
-    char ch;
-
-    if (p->nread == p->nwrite && p->writeopen){
-        printl("pipe_pop: empty\n");
-        return 0;
-    }
-
-    ch = p->data[p->nread++ % PIPE_SIZE];
-    printl("pipe_pop: pipe 0x%x, nread: %d, nwrite: %d, pop: 0x%x\n", p, p->nread, p->nwrite, ch);
-
-    return ch;
-}
