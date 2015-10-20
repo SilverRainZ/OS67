@@ -12,7 +12,7 @@
 extern int _fork();
 extern int _exit();
 extern int _wait();
-extern int _pipe();
+extern int _pipe(int *fd);  // fd[0] fd[1]
 extern int _read(int fd, char *addr, uint32_t n);
 extern int _kill(int pid);
 extern int _exec(char *path, char **argv);
@@ -20,7 +20,6 @@ extern int _fstat(int fd, struct stat *stat);
 extern int _chdir(char *path);
 extern int _dup(int fd);
 extern int _getpid();
-// extern int _sbrk();
 extern int _sleep(uint32_t sec);
 extern int _uptime();
 extern int _open(char *path, uint32_t mode);

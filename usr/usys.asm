@@ -12,16 +12,15 @@ sys_fstat   EQU 8
 sys_chdir   EQU 9
 sys_dup     EQU 10
 sys_getpid  EQU 11
-sys_sbrk    EQU 12
-sys_sleep   EQU 13
-sys_uptime  EQU 14
-sys_open    EQU 15
-sys_write   EQU 16
-sys_mknod   EQU 17
-sys_unlink  EQU 18
-sys_link    EQU 19
-sys_mkdir   EQU 20
-sys_close   EQU 21
+sys_sleep   EQU 12
+sys_uptime  EQU 13
+sys_open    EQU 14
+sys_write   EQU 15
+sys_mknod   EQU 16
+sys_unlink  EQU 17
+sys_link    EQU 18
+sys_mkdir   EQU 19
+sys_close   EQU 20
 
 %macro syscall 1
 [global %1]
@@ -42,7 +41,6 @@ syscall _fstat
 syscall _chdir 
 syscall _dup  
 syscall _getpid
-syscall _sbrk  
 syscall _sleep 
 syscall _uptime
 syscall _open  

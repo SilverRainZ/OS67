@@ -17,5 +17,6 @@ int sys_chdir();
 int sys_link();
 int sys_unlink();
 int sys_dup();
+int sys_pipe();
 
 #endif

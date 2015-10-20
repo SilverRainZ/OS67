@@ -4,7 +4,7 @@
 #include <type.h>
 #include <isr.h>
 
-#define NSYSCALL    21
+#define NSYSCALL    20
 
 // syscall nubmer
 #define SYS_FORK    1
@@ -18,16 +18,15 @@
 #define SYS_CHDIR   9
 #define SYS_FDUP    10
 #define SYS_GETPID  11
-#define SYS_SBRK    12
-#define SYS_SLEEP   13
-#define SYS_UPTIME  14
-#define SYS_OPEN    15
-#define SYS_WRITE   16
-#define SYS_MKNOD   17
-#define SYS_UNLINK  18
-#define SYS_LINK    19
-#define SYS_MKDIR   20
-#define SYS_CLOSE   21
+#define SYS_SLEEP   12
+#define SYS_UPTIME  13
+#define SYS_OPEN    14
+#define SYS_WRITE   15
+#define SYS_MKNOD   16
+#define SYS_UNLINK  17
+#define SYS_LINK    18
+#define SYS_MKDIR   19
+#define SYS_CLOSE   20
 
 int fetchint(uint32_t addr, int *ip);
 int fetchstr(uint32_t addr, char **pp);

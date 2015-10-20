@@ -25,7 +25,7 @@ static int (*sys_routines[])(void) = {
     sys_fork,
     sys_exit,
     sys_wait,
-    sys_none,   // sys_pipe(),
+    sys_pipe,
     sys_read,
     sys_kill,
     sys_exec,
@@ -33,7 +33,6 @@ static int (*sys_routines[])(void) = {
     sys_chdir,
     sys_dup,
     sys_getpid,
-    sys_none,   // sys_sbrk,
     sys_sleep,
     sys_uptime,
     sys_open,
@@ -48,7 +47,7 @@ static int (*sys_routines[])(void) = {
 /* syscall name for debug */
 static char *sys_name[NSYSCALL + 1] = {
     "sys_none",
-    "sys_fork ",
+    "sys_fork",
     "sys_exit",
     "sys_wait",
     "sys_pipe",
@@ -57,9 +56,8 @@ static char *sys_name[NSYSCALL + 1] = {
     "sys_exec",
     "sys_fstat",
     "sys_chdir",
-    "sys_dup ",
-    "sys_getpi",
-    "sys_sbrk",
+    "sys_dup",
+    "sys_getpid",
     "sys_sleep",
     "sys_uptime",
     "sys_open",
@@ -147,7 +145,7 @@ void sys_init(){
 void syscall(){
     int cn;
 
-    printl(">>>>>>> syscall %s: number: %d, form ring@%d\n", sys_name[proc->fm->eax], proc->fm->eax, proc->fm->cs&0x3);
+    printl(">>>>>>> syscall %s: number: %d, form `%s`(PID: %d)\n", sys_name[proc->fm->eax], proc->fm->eax, proc->name, proc->pid);
 
     cn = proc->fm->eax;
 
