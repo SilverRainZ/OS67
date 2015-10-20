@@ -1,4 +1,4 @@
-// #define __LOG_ON
+// #define __LOG_ON 1
 
 // std
 #include <type.h>
@@ -279,17 +279,18 @@ void exit(){
     proc->cwd = 0;
 
     cli();
-    wakeup(proc->parent);
+    //wakeup(proc->parent);
 
     printl("exit: collecting subprocess\n");
     for (pp = ptable; pp < &proc[NPROC]; pp++){
         if (pp->parent == proc){
-            pp->parent = initproc;
+            pp->parent = proc->parent;
             if (pp->state == P_ZOMBIE){
-                wakeup(initproc);
+                wakeup(proc->parent);
             }
         }
     }
+    wakeup(proc->parent);
 
     printl("exit: ZOMBIE\n");
     proc->state = P_ZOMBIE;
