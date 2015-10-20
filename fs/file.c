@@ -114,9 +114,11 @@ int fwrite(struct file *fp, char *addr, uint32_t n){
         printl("fwrite: inode\n");
         ilock(fp->ip);
         if (iwrite(fp->ip, addr, fp->off, n) != (int)n){
-            panic("fwrite: fault");
+            printl("fwrite: fault\n");
         }
+        fp->off += n;
         iunlock(fp->ip);
+
         return n;
     }
 
