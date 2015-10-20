@@ -5,17 +5,13 @@
 #define LEN_CMD  128
 #define MAX_ARGC 20
 
-char *path  = "/bin/";
-
-int getcmd(char *cmd){
-    int len;
-
+static int get_cmd(char *cmd){
     printf("$ ");
-    if ((len = gets(cmd, LEN_CMD)) < 0) return -1;
-    return len;
+
+    return gets(cmd, LEN_CMD);
 }
 
-int parse(char *argv[], int *argc, char *cmd){
+static int split_cmd(char *argv[], int *argc, char *cmd){
     char *pcmd;
 
     pcmd = cmd;
@@ -41,7 +37,131 @@ int parse(char *argv[], int *argc, char *cmd){
     return 1;
 }
 
-void welcome(){
+/* execute external command */
+/* only support one operator in a command :
+ *      cat < README
+ *      cat README > newfile
+ *      ls | cat
+ */
+static int parse_cmd(int argc, char **argv){
+    int i;
+    int pid, pid2;
+    int fd[2];
+    char argcmd[LEN_CMD/2];
+    char type;
+    char **argv2;
+
+    type = ' ';
+
+    /* need a argument after >, < or | */
+    for (i = 1; i < argc - 1; i++){
+        if (strcmp("<", argv[i]) == 0
+                || strcmp(">", argv[i]) == 0
+                || strcmp("|", argv[i]) == 0){
+
+            argc = i;
+            argv2 = &argv[i+1];
+            type = argv[i][0];
+            argv[i] = 0;
+            break;
+        }
+    }
+
+    pid = _fork();
+    /********** in new process **********/
+    if (pid == 0){
+        switch(type){
+            case '<':{
+                         if (_close(stdin) < 0){
+                             puts("sh1: can not close stdin\n");
+                             _exit();
+                         }
+                         if (_open(argv2[0], O_RONLY) != stdin){
+                             printf("sh1: can not open file `%s` as stdin\n", argv2[0]);
+                             _exit();
+                         }
+                         break;
+                     }
+            case '>':{
+                         if (_close(1) < 0){
+                             puts("sh1: can not close stdout\n");
+                             _exit();
+                         }
+                         if (_open(argv2[0], O_RW | O_CREATE) != 1){
+                             printf("sh1: can not open file `%s` as stdout\n", argv2[0]);
+                             _exit();
+                         }
+                         break;
+                     }
+            case '|':{
+                         if (_pipe(fd) < 0){
+                             puts("sh1: pipe\n");
+                             _exit();
+                         }
+
+                         pid2 = _fork();
+                         if (pid2 == 0){
+                             if (_close(stdin) < 0){
+                                 printf("sh2: can not close stdin\n");
+                                 _exit();
+                             }
+                             if (_dup(fd[0]) != 0){
+                                 printf("sh2: can not dup fd0\n");
+                                 _exit();
+                             }
+
+                             memset(argcmd, 0, sizeof(argcmd));
+                             strcpy(argcmd, "/bin/");
+                             strcat(argcmd, argv2[0]);
+
+                             if (_exec(argcmd, argv2) < 0){
+                                 printf("sh2: can not exec %s\n", argcmd);
+                                 _exit();
+                             }
+                         } else if (pid2 < 0){
+                             printf("sh2: fork fail\n");
+                             _exit();
+                         }
+                         break;
+                     }
+            default:
+                     break;
+        }
+
+
+        if (type == '|'){
+            if (_close(stdout) < 0){
+                printf("sh1: can not close stdout\n");
+                _exit();
+            }
+            if (_dup(fd[1]) != 1) _exit();
+        }
+
+        memset(argcmd, 0, sizeof(argcmd));
+        strcpy(argcmd, "/bin/");
+        strcat(argcmd, argv[0]);
+        if (_exec(argcmd, argv) < 0){
+            printf("sh1: can not exec %s\n", argcmd);
+            _exit();
+        }
+        /**********************************/
+    } else if (pid > 0){
+        if (_wait() < 0){
+            printf("sh: wait %d return -1\n", pid);
+            goto bad;
+        }
+    } else {
+        printf("sh: fork fail");
+        goto bad;
+    }
+
+    return 0;
+
+bad:
+    return -1;
+}
+
+static void welcome(){
     struct stat st;
     int fd;
     char logo[150] = "";
@@ -65,10 +185,9 @@ bad:
 
 
 int main(){
-    int argc, pid, len;
+    int argc;
     char cmd[LEN_CMD];
     char *argv[MAX_ARGC];
-    char argv0[LEN_CMD/2];
 
     welcome();
     for (;;){
@@ -76,11 +195,10 @@ int main(){
         memset(cmd, 0, sizeof(cmd));
         memset(argv, 0, sizeof(argv));
 
-        len = getcmd(cmd);
-        if (len < 0) break;
+        if (get_cmd(cmd) < 0) break;
 
-        if (parse(argv, &argc, cmd) < 0){
-            printf("parse fail, too many arguments\n");
+        if (split_cmd(argv, &argc, cmd) < 0){
+            printf("sh: split cmd fail, too many arguments\n");
         };
 
         if (argc == 0) continue;
@@ -94,30 +212,9 @@ int main(){
                     printf("cd: can not change directroy to %s\n", argv[1]);
                 }
             }
-        /* external command in /bin */
+            /* external command in /bin */
         } else {
-            memset(argv0, 0, sizeof(argv0));
-            strcpy(argv0, "/bin/");
-            strcat(argv0, argv[0]);
-
-            pid = _fork();
-            if (pid == 0){
-                if (_exec(argv0, argv) < 0){
-                    printf("argv: can not exec %s\n", argv0);
-                    _exit();
-                }
-            } else if (pid > 0){
-                if (_wait() < 0){
-                    printf("sh: wait %d return -1\n", pid);
-                    goto bad;
-                }
-            } else {
-                printf("sh: fork fail");
-                continue;
-            }
+            parse_cmd(argc, argv);
         }
     }
-
-bad:
-    _exit();
 }
