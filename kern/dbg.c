@@ -43,6 +43,8 @@ void print_stack_trace(){
 }
 
 void panic(const char *msg){
+    cli();
+
     vga_setcolor(COL_L_RED, COL_BLACK);
 
     printk("*** Kernel panic ***\n");
@@ -58,7 +60,7 @@ void panic(const char *msg){
     //i can't get the name of funciton form call stack, so don't use it
     printk("Call stack:\n");
     print_stack_trace();
-    for (;;);
+    for (;;) hlt();
 }
 
 /********* Debug functions which depend on bochs ****************/
