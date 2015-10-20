@@ -38,7 +38,7 @@ int main(int argc, char **argv){
         n = _read(stdin, buf, sizeof(buf));
         buf[n] = '\0';
         puts(buf);
-        if (n != sizeof(buf)){
+        if (n == 0){
             break;
         }
     }
