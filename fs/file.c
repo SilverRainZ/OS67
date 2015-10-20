@@ -49,14 +49,13 @@ void fclose(struct file *fp){
 
     if (fp->type == F_PIPE){
         pipe_close(fp->pipe, fp->writeable);
-        return;
     }
     if (fp->type == F_INODE){
         iput(fp->ip);
-        fp->type = F_NONE;
-
-        return;
     }
+
+    fp->type = F_NONE;
+    fp->ref = 0;
 }
 
 int fstat(struct file *fp, struct stat *st){
@@ -99,15 +98,20 @@ int fread(struct file *fp, char *addr, uint32_t n){
 
 int fwrite(struct file *fp, char *addr, uint32_t n){
 
+    printl("fwrite: fp 0x%x, addr 0x%x, len %d\n", fp, addr, n);
+
     if (!fp->writeable){
-        return ERROR;
+        printl("fwrite: no writeable\n");
+        return -1;
     }
 
     if (fp->type == F_PIPE){
-        pipe_write(fp->pipe, addr, n);
+        printl("fwrite: pipe\n");
+        return pipe_write(fp->pipe, addr, n);
     }
 
     if (fp->type == F_INODE){
+        printl("fwrite: inode\n");
         ilock(fp->ip);
         if (iwrite(fp->ip, addr, fp->off, n) != (int)n){
             panic("fwrite: fault");
