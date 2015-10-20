@@ -1,4 +1,4 @@
-#define __LOG_ON 1
+// #define __LOG_ON 1
 /* vmm.h
  * 
  */
@@ -84,6 +84,7 @@ void vmm_map(pde_t *pgdir, uint32_t va, uint32_t pa, uint32_t flags){
         } else {
             pte = (pte_t *)(pgd_kern[pde_idx] & PAGE_MASK);
             pgdir[pde_idx] = (uint32_t)pte | PTE_P | flags;
+            return;
         }
     }
 
