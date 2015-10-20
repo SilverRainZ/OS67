@@ -24,7 +24,7 @@ child:
 
 msg_init:
     db "/bin/cinit", 0
-; char **argv = {'init', 0}
+; char **argv = {"/bin/cinit", 0}
 msg_argv:
     dd (msg_init - $$) + 0xc0000000
     dd 0
