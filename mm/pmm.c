@@ -110,6 +110,7 @@ uint32_t pmm_alloc(){
     uint32_t addr = pmm_stack[--pmm_stack_top];
     assert(pmm_stack_top >= 0,"pmm_alloc: no physical page");
 
+    memset((void *)addr, 0, PAGE_SIZE);
     printl("pmm_alloc: alloc page 0x%x, pmm_stack_top = %d\n", addr, pmm_stack_top);
     return addr;
 }
