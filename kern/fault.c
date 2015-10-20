@@ -126,10 +126,24 @@ void fault_init()
 
 }
 
+static void page_fault(){
+    uint32_t cr2;
+
+    __asm__ volatile ("mov %%cr2, %0":"=r"(cr2));
+
+    printk("addr: 0x%x\n", cr2);
+}
+
 void fault_handler(struct int_frame *r){
+    // Page Fault
+    if (r->int_no == 14) {
+        page_fault();
+    }
+
     /* fault happen in kernel(ring0) */
     if (proc == 0 || (r->cs & 0x3) == CPL_KERN){
         if (r->int_no < 32){
+
             printk("error code: %d\n", r->err_code);
             panic(fault_msg[r->int_no]);
         }
@@ -137,6 +151,8 @@ void fault_handler(struct int_frame *r){
             panic("Unkonwn Interrupt, System Halted!\n");
         }
     }
+
+    /* fault happen in userland(ring3) */
     vga_setcolor(COL_L_RED, COL_BLACK);
     printk("** User panic ***\n");  // 不知道是否真的有 User panic 2333
     printk("proc: `%s`(PID: %d)\n", proc->name, proc->pid);

@@ -54,7 +54,6 @@ static inline void vmm_enable(){
 void vmm_init(){
     uint32_t i, j;
     /* register isr */
-    idt_install(FAULT_PAGE, (unsigned)page_fault, SEL_KCODE << 3, GATE_INT, IDT_PR|IDT_DPL_KERN);
 
     // map 4G memory, physcial address = virtual address
     for (i = 0, j = 0; i < PTE_COUNT; i++, j++){
@@ -133,18 +132,6 @@ void vmm_test(){
     printl("=== vmm_test end ===\n");
 }
 
-void page_fault(struct int_frame *r){
-    uint32_t cr2;
-
-    __asm__ volatile ("mov %%cr2, %0":"=r"(cr2));
-
-    printk("errro code1: 0x%x\n", cr2);
-    printk("errro code2: 0x%x\n", r->err_code);
-
-    panic("Page Fault Excetpion\nSystem Halted!\n");
-
-    for (;;) hlt();
-}
 
 /* build a map of kernel space and unalloc memory for a process's page table
  * 这里简单地把从 0 到 0xc0000000 的所有内存（包含内核，未分配内存 和 不存在的内存）映射到页表中 */
