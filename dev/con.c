@@ -1,4 +1,4 @@
-#define __LOG_ON 1
+// #define __LOG_ON 1
 /* con is a device used to user's input & output 
  * input come form keyboard
  * output to screen via vga.c

@@ -1,4 +1,4 @@
-#define __LOG_ON 1
+// #define __LOG_ON 1
 
 /* kb.c 
  * This file is modified form Bram's Kernel Development Tutorial

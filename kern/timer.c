@@ -1,4 +1,4 @@
-#define __LOG_ON 1
+// #define __LOG_ON 1
 /* timer.c 
  * This file is modified form Bram's Kernel Development Tutorial
  * enable programmable interval timer(PIT)

@@ -1,4 +1,4 @@
-#define __LOG_ON 1
+// #define __LOG_ON 1
 // std
 #include <type.h>
 #include <dbg.h>
@@ -56,7 +56,7 @@ int dir_link(struct inode *dip, char *name, struct inode *fip){
     struct dir_entry de;
     struct inode *ip;
 
-    printl("dir_link: link inode-%d named %s to dir inode-%d\n", fip->ino, name, dip->ino);
+    printl("dir_link: link inode-%d named [%s] to dir inode-%d\n", fip->ino, name, dip->ino);
 
     assert(S_ISDIR(dip->mode), "dir_link: no dir");
     assert(fip->flags & I_BUSY, "dir_link: file inode no locked")
@@ -86,13 +86,6 @@ int dir_link(struct inode *dip, char *name, struct inode *fip){
     if (iwrite(dip, (char *)&de, off, sizeof(de)) != sizeof(de)){
         panic("dir_link: fault when write");
     }
-
-
-    /* increase nlinks*/
-    /*
-    fip->nlinks++;
-    iupdate(fip);
-    */
 
     return OK;
 }

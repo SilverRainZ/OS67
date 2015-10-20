@@ -422,7 +422,7 @@ int sys_chdir(){
 int sys_pipe(){
     int *fd;
     struct file *rf, *wf;
-    int fd0, fd1;
+    int fd0 = -1, fd1 = -1;
  
     if (argptr(0, (void *)&fd, 2*sizeof(*fd)) < 0){
         return -1;
@@ -431,6 +431,7 @@ int sys_pipe(){
     printl("sys_pipe: ptr: 0x%x\n", fd);
 
     if (pipe_alloc(&rf, &wf) < 0){
+        printl("sys_pipe: fail to alloc pipe\n");
         return -1;
     }
 
@@ -438,8 +439,10 @@ int sys_pipe(){
         if (fd >= 0){
             proc->ofile[fd0] = 0;
         }
+        /* fd1 must be -1 */
         fclose(rf);
         fclose(wf);
+        printl("sys_pipe: fail to alloc fd\n");
         return -1;
     }
     fd[0] = fd0;
