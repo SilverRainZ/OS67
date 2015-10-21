@@ -76,7 +76,7 @@ Please paste the kernel log in the issue.
 
 Uncomment macro `__LOG_ON` as follow to enable logging of specific file:
 
-```makefile
+```c
  - // #define __LOG_ON 1
  + #define __LOG_ON 1
 ```

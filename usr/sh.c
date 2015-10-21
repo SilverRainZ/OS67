@@ -11,6 +11,9 @@ static int get_cmd(char *cmd){
     return gets(cmd, LEN_CMD);
 }
 
+/* splist command 
+ * "cat READMD >  cat"  -> "cat", 0, "README", 0, ">", 0, 0, "cat", 0
+ * */
 static int split_cmd(char *argv[], int *argc, char *cmd){
     char *pcmd;
 
@@ -37,7 +40,7 @@ static int split_cmd(char *argv[], int *argc, char *cmd){
     return 1;
 }
 
-/* execute external command */
+/* parse & execute external command */
 /* only support one operator in a command :
  *      cat < README
  *      cat README > newfile
@@ -45,9 +48,10 @@ static int split_cmd(char *argv[], int *argc, char *cmd){
  */
 static int parse_cmd(int argc, char **argv){
     int i;
+    int fd;
     int pid, pid2;
-    int fd[2];
-    char argcmd[LEN_CMD/2];
+    int pfd[2];
+    char argcmd[LEN_CMD];
     char type;
     char **argv2;
 
@@ -72,29 +76,42 @@ static int parse_cmd(int argc, char **argv){
     if (pid == 0){
         switch(type){
             case '<':{
+                         if ((fd = _open(argv2[0], O_RONLY)) < 0){
+                             printf("sh1: can not open file `%s`\n", argv2[0]);
+                             _exit();
+                         }
+
                          if (_close(stdin) < 0){
                              puts("sh1: can not close stdin\n");
                              _exit();
                          }
-                         if (_open(argv2[0], O_RONLY) != stdin){
-                             printf("sh1: can not open file `%s` as stdin\n", argv2[0]);
+
+                         if (_dup(fd) < 0){
+                             puts("sh1: can not close stdin\n");
                              _exit();
                          }
+
                          break;
                      }
             case '>':{
-                         if (_close(1) < 0){
+                         if ((fd = _open(argv2[0], O_RW | O_CREATE)) < 0){
+                             printf("sh1: can not open file `%s`\n", argv2[0]);
+                             _exit();
+                         }
+
+                         if (_close(stdout) < 0){
                              puts("sh1: can not close stdout\n");
                              _exit();
                          }
-                         if (_open(argv2[0], O_RW | O_CREATE) != 1){
-                             printf("sh1: can not open file `%s` as stdout\n", argv2[0]);
+
+                         if (_dup(fd) < 0){
+                             puts("sh1: can not close stdin\n");
                              _exit();
                          }
                          break;
                      }
             case '|':{
-                         if (_pipe(fd) < 0){
+                         if (_pipe(pfd) < 0){
                              puts("sh1: pipe\n");
                              _exit();
                          }
@@ -105,8 +122,10 @@ static int parse_cmd(int argc, char **argv){
                                  printf("sh2: can not close stdin\n");
                                  _exit();
                              }
-                             if (_dup(fd[0]) != 0){
+
+                             if (_dup(pfd[0]) != stdin){
                                  printf("sh2: can not dup fd0\n");
+                                 _close(pfd[0]);
                                  _exit();
                              }
 
@@ -116,10 +135,14 @@ static int parse_cmd(int argc, char **argv){
 
                              if (_exec(argcmd, argv2) < 0){
                                  printf("sh2: can not exec %s\n", argcmd);
+                                 _close(pfd[0]);
+                                 _close(stdin);
                                  _exit();
                              }
                          } else if (pid2 < 0){
                              printf("sh2: fork fail\n");
+                             _close(pfd[0]);
+                             _close(stdin);
                              _exit();
                          }
                          break;
@@ -131,17 +154,25 @@ static int parse_cmd(int argc, char **argv){
 
         if (type == '|'){
             if (_close(stdout) < 0){
-                printf("sh1: can not close stdout\n");
+                _close(pfd[1]);
                 _exit();
             }
-            if (_dup(fd[1]) != 1) _exit();
+
+            if (_dup(pfd[1]) != stdout) {
+                _close(pfd[1]);
+                _exit();
+            }
         }
 
         memset(argcmd, 0, sizeof(argcmd));
         strcpy(argcmd, "/bin/");
         strcat(argcmd, argv[0]);
+
         if (_exec(argcmd, argv) < 0){
-            printf("sh1: can not exec %s\n", argcmd);
+            /* when type == '|' when argv2 is invaild, printf maybe cause sleeping */
+            if (type == '|') printf("sh1: can not exec %s\n", argcmd);
+            _close(pfd[1]);
+            _close(stdin);
             _exit();
         }
         /**********************************/
@@ -217,4 +248,6 @@ int main(){
             parse_cmd(argc, argv);
         }
     }
+
+    _exit();
 }
