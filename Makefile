@@ -29,7 +29,7 @@ OBJS = bin/loader.o \
 
 UDEPS = bin/usys.o bin/uio.o bin/string.o bin/vsprint.o
 
-UPROGS =  bin/cinit bin/sh bin/cat bin/ls bin/pwd bin/mkdir bin/rm
+UPROGS =  bin/cinit bin/sh bin/cat bin/ls bin/mkdir bin/rm
 
 UOBJS := $(UPROGS:%=%.o)
 
