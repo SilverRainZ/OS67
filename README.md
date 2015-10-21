@@ -2,6 +2,9 @@ OS67
 ===============================
 OS67 is a unix-like toy kernel, which comes with some user routines.
 
+![OS67](scrshot.png)
+
+
 ###Build requirements
 Platform: Linux
 * make
