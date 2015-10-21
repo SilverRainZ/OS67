@@ -1,7 +1,7 @@
-/*dbg.c
+/* dbg.c
  * This file is modified form hurlex 
- * 提供了panic和assert
- * 由于kernel是纯二进制文件， print_stack_trace并没有太大的作用
+ * 提供了 panic 和 assert
+ * 由于没有符号表， print_stack_trace并没有太大的作用，还经常引发连锁的 Page Fault
  */
 
 // std

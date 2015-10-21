@@ -1,4 +1,4 @@
-#define __LOG_ON 1
+// #define __LOG_ON 1
 
 //std
 #include <type.h>
@@ -45,7 +45,7 @@ static int (*sys_routines[])(void) = {
 }; 
 
 /* syscall name for debug */
-static char *sys_name[NSYSCALL + 1] = {
+char *sys_name[NSYSCALL + 1] = {
     "sys_none",
     "sys_fork",
     "sys_exit",
@@ -102,7 +102,6 @@ int fetchstr(uint32_t addr, char **pp){
 }
 
 int argint(int n, int *ip){
-    // TODO
     return fetchint(proc->fm->user_esp + 4*n + 4, ip);  // "+4" for eip
 }
 

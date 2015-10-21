@@ -1,4 +1,4 @@
-#define __LOG_ON 1
+// #define __LOG_ON 1
 #include <dev.h>
 #include <con.h>
 #include <printk.h>

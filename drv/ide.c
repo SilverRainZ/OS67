@@ -1,4 +1,4 @@
-#undef DEBUG
+// #define __LOG_ON 1
 /* ide.c
  * This file is modified form xv6
  * use DMA, assume we hava only a disk
@@ -56,7 +56,7 @@ static void ide_start(struct buf *b){
     outb(IDE_PORT_LBA1, (phy_blkn  >> 8) & 0xff);
     outb(IDE_PORT_LBA2, (phy_blkn >> 16) & 0xff);
     /* IDE_PORT_CURRENT = 0x101dhhhh d = driver hhhh = head*/
-    /* but 0xe0 = 1010000 (? TODO */
+    /* but 0xe0 = 1010000 (?) */
     outb(IDE_PORT_CURRENT, 0xe0 | ((b->dev & 1) << 4) | ((phy_blkn >> 24) & 0x0f)); 
 
     if(b->flags & B_DIRTY){   // write
@@ -120,7 +120,8 @@ void ide_rw(struct buf *b){
     }
     // wait for the request to finish 
     while ((b->flags & (B_VALID|B_DIRTY)) != B_VALID) {
-        hlt();  // TODO 
+        // TODO: maybe use sleep()/wakeup()
+        hlt();
     }
 }
 

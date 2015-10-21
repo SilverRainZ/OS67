@@ -1,6 +1,6 @@
 // #define __LOG_ON 1
 
-/* block cache 
+/* buffer cache 
  * This file is modified form xv6
  */
 // std

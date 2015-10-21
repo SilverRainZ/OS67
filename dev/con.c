@@ -52,7 +52,7 @@ int con_read(struct inode *ip, char *dest, uint32_t n){
             printl("con_read: empty\n");
             if (proc->killed){
                 printl("con_read: fail\n");
-                return -1;      // TODO why (?)
+                return -1;
             }
             sleep(&con_buf.nread);
         }

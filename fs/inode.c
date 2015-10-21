@@ -169,7 +169,7 @@ void iput(struct inode *ip){
         /* can not free a locked inode */
         assert(!(ip->flags & I_BUSY), "iput: free a locked inode");
         ip->flags |= I_BUSY;
-        itrunc(ip); // TODO
+        itrunc(ip);
 
         _ifree(ip->dev, ip->ino);
 
@@ -195,7 +195,7 @@ void ilock(struct inode *ip){
 
     read_sb(ip->dev, &sb);
 
-    // TODO
+    // TODO: maybe use sleep()/wakeup()
     int timeout = 20000;
     while (ip->flags & I_BUSY){
         timeout--;

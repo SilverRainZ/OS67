@@ -1,7 +1,7 @@
 #ifndef __PRINTK_H
 #define __PRINTK_H
 
-// farseefc holy high!  :D
+// farseerfc holy high!  :D
 // https://gcc.gnu.org/onlinedocs/cpp/Variadic-Macros.html
 // waiting for fixing, issue #2
 

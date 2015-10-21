@@ -1,4 +1,4 @@
-#define __LOG_ON 1
+// #define __LOG_ON 1
 // std
 #include <type.h>
 #include <dbg.h>
@@ -106,7 +106,13 @@ int exec(char *path, char **argv){
     if ((sz = uvm_alloc(pgdir, sz, sz + 2*PAGE_SIZE)) == 0){
         goto bad;
     }
-    // leave a page unaccessable TODO
+
+    /* leave a unaccessable page between kernel stack */
+    if (vmm_get_mapping(pgdir, sz - 2*PAGE_SIZE, &pa) == 0){  // sz is no mapped
+        goto bad;
+    }
+    vmm_map(pgdir, sz - 2*PAGE_SIZE, pa, PTE_K | PTE_P | PTE_W);
+
     sp = sz;
     if (vmm_get_mapping(pgdir, sz - PAGE_SIZE, &pa) == 0){  // sz is no mapped
         goto bad;

@@ -1,4 +1,4 @@
-#define __LOG_ON 1
+// #define __LOG_ON 1
 // std
 #include <type.h>
 #include <asm.h>
@@ -9,7 +9,6 @@
 #include <timer.h>
 #include <syscall.h>
 // libs
-#include <string.h>
 #include <printk.h>
 // drv
 #include <vga.h>
@@ -20,8 +19,6 @@
 #include <vmm.h>
 // proc
 #include <proc.h>
-// pipe
-#include <pipe.h>
 // fs
 #include <bcache.h>
 #include <inode.h>
@@ -46,15 +43,15 @@ int osmain(void)
 {
     vga_init();
 
-    puts("Installing GDT...     ");
+    puts("installing GDT...     ");
     gdt_init();
     print_ok();
 
-    puts("Installing IDT...     ");
+    puts("installing IDT...     ");
     idt_init();
     print_ok();
 
-    puts("Installing ISR...     ");
+    puts("installing ISR...     ");
     isr_init();
     print_ok();
 
@@ -80,21 +77,21 @@ int osmain(void)
     puts("ide init...           ");
     ide_init();
     print_ok();
-    // ide_test();
 
-    puts("buffer cache init...  ");
+    // ide_test();
+    puts("bcache init...        ");
     bcache_init();
     print_ok();
 
-    puts("inode cache init...   ");
+    puts("icache init...        ");
     inode_init();
     print_ok();
 
-    puts("file table init...    ");
+    puts("ftable init...        ");
     file_init();
     print_ok();
 
-    puts("virtual device init...");
+    puts("dev init...           ");
     dev_init();
     print_ok();
 

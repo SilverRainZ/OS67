@@ -1,8 +1,8 @@
-/* alloc.c
- * alloc/free data_block/inode
+// #define __LOG_ON 1
+/* bitmap.c
+ * alloc/free block & inode by modifying disk's bitmap
  */
 // std
-#define __LOG_ON 1
 #include <type.h> 
 #include <dbg.h> 
 // libs

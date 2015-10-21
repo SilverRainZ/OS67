@@ -1,5 +1,5 @@
-/* 
- *
+/*  fault.c 
+ *  fault handler
  */
 
 // std
