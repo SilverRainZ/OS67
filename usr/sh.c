@@ -170,7 +170,7 @@ static int parse_cmd(int argc, char **argv){
 
         if (_exec(argcmd, argv) < 0){
             /* when type == '|' when argv2 is invaild, printf maybe cause sleeping */
-            if (type == '|') printf("sh1: can not exec %s\n", argcmd);
+            if (type != '|') printf("sh1: can not exec %s\n", argcmd);
             _close(pfd[1]);
             _close(stdin);
             _exit();
