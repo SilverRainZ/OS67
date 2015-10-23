@@ -1,6 +1,6 @@
 OS67
 ===============================
-OS67 is a unix-like toy kernel, which comes with some user routines.
+OS67 is a unix-like toy kernel, which comes with some user routines. (x86 based)
 
 ![OS67](scrshot.png)
 
@@ -52,30 +52,30 @@ int _close(int fd);
 * sh: a simple shell, support IO redirect and pipe
 * ls: list files
 * cat: read from stdin and send it to stdout
-* mkdir: make up diectroy
+* mkdir: make up directroy
 * rm: remove file
 * ...
 
-####Witre youself a user routines
-* add a new file in `usr/`: `touch usr/newroutines.c`
+####Witre youself a user routine
+* add a new file in `usr/`: `touch usr/newroutine.c`
 * add a new value to `UPROGS` varible in `Makefile` as follow:
 
 ```makefile
  - UPROGS =  bin/cinit bin/sh bin/cat bin/ls bin/mkdir bin/rm
- + UPROGS =  bin/cinit bin/sh bin/cat bin/ls bin/mkdir bin/rm bin/newroutines
+ + UPROGS =  bin/cinit bin/sh bin/cat bin/ls bin/mkdir bin/rm bin/newroutine
 ```
 
-* in newroutines.c you can use these header files:
+* in newroutine.c you can use these header files:
     * usys.h: system call interfaces
-    * uio.h: basic input output function
-    * string.h: basic string operate function
-* `make fs && make run` then you can run your user routines
+    * uio.h: basic input output functions
+    * string.h: basic string operate functions
+* `make fs && make run` then you can run your user routine
 
 
 ###Bug report
 See [Issues · LastAvenger/OS67](https://github.com/LastAvenger/OS67/issues)
 
-Please paste the kernel log in the issue.
+Please paste the kernel logs in the issue.
 
 Uncomment macro `__LOG_ON` as follow to enable logging of specific file:
 
