@@ -25,7 +25,7 @@ OBJS = bin/loader.o \
 	   bin/bcache.o bin/sb.o bin/bitmap.o bin/inode.o bin/dir.o bin/p2i.o bin/fstest.o bin/file.o bin/sysfile.o \
 	   bin/init.o bin/proc.o bin/sysproc.o bin/exec.o \
 	   bin/pipe.o \
-	   bin/dev.o bin/con.o
+	   bin/dev.o bin/tty.o
 
 UDEPS = bin/usys.o bin/uio.o bin/string.o bin/vsprint.o
 

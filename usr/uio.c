@@ -7,8 +7,8 @@
 #include <vsprint.h>
 
 int uio_init(){
-    if (_open("/con", O_RW) < 0){
-        if (_mknod("/con", CON) < 0 || _open("/con", O_RW)){
+    if (_open("/tty", O_RW) < 0){
+        if (_mknod("/tty", TTY) < 0 || _open("/tty", O_RW)){
             return -1;
         }
     }

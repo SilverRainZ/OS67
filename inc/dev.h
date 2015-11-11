@@ -5,7 +5,7 @@
 #include <inode.h>
 
 /* device index */
-#define DEV_CON     1
+#define DEV_TTY     1
 
 #define NDEV        10
 

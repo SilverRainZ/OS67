@@ -18,7 +18,7 @@
 // libs
 #include <printk.h>
 // dev
-#include <con.h>
+#include <tty.h>
 
 static uint32_t kb_mode = 0;
 
@@ -164,8 +164,8 @@ void kb_handler(struct int_frame *r){
         printl("kb_handler: CTRL\n");
         switch(ch){
             // console control char
-            case 'd': printl("kb_handler: EOF\n"); ch = CON_EOF; break;
-            case 'c': printl("kb_handler: INT\n"); ch = CON_INT; break;
+            case 'd': printl("kb_handler: EOF\n"); ch = TTY_EOF; break;
+            case 'c': printl("kb_handler: INT\n"); ch = TTY_INT; break;
         }
     }
 
@@ -184,7 +184,7 @@ void kb_handler(struct int_frame *r){
         printl("kb_handler: char: [%c]\n", ch);
 
         /* write to kernel input buffer */
-        if (con_buf_in(ch) < 0){
+        if (tty_buf_in(ch) < 0){
             printl("kb: buffer overflow.\n");
         }
     }
