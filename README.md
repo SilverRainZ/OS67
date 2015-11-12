@@ -52,13 +52,13 @@ int _close(int fd);
 * sh: a simple shell, support IO redirect and pipe
 * ls: list files
 * cat: read from stdin and send it to stdout
-* mkdir: make up directroy
+* mkdir: make directory
 * rm: remove file
 * ...
 
-####Witre youself a user routine
+####Write youself a user routine
 * add a new file in `usr/`: `touch usr/newroutine.c`
-* add a new value to `UPROGS` varible in `Makefile` as follow:
+* add a new value to `UPROGS` variable in `Makefile` as follow:
 
 ```makefile
  - UPROGS =  bin/cinit bin/sh bin/cat bin/ls bin/mkdir bin/rm
