@@ -60,9 +60,9 @@ int _close(int fd);
 * add a new file in `usr/`: `touch usr/newroutine.c`
 * add a new value to `UPROGS` variable in `Makefile` as follow:
 
-```makefile
- - UPROGS =  bin/cinit bin/sh bin/cat bin/ls bin/mkdir bin/rm
- + UPROGS =  bin/cinit bin/sh bin/cat bin/ls bin/mkdir bin/rm bin/newroutine
+```patch
+- UPROGS =  bin/cinit bin/sh bin/cat bin/ls bin/mkdir bin/rm
++ UPROGS =  bin/cinit bin/sh bin/cat bin/ls bin/mkdir bin/rm bin/newroutine
 ```
 
 * in newroutine.c you can use these header files:
@@ -79,9 +79,9 @@ Please paste the kernel logs in the issue.
 
 Uncomment macro `__LOG_ON` as follow to enable logging of specific file:
 
-```c
- - // #define __LOG_ON 1
- + #define __LOG_ON 1
+```patch
+- // #define __LOG_ON 1
++ #define __LOG_ON 1
 ```
 
 ###License
