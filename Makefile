@@ -14,7 +14,7 @@ LD = ld
 OBJCPY = objcopy
 CFLAGS = -c -O0 -Wall -Werror -nostdinc -fno-builtin -fno-stack-protector -funsigned-char \
 		 -finline-functions -finline-small-functions -findirect-inlining \
-		 -finline-functions-called-once -Iinc -m32 -ggdb -gstabs+ 
+		 -finline-functions-called-once -Iinc -m32 -ggdb -gstabs+ -fdump-rtl-expand
 ROOTFS = bin/rootfs
 OBJS = bin/loader.o \
 	   bin/main.o bin/dbg.o bin/timer.o bin/asm.o \
