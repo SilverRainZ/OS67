@@ -1,5 +1,5 @@
 ;boot sector FAT12
-%INCLUDE "pm.inc"
+%INCLUDE "pm.asm"
 [BITS 16]
 org    0x7c00        
 
