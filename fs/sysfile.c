@@ -191,7 +191,7 @@ int sys_unlink(){
     print_i(dip);
 
     if (strcmp(name, ".") == 0 || strcmp(name, "..") == 0){
-        return -1;
+        goto bad;
     }
 
     if ((ip = dir_lookup(dip, name, &off)) == 0){
@@ -205,8 +205,7 @@ int sys_unlink(){
 
     /* we do not link any directory, so directory's nlinks always be 2 (self and ".") */
     if (S_ISDIR(ip->mode) && !dir_isempty(ip)){
-        iunlockput(ip);
-        goto bad;
+        goto bad1;
     }
 
     memset(&de, 0, sizeof(de));
@@ -226,7 +225,8 @@ int sys_unlink(){
     iunlockput(ip);
 
     return 0;
-
+bad1:
+    iunlockput(ip);
 bad:
     iunlockput(dip);
 
