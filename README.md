@@ -5,18 +5,21 @@ OS67 is a unix-like toy kernel, which comes with some user routines. (x86 based)
 ![OS67](scrshot.png)
 
 
-###Build requirements
+### Build requirements
+
 Platform: Linux
-* make
+
+* gnu make
 * nasm
 * gcc
 * binutils(ld, objcopy)
 * mkfs
-* bochs
-     
-###How to compile  
+* bochs 2.6.7+
+
+### How to compile
+
 ```shell
-git clone https://github.com/LastAvenger/OS67.git
+git clone https://github.com/SilverRainZ/OS67.git
 cd OS67
 make init   # only for first time
 make fs     # build root file system and user routines, root privilege required
@@ -24,7 +27,8 @@ make        # build kernel
 make run    # run with bochs
 ```
 
-###Syscalls list
+### Syscalls list
+
 ```c
 int _fork();
 int _exit();
@@ -48,7 +52,8 @@ int _mkdir(char *path);
 int _close(int fd);
 ```
 
-###User routines list
+### User routines list
+
 * sh: a simple shell, support IO redirect and pipe
 * ls: list files
 * cat: read from stdin and send it to stdout
@@ -56,7 +61,8 @@ int _close(int fd);
 * rm: remove file
 * ...
 
-####Write youself a user routine
+#### Write youself a user routine
+
 * add a new file in `usr/`: `touch usr/newroutine.c`
 * add a new value to `UPROGS` variable in `Makefile` as follow:
 
@@ -72,8 +78,9 @@ int _close(int fd);
 * `make fs && make run` then you can run your user routine
 
 
-###Bug report
-See [Issues · LastAvenger/OS67](https://github.com/LastAvenger/OS67/issues)
+### Bug report
+
+See [Issues · SilverRainZ/OS67](https://github.com/SilverRainZ/OS67/issues)
 
 Please paste the kernel logs in the issue.
 
@@ -84,10 +91,12 @@ Uncomment macro `__LOG_ON` as follow to enable logging of specific file:
 + #define __LOG_ON 1
 ```
 
-###License
-[GNU General Public License Version 3](https://github.com/LastAvenger/OS67/blob/master/LICENSE)
+### License
 
-###References
+[GNU General Public License Version 3](https://github.com/SilverRainZ/OS67/blob/master/LICENSE)
+
+### References
+
 * [MIT 6.828 xv6](http://pdos.csail.mit.edu/6.828/2011/xv6.html)
 * [xv6 中文文档](https://github.com/ranxian/xv6-chinese)
 * [Bran's Kernel Developments Toturial](http://www.osdever.net/bkerndev/Docs/gettingstarted.htm)
@@ -100,11 +109,12 @@ Uncomment macro `__LOG_ON` as follow to enable logging of specific file:
 * [《30天自制操作系统》](http://book.douban.com/subject/11530329/)
 * [《Orange's 一个操作系统的实现》](http://book.douban.com/subject/3735649/)
 
-###Thanks to
+### Thanks to
+
 * [fleuria](http://fleurer-lee.com/)
 * [郭家华](http://www.zhihu.com/people/guo-jiahua)
 * [farseerfc](https://farseerfc.me/)
 * [fixme](https://fbq.github.io/)
 * nami
 
-###Just for fun. 
+### Just for fun.
