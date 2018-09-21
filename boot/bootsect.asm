@@ -117,7 +117,7 @@ retry:
     mov ah,0x00
     mov dl,0x00 ; driver a
     int 0x13    ; reset
-    jmp next 
+    jmp retry   ; 读取失败重新读取
 
 next: 
     mov ax, es
