@@ -20,7 +20,7 @@ extern void isr_unknown();
 
 void isr_init(){
     fault_init();
-    /* treat unkown interrupt as fault */
+    /* treat unknown interrupt as fault */
     int i;
     for (i = ISR_IRQ0; i < NIDT; i++){
         idt_install(i,(uint32_t)isr_unknown, SEL_KCODE << 3, GATE_INT, IDT_PR|IDT_DPL_KERN);
