@@ -95,7 +95,7 @@ int osmain(void)
     dev_init();
     print_ok();
 
-    puts("porcess init...       ");
+    puts("process init...       ");
     proc_init();
     print_ok();
 
