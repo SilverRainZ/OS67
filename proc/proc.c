@@ -341,7 +341,7 @@ int fork(){
     printl("fork: copying attrib...\n");
     child->size = proc->size;
     child->parent = proc;
-    *child->fm = *proc->fm; // return form same address
+    *child->fm = *proc->fm; // return from same address
 
     child->fm->eax = 0;
     printl("fork: dup opened files\n");
