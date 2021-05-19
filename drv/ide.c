@@ -1,7 +1,7 @@
 // #define __LOG_ON 1
 /* ide.c
  * This file is modified form xv6
- * use DMA, assume we hava only a disk
+ * use DMA, assume we have only a disk
  * 假设系统只有一个ATA磁盘, 并且始终存在
  * 使用LBA28寻址, 使用 PIO 存取数据
  * 注意磁盘镜像是通过 make fs 生成的rootfs.img文件, 而内核单独存在于floppy.img中
