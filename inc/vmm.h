@@ -43,7 +43,7 @@
 
 /* size of page global dirctory */
 #define PDE_SIZE (PAGE_SIZE/sizeof(pte_t))
-/* size of page talbe entry */
+/* size of page table entry */
 #define PTE_SIZE (PAGE_SIZE/sizeof(uint32_t))
 
 /* 128个页表 每个PAGE_SIZE（4M）大小, 
