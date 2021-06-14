@@ -102,7 +102,7 @@ void vmm_unmap(pde_t *pde, uint32_t va){
         // printl("unmap: unmap a unmapped page\n");
         return;
     }
-    /* unmap this poge */
+    /* unmap this page */
     pte[pte_idx] = 0;
 
     vmm_reflush(va);
